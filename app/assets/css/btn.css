@@ -1,0 +1,43 @@
+button {
+  @apply focus:outline-none cursor-pointer flex items-center justify-center select-none text-sm lg:text-base text-white rounded-full;
+}
+
+button:disabled {
+  @apply opacity-70 cursor-not-allowed;
+}
+
+/* Primary Button */
+.btn-primary {
+  @apply px-6 h-12 bg-primary hover:bg-blue-dark transition-colors text-white font-medium;
+}
+
+/* Outline Button */
+.btn-outline {
+  @apply px-6 h-12 border-2 border-primary text-primary bg-transparent hover:bg-primary hover:text-white transition-colors font-medium;
+}
+
+/* Full Width Button */
+.btn-full {
+  @apply w-full h-12 bg-primary hover:bg-blue-dark transition-colors text-white font-medium;
+}
+
+@keyframes rotation {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.loader-btn {
+    width: 20px;
+    height: 20px;
+    border: 3px solid;
+    border-color: #fff transparent;
+    border-radius: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
+}

@@ -1,0 +1,82 @@
+{
+  "app": {
+    "title": "عماد، نماد اعتماد"
+  },
+  "auth": {
+    "enterNumber_title": "ورود / ثبت نام",
+    "loginWithPassword_title": "رمز عبور",
+    "loginWithOTP_title": "کد تایید را وارد کنید",
+    "setPassword_title": "تعیین رمز عبور",
+    "enterNumber_description": "برای ادامه، شماره موبایل خود را وارد کنید.",
+    "loginWithPassword_description": "رمز عبور خود را وارد کنید.",
+    "loginWithOTP_description": "کد تایید برای شماره تلفن شما ارسال شد.",
+    "setPassword_description": "رمز عبور خود را تعیین کنید.",
+    "terms_agreement": "با استفاده از پک‌فلایت، شما با",
+    "terms_and_conditions": "شرایط و مقررات",
+    "terms_acceptance": "ما موافقت می‌کنید.",
+    "otp_sent_message": "کد تایید ارسال شده به شماره {phone} را وارد کنید.",
+    "resend_code": "ارسال مجدد کد",
+    "second_to": "ثانیه تا",
+    "enter_password": "رمز عبور خود را وارد کنید",
+    "enter_re_password": "رمز عبور را مجدد وارد کنید",
+    "forget_password": "فراموشی رمز عبور"
+  },
+  "global": {
+    "button": {
+      "save": "ذخیره",
+      "cancel": "لغو",
+      "edit": "ویرایش",
+      "delete": "حذف",
+      "submit": "ارسال",
+      "back": "بازگشت",
+      "next": "بعدی",
+      "previous": "قبلی",
+      "close": "بستن",
+      "confirm": "تایید",
+      "search": "جستجو",
+      "reset": "بازنشانی",
+      "clear": "پاک کردن",
+      "add": "افزودن",
+      "create": "ایجاد",
+      "update": "بروزرسانی",
+      "view": "مشاهده",
+      "download": "دانلود",
+      "upload": "بارگذاری",
+      "login": "ورود",
+      "logout": "خروج",
+      "register": "ثبت‌نام",
+      "continue": "ادامه",
+      "get_code": "دریافت کد"
+    },
+    "form": {
+      "mobile_number": "شماره موبایل",
+      "mobile_placeholder": "09xxxxxxxxx",
+      "country_code": "کد کشور"
+    },
+    "navigation": {
+      "home": "خانه",
+      "about": "درباره ما",
+      "contact": "تماس با ما",
+      "services": "خدمات",
+      "blog": "وبلاگ",
+      "profile": "پروفایل",
+      "dashboard": "داشبورد",
+      "settings": "تنظیمات"
+    },
+    "sign_up_sign_in": "ورود / ثبت نام",
+    "currency": {
+      "rial": "ریال",
+      "toman": "تومان"
+    }
+  },
+  "theme": {
+    "design_system": "سیستم طراحی",
+    "primary_colors": "رنگ‌های اصلی",
+    "surface_colors": "رنگ‌های سطح",
+    "tertiary_colors": "رنگ‌های فرعی",
+    "grayscale": "طیف خاکستری",
+    "border_radius": "شعاع گوشه",
+    "buttons": "دکمه‌ها",
+    "cards": "کارت‌ها"
+  }
+}

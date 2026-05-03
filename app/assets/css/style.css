@@ -1,0 +1,111 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@font-face {
+  font-family: 'Shabnam';
+  src: url('~/assets/font/shabnam/Shabnam-Light-FD.woff') format('woff');
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Shabnam';
+  src: url('~/assets/font/shabnam/Shabnam-FD.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Shabnam';
+  src: url('~/assets/font/shabnam/Shabnam-FD.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Shabnam';
+  src: url('~/assets/font/shabnam/Shabnam-Medium-FD.woff') format('woff');
+  font-weight: 600;
+  font-style: normal;
+}
+
+
+@font-face {
+  font-family: 'Shabnam';
+  src: url('~/assets/font/shabnam/Shabnam-Medium-FD.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Shabnam';
+  src: url('~/assets/font/shabnam/Shabnam-Bold-FD.woff') format('woff');
+  font-weight: 800;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Shabnam';
+  src: url('~/assets/font/shabnam/Shabnam-Bold-FD.woff') format('woff');
+  font-weight: 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Shabnam';
+  src: url('~/assets/font/shabnam/Shabnam-Bold-FD.woff') format('woff');
+  font-weight: bold;
+  font-style: normal;
+}
+
+/* Custom CSS variables for your color palette */
+:root {
+  /* Primary colors - Emad Brand */
+  --color-primary: #0f3057;
+  --color-secondary: #008891;
+  --color-accent: #00587a;
+
+  /* Blue dark variants (kept for compatibility) */
+  --color-blue-dark: #0f3057;
+  --color-blue-dark-700: #0a2240;
+
+  /* Blue light variants (secondary shades) */
+  --color-blue-light: #008891;
+  --color-blue-light-300: #00c8d4;
+
+  /* Light theme grayscale */
+  --color-black: #1a1a1a;
+  --color-gray-50: #F9FAFB;
+  --color-gray-100: #F3F4F6;
+  --color-gray-200: #E5E7EB;
+  --color-gray-300: #D1D5DB;
+  --color-gray-400: #9CA3AF;
+  --color-gray-500: #6B7280;
+  --color-gray-600: #4B5563;
+  --color-gray-700: #374151;
+  --color-gray-800: #1F2937;
+  --color-gray-900: #111827;
+  --color-gray: #6B7280;
+  --color-white: #FFFFFF;
+
+  /* Border radius */
+  --radius: 8px;
+  --radius-full: 999px;
+}
+
+body {
+  direction: rtl;
+  font-family: 'shabnam';
+  background-color: var(--color-gray-50);
+  color: var(--color-gray-900);
+}
+
+.card {
+  @apply bg-white rounded shadow-sm border border-gray-200 p-6;
+}
+
+.card-dark {
+  @apply bg-gray-800 rounded p-6;
+}
