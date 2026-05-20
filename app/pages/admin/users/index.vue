@@ -227,15 +227,15 @@ onMounted(() => {
             <p class="text-sm text-gray-600">تعداد: {{ total.toLocaleString('fa-IR') }} کاربر</p>
           </div>
           <div class="flex items-center gap-3">
-            <button
+            <!-- <button
               @click="showCsvImportModal = true"
               class="px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:shadow-lg transition-all duration-300 flex items-center gap-2 font-medium"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
               </svg>
-              افزودن گروهی
-            </button>
+              بدهی گروهی
+            </button> -->
             <NuxtLink
               to="/admin/users/create"
               class="px-4 py-2 bg-gradient-to-r from-primary to-accent text-white rounded-lg hover:shadow-lg transition-all duration-300 flex items-center gap-2 font-medium"

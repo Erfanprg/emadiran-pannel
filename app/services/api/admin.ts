@@ -1,4 +1,4 @@
-import type { UserStats, AdminUser, UsersListResponse, GetUsersQuery, CreateUserDto, UpdateUserDto } from '~/types/admin'
+import type { UserStats, AdminUser, UsersListResponse, GetUsersQuery, CreateUserDto, UpdateUserDto, BulkPaymentImportResponse } from '~/types/admin'
 import type { AddDebtRequest, ReduceDebtRequest } from '~/types/transaction'
 
 /**
@@ -294,6 +294,29 @@ export const adminApi = {
     formData.append('file', file)
 
     const response = await $fetch<import('~/types/admin').CsvImportResponse>(`${baseURL}/admin/users/import-csv`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token.value}`
+      },
+      body: formData
+    })
+
+    return response
+  },
+
+  /**
+   * Import CSV File for Bulk Payment Processing
+   * POST /admin/payments/import-csv
+   */
+  async importPaymentsCsv(file: File): Promise<BulkPaymentImportResponse> {
+    const config = useRuntimeConfig()
+    const baseURL = config.public.apiBaseUrl
+    const token = useCookie('auth_token')
+
+    const formData = new FormData()
+    formData.append('file', file)
+
+    const response = await $fetch<BulkPaymentImportResponse>(`${baseURL}/admin/payments/import-csv`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token.value}`

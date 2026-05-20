@@ -13,8 +13,6 @@ export const installmentsApi = {
     const baseURL = config.public.apiBaseUrl 
     const token = useCookie('auth_token')
 
-    console.log('[INSTALLMENTS API] Received query:', query)
-
     const params = new URLSearchParams()
     if (query.limit) params.append('limit', query.limit.toString())
     if (query.offset) params.append('offset', query.offset.toString())
@@ -26,7 +24,6 @@ export const installmentsApi = {
     if (query.loanNumber) params.append('loanNumber', query.loanNumber)
 
     const url = `${baseURL}/admin/installments?${params.toString()}`
-    console.log('[INSTALLMENTS API] Final URL:', url)
 
     const response = await $fetch<InstallmentsListResponse>(url, {
       method: 'GET',

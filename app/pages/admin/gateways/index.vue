@@ -42,7 +42,6 @@ const fetchGateways = async () => {
   try {
     const data = await gatewaysApi.getAll();
     gateways.value = data;
-    console.log("Gateways loaded:", data, "length:", data.length);
   } catch (err: any) {
     console.error("Error:", err);
     error.value =

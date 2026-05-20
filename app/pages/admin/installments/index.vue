@@ -102,15 +102,12 @@ const fetchInstallments = async () => {
     isLoading.value = true
     error.value = null
     filters.value.offset = (page.value - 1) * (filters.value.limit || 20)
-    
-    console.log('[INSTALLMENTS FETCH] Original:', JSON.parse(JSON.stringify(filters.value)))
-    
+        
     // Clean filters - remove undefined/empty values
     const cleanedFilters = Object.fromEntries(
       Object.entries(filters.value).filter(([_, v]) => v !== undefined && v !== '' && v !== null)
     )
     
-    console.log('[INSTALLMENTS FETCH] Cleaned:', cleanedFilters)
     
     const response = await installmentsApi.getInstallments(cleanedFilters as GetInstallmentsQuery)
     installments.value = response.data.data || []
@@ -125,7 +122,6 @@ const fetchInstallments = async () => {
 
 // Handle filter field updates
 const handleFilterUpdate = (key: string, val: any) => {
-  console.log('[INSTALLMENTS UPDATE]', key, 'value:', val)
   
   if (key === 'phoneNumber') {
     const trimmed = val?.trim()
@@ -147,7 +143,6 @@ const handleFilterUpdate = (key: string, val: any) => {
     filters.value.status = val === 'undefined' ? undefined : val
   }
   
-  console.log('[INSTALLMENTS FILTERS]', JSON.parse(JSON.stringify(filters.value)))
 }
 
 // Handle search

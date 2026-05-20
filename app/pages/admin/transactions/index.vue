@@ -41,6 +41,8 @@ const transactions = ref<Transaction[]>([]);
 const isLoading = ref(false);
 const error = ref<string | null>(null);
 const isExporting = ref(false);
+const showCsvImportModal = ref(false);
+const showPaymentImportModal = ref(false);
 const showEditModal = ref(false);
 const showDeleteModal = ref(false);
 const isUpdating = ref(false);
@@ -359,10 +361,6 @@ const fetchTransactions = async () => {
     error.value = null;
     filters.value.offset = (page.value - 1) * (filters.value.limit || 20);
 
-    console.log(
-      "[FETCH] Original filters:",
-      JSON.parse(JSON.stringify(filters.value))
-    );
 
     // Clean filters - remove undefined/empty values
     const cleanedFilters = Object.fromEntries(
@@ -371,8 +369,6 @@ const fetchTransactions = async () => {
       )
     );
 
-    console.log("[FETCH] Cleaned filters:", cleanedFilters);
-    console.log("[FETCH] Sending to API...");
 
     const response = await transactionsApi.getTransactions(
       cleanedFilters as GetTransactionsQuery
@@ -402,9 +398,16 @@ const handleExport = async () => {
   }
 };
 
+const handleCsvImportSuccess = async () => {
+  await fetchTransactions();
+};
+
+const handlePaymentImportSuccess = async () => {
+  await fetchTransactions();
+};
+
 // Handle filter field updates
 const handleFilterUpdate = (key: string, val: any) => {
-  console.log("[UPDATE FIELD]", key, "value:", val, "type:", typeof val);
 
   if (key === "phoneNumber") {
     const trimmed = val?.trim();
@@ -427,10 +430,6 @@ const handleFilterUpdate = (key: string, val: any) => {
     filters.value.type = val === "undefined" ? undefined : val;
   }
 
-  console.log(
-    "[FILTERS AFTER UPDATE]",
-    JSON.parse(JSON.stringify(filters.value))
-  );
 };
 
 // Handle search
@@ -493,27 +492,48 @@ watch(page, () => {
               تعداد: {{ total.toLocaleString("fa-IR") }} مورد
             </p>
           </div>
-          <button
-            @click="handleExport"
-            :disabled="isExporting"
-            class="px-4 py-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors duration-200 flex items-center gap-2 font-medium disabled:opacity-50"
-          >
-            <svg
-              class="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+
+          <div class="flex items-center gap-3 flex-wrap justify-end">
+            <button
+              @click="showCsvImportModal = true"
+              class="px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:shadow-lg transition-all duration-300 flex items-center gap-2 font-medium"
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-              />
-            </svg>
-            <span v-if="isExporting">در حال دانلود...</span>
-            <span v-else>خروجی اکسل</span>
-          </button>
+              <svg
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                />
+              </svg>
+              بدهی گروهی
+            </button>
+
+            <button
+              @click="showPaymentImportModal = true"
+              class="px-4 py-2 bg-gradient-to-r from-primary to-accent text-white rounded-lg hover:shadow-lg transition-all duration-300 flex items-center gap-2 font-medium"
+            >
+              <svg
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M12 12v8m0 0l-3-3m3 3l3-3"
+                />
+              </svg>
+              پرداخت گروهی
+            </button>
+          </div>
         </div>
 
         <!-- Loading State -->
@@ -648,6 +668,16 @@ watch(page, () => {
         />
       </BaseCard>
     </main>
+
+    <AdminCsvImportModal
+      v-model="showCsvImportModal"
+      @success="handleCsvImportSuccess"
+    />
+
+    <AdminBulkPaymentImportModal
+      v-model="showPaymentImportModal"
+      @success="handlePaymentImportSuccess"
+    />
 
     <!-- Edit Transaction Modal -->
     <div

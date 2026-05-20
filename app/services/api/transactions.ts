@@ -18,7 +18,6 @@ export const transactionsApi = {
     const baseURL = config.public.apiBaseUrl 
     const token = useCookie('auth_token')
 
-    console.log('[API] Received query:', query)
 
     const params = new URLSearchParams()
     if (query.limit) params.append('limit', query.limit.toString())
@@ -37,7 +36,6 @@ export const transactionsApi = {
     if (query.loanNumber) params.append('loanNumber', query.loanNumber)
 
     const url = `${baseURL}/admin/transactions?${params.toString()}`
-    console.log('[API] Final URL:', url)
 
     const response = await $fetch<TransactionsListResponse>(url, {
       method: 'GET',

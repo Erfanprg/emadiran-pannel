@@ -13,8 +13,6 @@ export const loansApi = {
     const baseURL = config.public.apiBaseUrl 
     const token = useCookie('auth_token')
 
-    console.log('[LOANS API] Fetching loans for user:', userId)
-
     const response = await $fetch<{ success: boolean; data: LoanListItem[] }>(
       `${baseURL}/admin/loans/user/${userId}`,
       {
@@ -25,7 +23,6 @@ export const loansApi = {
       }
     )
 
-    console.log('[LOANS API] Received loans:', response.data)
     return response
   },
 
@@ -38,8 +35,6 @@ export const loansApi = {
     const baseURL = config.public.apiBaseUrl 
     const token = useCookie('auth_token')
 
-    console.log('[LOANS API] Creating loan for user:', data.userId)
-
     const response = await $fetch<CreateLoanResponse>(
       `${baseURL}/admin/loans/create`,
       {
@@ -51,7 +46,6 @@ export const loansApi = {
       }
     )
 
-    console.log('[LOANS API] Loan created:', response.data)
     return response
   }
 }

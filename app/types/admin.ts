@@ -72,3 +72,21 @@ export interface CsvImportResponse {
     }
   }
 }
+
+export interface BulkPaymentImportResponse {
+  success: boolean
+  message: string
+  data: {
+    successCount: number
+    failedCount: number
+    processedUsers: number
+    errors: string[]
+    metadata: {
+      totalRows: number
+      skippedRows: number
+      processingTime: string
+      totalPaymentAmount: string
+      totalDebtReduced: string
+    }
+  }
+}
