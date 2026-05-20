@@ -1,4 +1,17 @@
-import type { UserStats, AdminUser, UsersListResponse, GetUsersQuery, CreateUserDto, UpdateUserDto, BulkPaymentImportResponse } from '~/types/admin'
+import type {
+  UserStats,
+  AdminUser,
+  UsersListResponse,
+  GetUsersQuery,
+  CreateUserDto,
+  UpdateUserDto,
+  BulkPaymentImportResponse,
+  PaymentDeadlineCurrentResponse,
+  PaymentDeadlinesListResponse,
+  CreatePaymentDeadlineDto,
+  UpdatePaymentDeadlineDto,
+  PaymentDeadlineMutationResponse
+} from '~/types/admin'
 import type { AddDebtRequest, ReduceDebtRequest } from '~/types/transaction'
 
 /**
@@ -276,6 +289,88 @@ export const adminApi = {
       headers: {
         'Authorization': `Bearer ${token.value}`
       }
+    })
+
+    return response
+  },
+
+  /**
+   * Get Current Payment Deadline
+   * GET /admin/users/:userId/payment-deadlines/current
+   */
+  async getCurrentPaymentDeadline(userId: number): Promise<PaymentDeadlineCurrentResponse> {
+    const config = useRuntimeConfig()
+    const baseURL = config.public.apiBaseUrl
+    const token = useCookie('auth_token')
+
+    const response = await $fetch<PaymentDeadlineCurrentResponse>(`${baseURL}/admin/users/${userId}/payment-deadlines/current`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token.value}`
+      }
+    })
+
+    return response
+  },
+
+  /**
+   * Get Payment Deadlines List
+   * GET /admin/users/:userId/payment-deadlines
+   */
+  async getPaymentDeadlines(userId: number, limit: number = 10, offset: number = 0): Promise<PaymentDeadlinesListResponse> {
+    const config = useRuntimeConfig()
+    const baseURL = config.public.apiBaseUrl
+    const token = useCookie('auth_token')
+
+    const params = new URLSearchParams()
+    params.append('limit', limit.toString())
+    params.append('offset', offset.toString())
+
+    const response = await $fetch<PaymentDeadlinesListResponse>(`${baseURL}/admin/users/${userId}/payment-deadlines?${params.toString()}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token.value}`
+      }
+    })
+
+    return response
+  },
+
+  /**
+   * Create Payment Deadline
+   * POST /admin/users/:userId/payment-deadlines
+   */
+  async createPaymentDeadline(userId: number, data: CreatePaymentDeadlineDto): Promise<PaymentDeadlineMutationResponse> {
+    const config = useRuntimeConfig()
+    const baseURL = config.public.apiBaseUrl
+    const token = useCookie('auth_token')
+
+    const response = await $fetch<PaymentDeadlineMutationResponse>(`${baseURL}/admin/users/${userId}/payment-deadlines`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token.value}`
+      },
+      body: data
+    })
+
+    return response
+  },
+
+  /**
+   * Update Payment Deadline
+   * PUT /admin/users/:userId/payment-deadlines/:id
+   */
+  async updatePaymentDeadline(userId: number, deadlineId: number, data: UpdatePaymentDeadlineDto): Promise<PaymentDeadlineMutationResponse> {
+    const config = useRuntimeConfig()
+    const baseURL = config.public.apiBaseUrl
+    const token = useCookie('auth_token')
+
+    const response = await $fetch<PaymentDeadlineMutationResponse>(`${baseURL}/admin/users/${userId}/payment-deadlines/${deadlineId}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token.value}`
+      },
+      body: data
     })
 
     return response

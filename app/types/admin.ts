@@ -90,3 +90,50 @@ export interface BulkPaymentImportResponse {
     }
   }
 }
+
+export interface PaymentDeadline {
+  id: number
+  userId: number
+  deadlineAt: string
+  createdByAdminId: number
+  createdAt: string
+  updatedAt: string
+  editReason: string | null
+  editedByAdminId: number | null
+  editedAt: string | null
+}
+
+export interface PaymentDeadlinesMeta {
+  total: number
+  limit: number
+  offset: number
+  hasMore: boolean
+}
+
+export interface PaymentDeadlinesListResponse {
+  success: boolean
+  data: {
+    items: PaymentDeadline[]
+    meta: PaymentDeadlinesMeta
+  }
+}
+
+export interface PaymentDeadlineCurrentResponse {
+  success: boolean
+  data: PaymentDeadline | null
+}
+
+export interface CreatePaymentDeadlineDto {
+  deadlineAt: string
+}
+
+export interface UpdatePaymentDeadlineDto {
+  deadlineAt: string
+  editReason: string
+}
+
+export interface PaymentDeadlineMutationResponse {
+  success: boolean
+  message: string
+  data: PaymentDeadline
+}

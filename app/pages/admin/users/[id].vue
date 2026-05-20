@@ -9,7 +9,13 @@ import { useCurrencyInput } from '~/composables/useCurrencyInput'
 import { formatDate, formatNumber, formatCurrency } from '~/utils/formatters'
 import { getUserDisplayName } from '~/func/getUserDisplayName'
 import { validateDebtForm, ADD_DEBT_TRANSACTION_TYPES, getTransactionTypeLabel } from '~/utils/adminTransactionPayload'
+import { convertJalaliDateToIso, isValidJalaliDate } from '~/func/GenerateDate'
+import PaymentDeadlinesModal from '~/components/Admin/payment-deadlines/PaymentDeadlinesModal.vue'
+import PaymentDeadlineCreateModal from '~/components/Admin/payment-deadlines/PaymentDeadlineCreateModal.vue'
+import PaymentDeadlineEditModal from '~/components/Admin/payment-deadlines/PaymentDeadlineEditModal.vue'
+import moment from 'jalali-moment'
 import type { LoanListItem } from '~/types/loan'
+import type { PaymentDeadline, PaymentDeadlinesMeta } from '~/types/admin'
 
 useHead({
   title: 'جزئیات کاربر - عماد ایران'
@@ -58,6 +64,46 @@ const isLoadingLoans = ref(false)
 const showLoanWarning = ref(false)
 const showNewLoanInput = ref(false)
 
+// Payment Deadline State
+const currentPaymentDeadline = ref<PaymentDeadline | null>(null)
+const isLoadingPaymentDeadline = ref(false)
+const showPaymentDeadlinesModal = ref(false)
+const paymentDeadlines = ref<PaymentDeadline[]>([])
+const paymentDeadlinesMeta = ref<PaymentDeadlinesMeta>({
+  total: 0,
+  limit: 10,
+  offset: 0,
+  hasMore: false
+})
+const isLoadingPaymentDeadlines = ref(false)
+const paymentDeadlinesError = ref<string | null>(null)
+const paymentDeadlinesPage = ref(1)
+const paymentDeadlinesLimit = ref(10)
+const showCreatePaymentDeadlineModal = ref(false)
+const showEditPaymentDeadlineModal = ref(false)
+const selectedPaymentDeadline = ref<PaymentDeadline | null>(null)
+const createPaymentDeadlineForm = ref({
+  deadlineAt: ''
+})
+const createPaymentDeadlineErrors = ref<{ deadlineAt?: string }>({})
+const isSubmittingPaymentDeadline = ref(false)
+const editPaymentDeadlineForm = ref({
+  deadlineAt: '',
+  editReason: ''
+})
+const editPaymentDeadlineErrors = ref<{ deadlineAt?: string; editReason?: string }>({})
+const isSubmittingEditPaymentDeadline = ref(false)
+
+const paymentDeadlineLabel = computed(() => {
+  if (isLoadingPaymentDeadline.value) {
+    return 'در حال بارگذاری مهلت پرداخت...'
+  }
+  if (currentPaymentDeadline.value?.deadlineAt) {
+    return `مهلت پرداخت: ${formatDate(currentPaymentDeadline.value.deadlineAt)}`
+  }
+  return 'ثبت مهلت پرداخت'
+})
+
 // Fetch user details
 const fetchUserDetails = async () => {
   try {
@@ -69,6 +115,33 @@ const fetchUserDetails = async () => {
     console.error('Error fetching user:', err)
   } finally {
     isLoading.value = false
+  }
+}
+
+const fetchCurrentPaymentDeadline = async () => {
+  try {
+    isLoadingPaymentDeadline.value = true
+    const response = await adminApi.getCurrentPaymentDeadline(userId)
+    currentPaymentDeadline.value = response.data
+  } catch (err: any) {
+    currentPaymentDeadline.value = null
+  } finally {
+    isLoadingPaymentDeadline.value = false
+  }
+}
+
+const fetchPaymentDeadlines = async () => {
+  try {
+    isLoadingPaymentDeadlines.value = true
+    paymentDeadlinesError.value = null
+    const offset = (paymentDeadlinesPage.value - 1) * paymentDeadlinesLimit.value
+    const response = await adminApi.getPaymentDeadlines(userId, paymentDeadlinesLimit.value, offset)
+    paymentDeadlines.value = response.data.items
+    paymentDeadlinesMeta.value = response.data.meta
+  } catch (err: any) {
+    paymentDeadlinesError.value = err.data?.message || 'خطا در دریافت لیست مهلت‌ها'
+  } finally {
+    isLoadingPaymentDeadlines.value = false
   }
 }
 
@@ -322,9 +395,209 @@ const closeDebtModal = () => {
   showNewLoanInput.value = false
 }
 
+const openPaymentDeadlinesModal = () => {
+  paymentDeadlinesPage.value = 1
+  showPaymentDeadlinesModal.value = true
+  fetchPaymentDeadlines()
+}
+
+const closePaymentDeadlinesModal = () => {
+  showPaymentDeadlinesModal.value = false
+}
+
+const handlePaymentDeadlinesPageChange = (page: number) => {
+  paymentDeadlinesPage.value = page
+  fetchPaymentDeadlines()
+}
+
+const openCreatePaymentDeadlineModal = () => {
+  if (currentPaymentDeadline.value) {
+    toast.error('مهلت فعال وجود دارد و امکان ثبت مهلت جدید نیست')
+    return
+  }
+  createPaymentDeadlineForm.value.deadlineAt = ''
+  createPaymentDeadlineErrors.value = {}
+  showPaymentDeadlinesModal.value = false
+  showCreatePaymentDeadlineModal.value = true
+}
+
+const openEditPaymentDeadlineModal = (deadline: PaymentDeadline) => {
+  selectedPaymentDeadline.value = deadline
+  editPaymentDeadlineForm.value.deadlineAt = moment(deadline.deadlineAt)
+    .locale('en')
+    .format('YYYY-MM-DD')
+  editPaymentDeadlineForm.value.editReason = ''
+  editPaymentDeadlineErrors.value = {}
+  showPaymentDeadlinesModal.value = false
+  showEditPaymentDeadlineModal.value = true
+}
+
+const closeCreatePaymentDeadlineModal = () => {
+  showCreatePaymentDeadlineModal.value = false
+  createPaymentDeadlineForm.value.deadlineAt = ''
+  createPaymentDeadlineErrors.value = {}
+  showPaymentDeadlinesModal.value = true
+  fetchPaymentDeadlines()
+}
+
+const setCreatePaymentDeadlineErrorsFromBackend = (message: string) => {
+  const normalized = (message || '').toLowerCase()
+  if (normalized.includes('date') || normalized.includes('تاریخ')) {
+    createPaymentDeadlineErrors.value.deadlineAt = message
+  }
+}
+
+const validatePaymentDeadlineDate = (value: string) => {
+  const trimmed = (value || '').trim()
+  if (!trimmed) {
+    return { isValid: false, error: 'تاریخ مهلت الزامی است' }
+  }
+
+  if (!isValidJalaliDate(trimmed)) {
+    return { isValid: false, error: 'تاریخ مهلت معتبر نیست' }
+  }
+
+  const iso = convertJalaliDateToIso(trimmed)
+  if (!iso) {
+    return { isValid: false, error: 'تاریخ مهلت معتبر نیست' }
+  }
+
+  const deadlineTime = new Date(iso).getTime()
+  const todayUtc = new Date()
+  todayUtc.setUTCHours(0, 0, 0, 0)
+
+  if (deadlineTime < todayUtc.getTime()) {
+    return { isValid: false, error: 'تاریخ مهلت نمی‌تواند گذشته باشد' }
+  }
+
+  return { isValid: true, iso }
+}
+
+const editPaymentDeadlineDateDisplay = computed(() => {
+  if (!editPaymentDeadlineForm.value.deadlineAt) return ''
+
+  const jalaliDate = moment(
+    editPaymentDeadlineForm.value.deadlineAt,
+    'YYYY-MM-DD',
+    true
+  )
+
+  if (jalaliDate.isValid()) {
+    return jalaliDate.locale('fa').format('jYYYY/jMM/jDD')
+  }
+
+  return editPaymentDeadlineForm.value.deadlineAt
+})
+
+const handleEditPaymentDeadlineDateChange = (value: string) => {
+  editPaymentDeadlineForm.value.deadlineAt = value || ''
+  editPaymentDeadlineErrors.value.deadlineAt = undefined
+}
+
+const handleCreatePaymentDeadline = async () => {
+  createPaymentDeadlineErrors.value = {}
+
+  if (currentPaymentDeadline.value) {
+    toast.error('مهلت فعال وجود دارد و امکان ثبت مهلت جدید نیست')
+    return
+  }
+
+  const validation = validatePaymentDeadlineDate(createPaymentDeadlineForm.value.deadlineAt)
+  if (!validation.isValid) {
+    createPaymentDeadlineErrors.value.deadlineAt = validation.error
+    toast.error(validation.error || 'لطفاً خطاهای فرم را برطرف کنید')
+    return
+  }
+
+  isSubmittingPaymentDeadline.value = true
+
+  await execute(
+    () => adminApi.createPaymentDeadline(userId, { deadlineAt: validation.iso as string }),
+    {
+      successMessage: 'مهلت پرداخت با موفقیت ثبت شد',
+      onError: (err) => {
+        const message = err?.data?.message || err?.message || 'خطا در ثبت مهلت پرداخت'
+        setCreatePaymentDeadlineErrorsFromBackend(message)
+      },
+      onSuccess: async () => {
+        closeCreatePaymentDeadlineModal()
+        await fetchCurrentPaymentDeadline()
+      }
+    }
+  )
+
+  isSubmittingPaymentDeadline.value = false
+}
+
+const closeEditPaymentDeadlineModal = () => {
+  showEditPaymentDeadlineModal.value = false
+  editPaymentDeadlineForm.value.deadlineAt = ''
+  editPaymentDeadlineForm.value.editReason = ''
+  editPaymentDeadlineErrors.value = {}
+  selectedPaymentDeadline.value = null
+  showPaymentDeadlinesModal.value = true
+  fetchPaymentDeadlines()
+}
+
+const setEditPaymentDeadlineErrorsFromBackend = (message: string) => {
+  const normalized = (message || '').toLowerCase()
+  if (normalized.includes('date') || normalized.includes('تاریخ')) {
+    editPaymentDeadlineErrors.value.deadlineAt = message
+  }
+  if (normalized.includes('reason') || normalized.includes('دلیل')) {
+    editPaymentDeadlineErrors.value.editReason = message
+  }
+}
+
+const handleEditPaymentDeadline = async () => {
+  editPaymentDeadlineErrors.value = {}
+
+  if (!selectedPaymentDeadline.value) {
+    toast.error('مهلت پرداخت برای ویرایش انتخاب نشده است')
+    return
+  }
+
+  const reason = (editPaymentDeadlineForm.value.editReason || '').trim()
+  if (!reason) {
+    editPaymentDeadlineErrors.value.editReason = 'دلیل ویرایش الزامی است'
+    toast.error('دلیل ویرایش الزامی است')
+    return
+  }
+
+  const validation = validatePaymentDeadlineDate(editPaymentDeadlineForm.value.deadlineAt)
+  if (!validation.isValid) {
+    editPaymentDeadlineErrors.value.deadlineAt = validation.error
+    toast.error(validation.error || 'لطفاً خطاهای فرم را برطرف کنید')
+    return
+  }
+
+  isSubmittingEditPaymentDeadline.value = true
+
+  await execute(
+    () => adminApi.updatePaymentDeadline(userId, selectedPaymentDeadline.value!.id, {
+      deadlineAt: validation.iso as string,
+      editReason: reason
+    }),
+    {
+      successMessage: 'مهلت پرداخت با موفقیت ویرایش شد',
+      onError: (err) => {
+        const message = err?.data?.message || err?.message || 'خطا در ویرایش مهلت پرداخت'
+        setEditPaymentDeadlineErrorsFromBackend(message)
+      },
+      onSuccess: async () => {
+        closeEditPaymentDeadlineModal()
+        await fetchCurrentPaymentDeadline()
+      }
+    }
+  )
+
+  isSubmittingEditPaymentDeadline.value = false
+}
+
 // Load user on mount
 onMounted(() => {
   fetchUserDetails()
+  fetchCurrentPaymentDeadline()
 })
 </script>
 
@@ -361,22 +634,36 @@ onMounted(() => {
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
           <!-- Header -->
           <div class="flex flex-col gap-4 pb-6 border-b border-gray-200 mb-6">
-            <!-- User Name & Badges -->
-            <div>
-              <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-3">{{ getUserDisplayName(user) }}</h2>
-              <div class="flex flex-wrap items-center gap-2">
-                <span
-                  class="px-3 py-1 text-sm font-medium rounded-full"
-                  :class="user.role === 'ADMIN' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'"
-                >
-                  {{ user.role === 'ADMIN' ? 'مدیر' : 'کاربر عادی' }}
-                </span>
-                <span
-                  class="px-3 py-1 text-sm font-medium rounded-full"
-                  :class="user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
-                >
-                  {{ user.isActive ? 'فعال' : 'غیرفعال' }}
-                </span>
+            <!-- User Name & Payment Deadline -->
+            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+              <button
+                type="button"
+                @click="openPaymentDeadlinesModal"
+                :disabled="isLoadingPaymentDeadline"
+                class="order-1 sm:order-2 px-4 py-2.5 rounded-lg transition-colors duration-200 font-medium text-sm border w-full sm:w-auto"
+                :class="currentPaymentDeadline
+                  ? 'bg-red-50 text-red-600 hover:bg-red-100 border-red-100'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200'"
+              >
+                {{ paymentDeadlineLabel }}
+              </button>
+
+              <div class="order-2 sm:order-1">
+                <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-3">{{ getUserDisplayName(user) }}</h2>
+                <div class="flex flex-wrap items-center gap-2">
+                  <span
+                    class="px-3 py-1 text-sm font-medium rounded-full"
+                    :class="user.role === 'ADMIN' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'"
+                  >
+                    {{ user.role === 'ADMIN' ? 'مدیر' : 'کاربر عادی' }}
+                  </span>
+                  <span
+                    class="px-3 py-1 text-sm font-medium rounded-full"
+                    :class="user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                  >
+                    {{ user.isActive ? 'فعال' : 'غیرفعال' }}
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -654,6 +941,44 @@ onMounted(() => {
         </div> -->
       </div>
     </main>
+
+    <PaymentDeadlinesModal
+      v-if="showPaymentDeadlinesModal"
+      :items="paymentDeadlines"
+      :meta="paymentDeadlinesMeta"
+      :page="paymentDeadlinesPage"
+      :limit="paymentDeadlinesLimit"
+      :current-id="currentPaymentDeadline?.id ?? null"
+      :is-loading="isLoadingPaymentDeadlines"
+      :error="paymentDeadlinesError"
+      :disable-create="Boolean(currentPaymentDeadline)"
+      @close="closePaymentDeadlinesModal"
+      @create="openCreatePaymentDeadlineModal"
+      @edit="openEditPaymentDeadlineModal"
+      @update:page="handlePaymentDeadlinesPageChange"
+    />
+
+    <PaymentDeadlineCreateModal
+      v-if="showCreatePaymentDeadlineModal"
+      v-model:deadline-at="createPaymentDeadlineForm.deadlineAt"
+      :error="createPaymentDeadlineErrors.deadlineAt"
+      :is-submitting="isSubmittingPaymentDeadline"
+      @close="closeCreatePaymentDeadlineModal"
+      @submit="handleCreatePaymentDeadline"
+    />
+
+    <PaymentDeadlineEditModal
+      v-if="showEditPaymentDeadlineModal"
+      :deadline-at="editPaymentDeadlineForm.deadlineAt"
+      :deadline-display="editPaymentDeadlineDateDisplay"
+      v-model:edit-reason="editPaymentDeadlineForm.editReason"
+      :deadline-error="editPaymentDeadlineErrors.deadlineAt"
+      :reason-error="editPaymentDeadlineErrors.editReason"
+      :is-submitting="isSubmittingEditPaymentDeadline"
+      @close="closeEditPaymentDeadlineModal"
+      @update:deadline-at="handleEditPaymentDeadlineDateChange"
+      @submit="handleEditPaymentDeadline"
+    />
 
     <!-- Debt Management Modal -->
     <div v-if="showDebtModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
