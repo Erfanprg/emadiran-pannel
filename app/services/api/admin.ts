@@ -10,7 +10,10 @@ import type {
   PaymentDeadlinesListResponse,
   CreatePaymentDeadlineDto,
   UpdatePaymentDeadlineDto,
-  PaymentDeadlineMutationResponse
+  PaymentDeadlineMutationResponse,
+  ContactHistoriesListResponse,
+  CreateContactHistoryDto,
+  ContactHistoryMutationResponse
 } from '~/types/admin'
 import type { AddDebtRequest, ReduceDebtRequest } from '~/types/transaction'
 
@@ -367,6 +370,49 @@ export const adminApi = {
 
     const response = await $fetch<PaymentDeadlineMutationResponse>(`${baseURL}/admin/users/${userId}/payment-deadlines/${deadlineId}`, {
       method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token.value}`
+      },
+      body: data
+    })
+
+    return response
+  },
+
+  /**
+   * Get Contact Histories List
+   * GET /admin/users/:userId/contact-histories
+   */
+  async getContactHistories(userId: number, limit: number = 10, offset: number = 0): Promise<ContactHistoriesListResponse> {
+    const config = useRuntimeConfig()
+    const baseURL = config.public.apiBaseUrl 
+    const token = useCookie('auth_token')
+
+    const params = new URLSearchParams()
+    params.append('limit', limit.toString())
+    params.append('offset', offset.toString())
+
+    const response = await $fetch<ContactHistoriesListResponse>(`${baseURL}/admin/users/${userId}/contact-histories?${params.toString()}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token.value}`
+      }
+    })
+
+    return response
+  },
+
+  /**
+   * Create Contact History
+   * POST /admin/users/:userId/contact-histories
+   */
+  async createContactHistory(userId: number, data: CreateContactHistoryDto): Promise<ContactHistoryMutationResponse> {
+    const config = useRuntimeConfig()
+    const baseURL = config.public.apiBaseUrl 
+    const token = useCookie('auth_token')
+
+    const response = await $fetch<ContactHistoryMutationResponse>(`${baseURL}/admin/users/${userId}/contact-histories`, {
+      method: 'POST',
       headers: {
         'Authorization': `Bearer ${token.value}`
       },

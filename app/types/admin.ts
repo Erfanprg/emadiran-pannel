@@ -137,3 +137,40 @@ export interface PaymentDeadlineMutationResponse {
   message: string
   data: PaymentDeadline
 }
+
+export interface ContactHistoryAdmin {
+  id: number
+  fullName: string
+}
+
+export interface ContactHistoryItem {
+  id: number
+  description: string
+  createdAt: string
+  admin: ContactHistoryAdmin
+}
+
+export interface ContactHistoriesMeta {
+  total: number
+  limit: number
+  offset: number
+  hasMore: boolean
+}
+
+export interface ContactHistoriesListResponse {
+  success: boolean
+  data: {
+    items: ContactHistoryItem[]
+    meta: ContactHistoriesMeta
+  }
+}
+
+export interface CreateContactHistoryDto {
+  description: string
+}
+
+export interface ContactHistoryMutationResponse {
+  success: boolean
+  message: string
+  data: ContactHistoryItem
+}
