@@ -56,6 +56,8 @@ export const adminApi = {
     if (query.search) params.append('search', query.search)
     if (query.role) params.append('role', query.role)
     if (query.isActive !== undefined) params.append('isActive', query.isActive.toString())
+    if (query.sortBy) params.append('sortBy', query.sortBy)
+    if (query.sortOrder) params.append('sortOrder', query.sortOrder)
 
     const response = await $fetch<UsersListResponse>(`${baseURL}/admin/users?${params.toString()}`, {
       method: 'GET',
@@ -174,7 +176,8 @@ export const adminApi = {
     description?: string,
     loanId?: number,
     transactionType: 'ADMIN_DEBT_ADD' | 'LEGAL_DEBT_ADD' = 'ADMIN_DEBT_ADD',
-    transactionDate?: string
+    transactionDate?: string,
+    sendSms: boolean = true
   ): Promise<{ success: boolean; message: string; data: any }> {
     const config = useRuntimeConfig()
     const baseURL = config.public.apiBaseUrl 
@@ -186,7 +189,8 @@ export const adminApi = {
       description,
       loanId,
       transactionType,
-      transactionDate
+      transactionDate,
+      sendSms
     }
 
     const response = await $fetch<{ success: boolean; message: string; data: any }>(`${baseURL}/admin/users/debts/add`, {
@@ -210,7 +214,8 @@ export const adminApi = {
     description?: string,
     loanId?: number,
     transactionType: 'ADMIN_DEBT_REDUCE' = 'ADMIN_DEBT_REDUCE',
-    transactionDate?: string
+    transactionDate?: string,
+    sendSms: boolean = true
   ): Promise<{ success: boolean; message: string; data: any }> {
     const config = useRuntimeConfig()
     const baseURL = config.public.apiBaseUrl 
@@ -222,7 +227,8 @@ export const adminApi = {
       description,
       loanId,
       transactionType,
-      transactionDate
+      transactionDate,
+      sendSms
     }
 
     const response = await $fetch<{ success: boolean; message: string; data: any }>(`${baseURL}/admin/users/debts/reduce`, {

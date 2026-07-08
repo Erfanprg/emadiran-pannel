@@ -65,6 +65,7 @@ const debtForm = ref({
   loanId: undefined as number | undefined,
   newLoanNumber: "",
   description: "",
+  sendSms: true,
   transactionType: "ADMIN_DEBT_ADD" as
     | "ADMIN_DEBT_ADD"
     | "LEGAL_DEBT_ADD"
@@ -301,6 +302,7 @@ const openDebtModal = async (type: "add" | "reduce") => {
   debtModalType.value = type;
   debtForm.value.transactionType =
     type === "add" ? "ADMIN_DEBT_ADD" : "ADMIN_DEBT_REDUCE";
+  debtForm.value.sendSms = true;
   debtFieldErrors.value = {};
   showDebtModal.value = true;
   await fetchUserLoans();
@@ -422,7 +424,8 @@ const handleDebtSubmit = async () => {
             debtForm.value.transactionType === "LEGAL_DEBT_ADD"
               ? "LEGAL_DEBT_ADD"
               : "ADMIN_DEBT_ADD",
-            validation.transactionDateIso
+            validation.transactionDateIso,
+            debtForm.value.sendSms
           )
       : () =>
           adminApi.reduceDebt(
@@ -431,7 +434,8 @@ const handleDebtSubmit = async () => {
             debtForm.value.description,
             debtForm.value.loanId,
             "ADMIN_DEBT_REDUCE",
-            validation.transactionDateIso
+            validation.transactionDateIso,
+            debtForm.value.sendSms
           );
 
   const { success } = await execute(apiCall, {
@@ -459,6 +463,7 @@ const closeDebtModal = () => {
     loanId: undefined,
     newLoanNumber: "",
     description: "",
+    sendSms: true,
     transactionType: "ADMIN_DEBT_ADD",
     transactionDate: "",
   };
@@ -893,7 +898,6 @@ onMounted(() => {
                   {{ getUserDisplayName(user) }}
                 </h2>
                 <div class="flex flex-wrap items-center gap-2">
-
                   <span
                     class="px-3 py-1 text-sm font-medium rounded-full"
                     :class="
@@ -1298,8 +1302,8 @@ onMounted(() => {
                   >
                     {{ formatDate(transaction.transactionDate) }}
                   </td>
-                   <td
-                    class="max-w-[230px] px-6 py-4  text-sm text-gray-900 text-center"
+                  <td
+                    class="max-w-[230px] px-6 py-4 text-sm text-gray-900 text-center"
                   >
                     {{ transaction.description }}
                   </td>
@@ -1704,6 +1708,21 @@ onMounted(() => {
             >
               {{ debtFieldErrors.transactionType }}
             </p>
+          </div>
+
+          <!-- SMS Notification -->
+          <div
+            class="flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3"
+          >
+            <input
+              id="send-sms-notification"
+              v-model="debtForm.sendSms"
+              type="checkbox"
+              class="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+            />
+            <label for="send-sms-notification" class="text-sm text-gray-800">
+              ارسال پیامک اطلاع رسانی
+            </label>
           </div>
 
           <!-- Actions -->

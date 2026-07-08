@@ -27,7 +27,7 @@ const emit = defineEmits<{
 
 const columns = [
   { key: 'index', label: 'ردیف', align: 'center', width: '80px' },
-  { key: 'description', label: 'توضیحات', align: 'center', class: 'whitespace-normal max-w-[420px]' },
+  { key: 'description', label: 'توضیحات', align: 'center', class: '!whitespace-normal max-w-[320px]' },
   { key: 'admin', label: 'اپراتور', align: 'center', format: (val: ContactHistoryItem['admin']) => val?.fullName || '-' },
   { key: 'createdAt', label: 'تاریخ و ساعت', align: 'center', format: (val: string) => formatDate(val, true) }
 ]

@@ -56,7 +56,7 @@ const getAlignClass = (align?: string) => {
           <!-- Actions Slot -->
           <th
             v-if="$slots.actions"
-            class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase"
+            class="px-2 md:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase"
           >
             عملیات
           </th>

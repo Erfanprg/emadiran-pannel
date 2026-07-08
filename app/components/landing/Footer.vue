@@ -35,11 +35,19 @@
               /></a>
             </div>
 
-            <!-- BitPay Badge -->
+            <!-- Badge -->
             <div class="bg-white rounded-xl p-3 shadow-lg">
-              <a href="https://bitpay.ir/certificate-329003-emadiran.ir" target="_blank">
-                <img src="https://bitpay.ir/theme/public/images/trusted-logo.svg" alt="BitPay" class="w-24 h-auto"/>
-              </a>
+              <a
+                onclick="window.open('https://panel.aqayepardakht.ir/trustGateway/80153',null,'width=400, height=600, scrollbars=no, resizable=no')"
+                href="javascript:void(0)"
+                referrerpolicy="strict-origin-when-cross-origin"
+                title="پرداخت امن آقای پرداخت"
+              >
+                <img
+                  style="border-radius: 0px; margin-right: 10px"
+                  src="https://cdn.aqayepardakht.ir/trustlogo/2.svg"
+                  alt="پرداخت امن آقای پرداخت"
+              /></a>
             </div>
           </div>
 
@@ -305,10 +313,20 @@
                   <div class="text-xs text-gray-400 mb-1">وب‌سایت</div>
                   <div class="space-y-1">
                     <div class="font-medium">
-                      <a href="https://emadiran.ir" target="_blank" class="hover:text-white transition-colors">emadiran.ir</a>
+                      <a
+                        href="https://emadiran.ir"
+                        target="_blank"
+                        class="hover:text-white transition-colors"
+                        >emadiran.ir</a
+                      >
                     </div>
                     <div class="font-medium">
-                      <a href="https://ene.co.ir" target="_blank" class="hover:text-white transition-colors">ene.co.ir</a>
+                      <a
+                        href="https://ene.co.ir"
+                        target="_blank"
+                        class="hover:text-white transition-colors"
+                        >ene.co.ir</a
+                      >
                     </div>
                   </div>
                 </div>
@@ -342,7 +360,8 @@
                 <div class="flex-1">
                   <div class="text-xs text-gray-400 mb-1">آدرس</div>
                   <div class="font-medium text-sm leading-relaxed">
-                    تهران، بلوار آیت الله کاشانی، بین وفاآذر و رامین، پلاک 314، واحد 2
+                    تهران، بلوار آیت الله کاشانی، بین وفاآذر و رامین، پلاک 314،
+                    واحد 2
                   </div>
                   <div class="text-xs text-gray-400 mt-1" dir="ltr">
                     کدپستی: 1481856864
@@ -398,9 +417,9 @@
 useHead({
   script: [
     {
-      src: 'https://bitpay.ir/certificate-logo-329003',
-      defer: true
-    }
-  ]
-})
+      src: "https://bitpay.ir/certificate-logo-329003",
+      defer: true,
+    },
+  ],
+});
 </script>

@@ -60,6 +60,7 @@ export interface AddDebtRequest {
   description?: string
   transactionType?: Extract<DebtTransactionType, 'ADMIN_DEBT_ADD' | 'LEGAL_DEBT_ADD'>
   transactionDate?: string
+  sendSms?: boolean
 }
 
 export interface ReduceDebtRequest {
@@ -69,6 +70,7 @@ export interface ReduceDebtRequest {
   description?: string
   transactionType?: Extract<DebtTransactionType, 'ADMIN_DEBT_REDUCE'>
   transactionDate?: string
+  sendSms?: boolean
 }
 
 export interface UpdateTransactionRequest {

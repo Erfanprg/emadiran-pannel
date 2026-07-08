@@ -37,6 +37,8 @@ export interface GetUsersQuery {
   search?: string
   role?: 'USER' | 'ADMIN'
   isActive?: boolean
+  sortBy?: 'totalDebt' | 'createdAt'
+  sortOrder?: 'asc' | 'desc'
 }
 
 export interface CreateUserDto {

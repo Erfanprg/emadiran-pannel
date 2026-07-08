@@ -40,17 +40,31 @@ const limit = ref(10)
 const total = ref(0)
 const search = ref('')
 const statusFilter = ref<boolean | ''>('')
+// مرتب‌سازی بر اساس میزان بدهی: '' = پیش‌فرض، 'debt_desc' = بیشترین، 'debt_asc' = کمترین
+const sortFilter = ref<'' | 'debt_desc' | 'debt_asc'>('')
 
 // Filter fields definition
 const filterFields = computed(() => [
   {
     key: 'status',
+    label: 'وضعیت',
     type: 'select' as const,
     modelValue: statusFilter.value,
     options: [
       { label: 'همه وضعیت‌ها', value: '' },
       { label: 'فعال', value: true },
       { label: 'غیرفعال', value: false }
+    ]
+  },
+  {
+    key: 'sort',
+    label: 'مرتب سازی بر اساس',
+    type: 'select' as const,
+    modelValue: sortFilter.value,
+    options: [
+      { label: 'جدیدترین', value: '' },
+      { label: 'بیشترین بدهی', value: 'debt_desc' },
+      { label: 'کمترین بدهی', value: 'debt_asc' }
     ]
   }
 ])
@@ -94,6 +108,10 @@ const fetchUsers = async () => {
 
     if (search.value) query.search = search.value
     if (statusFilter.value !== '') query.isActive = statusFilter.value
+    if (sortFilter.value !== '') {
+      query.sortBy = 'totalDebt'
+      query.sortOrder = sortFilter.value === 'debt_desc' ? 'desc' : 'asc'
+    }
 
     const response: UsersListResponse = await adminApi.getUsers(query)
     users.value = response.data
@@ -200,9 +218,10 @@ onMounted(() => {
         :fields="filterFields"
         @search="(val) => { search = val; handleSearch() }"
         @apply="handleFilterChange"
-        @reset="() => { search = ''; statusFilter = ''; handleFilterChange() }"
+        @reset="() => { search = ''; statusFilter = ''; sortFilter = ''; handleFilterChange() }"
         @update:field="(key, val) => {
           if (key === 'status') statusFilter = val === '' ? '' : val === 'true'
+          if (key === 'sort') sortFilter = val
         }"
       />
 
