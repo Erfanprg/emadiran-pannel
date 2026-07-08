@@ -46,20 +46,15 @@ const handleLogout = async () => {
 
 <template>
   <header
-    class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm py-3"
+    class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm pb-3"
   >
     <div class="max-w-[1400px] mx-auto px-4">
       <div class="flex items-center justify-between h-16">
         <!-- Logo & Title -->
-        <div class="flex items-center gap-6">
+        <div class="flex items-center">
           <div class="flex items-center gap-3">
             <img src="/emad-logo-p.png" alt="عماد" class="h-10" />
-            <div>
-              <h1 class="text-xl font-bold text-gray-900 min-w-[150px]">
-                {{ title }}
-              </h1>
-              <p class="text-xs text-gray-500">پنل کاربری</p>
-            </div>
+          
           </div>
         </div>
 
@@ -82,7 +77,7 @@ const handleLogout = async () => {
         </nav>
 
         <!-- User Info & Actions -->
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-2  lg:gap-4">
           <!-- Debt Display -->
           <div v-if="authStore.user" class="hidden md:block">
             <div class="text-left bg-red-50 px-4 py-2 rounded-lg">
@@ -100,12 +95,8 @@ const handleLogout = async () => {
             class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 group"
             title="پروفایل کاربری"
           >
-            <div
-              class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center group-hover:bg-primary/20 transition-colors"
-            >
-              <Icon name="mdi:account-circle" size="24" class="text-primary" />
-            </div>
-            <div class="text-right hidden sm:block">
+        
+            <div class="text-right sm:block">
               <p
                 class="text-sm font-medium text-gray-900 group-hover:text-primary transition-colors"
               >
@@ -122,7 +113,7 @@ const handleLogout = async () => {
             title="خروج"
           >
             <Icon name="mdi:logout" size="20" />
-            <span class="hidden sm:inline">خروج</span>
+            <span class=" sm:inline">خروج</span>
           </button>
         </div>
       </div>

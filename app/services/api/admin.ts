@@ -16,6 +16,7 @@ import type {
   ContactHistoryMutationResponse
 } from '~/types/admin'
 import type { AddDebtRequest, ReduceDebtRequest } from '~/types/transaction'
+import type { LoanDebtBreakdown } from '~/types/debt'
 
 /**
  * Admin API Service
@@ -406,6 +407,25 @@ export const adminApi = {
     })
 
     return response
+  },
+
+  /**
+   * Get User Loan Debt Breakdown
+   * GET /admin/users/:id/loan-debts
+   */
+  async getUserLoanDebts(userId: number): Promise<LoanDebtBreakdown> {
+    const config = useRuntimeConfig()
+    const baseURL = config.public.apiBaseUrl
+    const token = useCookie('auth_token')
+
+    const response = await $fetch<{ success: boolean; data: LoanDebtBreakdown }>(`${baseURL}/admin/users/${userId}/loan-debts`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token.value}`
+      }
+    })
+
+    return response.data
   },
 
   /**

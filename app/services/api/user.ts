@@ -1,5 +1,6 @@
 import type { Installment } from '~/types/installment'
 import type { Transaction } from '~/types/transaction'
+import type { LoanDebtBreakdown } from '~/types/debt'
 
 export interface UserProfile {
   id: number
@@ -131,5 +132,24 @@ export const userApi = {
     })
 
     return response
+  },
+
+  /**
+   * Get User Loan Debt Breakdown
+   * GET /me/loan-debts
+   */
+  async getLoanDebts(): Promise<LoanDebtBreakdown> {
+    const config = useRuntimeConfig()
+    const baseURL = config.public.apiBaseUrl
+    const token = useCookie('auth_token')
+
+    const response = await $fetch<{ success: boolean; data: LoanDebtBreakdown }>(`${baseURL}/me/loan-debts`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token.value}`
+      }
+    })
+
+    return response.data
   }
 }

@@ -62,5 +62,5 @@ export const formatNumber = (value: string | number | null | undefined, defaultV
  */
 export const formatCurrency = (value: string | number | null | undefined, showUnit = false): string => {
   const formatted = formatNumber(value, '0')
-  return showUnit ? `${formatted} ریال` : formatted
+  return showUnit ? ` ${formatted} ریال` : formatted
 }

@@ -4,6 +4,7 @@ import { userApi } from "~/services/api/user";
 import { formatCurrency, formatDate } from "~/utils/formatters";
 import type { Installment } from "~/types/installment";
 import type { Transaction } from "~/types/transaction";
+import type { LoanDebtBreakdown } from "~/types/debt";
 
 useHead({
   title: "داشبورد - عماد ایران",
@@ -17,6 +18,9 @@ definePageMeta({
 const loading = ref(true);
 const upcomingInstallments = ref<Installment[]>([]);
 const recentTransactions = ref<Transaction[]>([]);
+const loanDebtBreakdown = ref<LoanDebtBreakdown | null>(null);
+const isLoadingLoanDebts = ref(false);
+const loanDebtError = ref<string | null>(null);
 const stats = ref({
   totalDebt: "0",
   overdueInstallments: 0,
@@ -25,6 +29,21 @@ const stats = ref({
 });
 
 const authStore = useAuthStore();
+
+const fetchLoanDebts = async () => {
+  try {
+    isLoadingLoanDebts.value = true;
+    loanDebtError.value = null;
+    loanDebtBreakdown.value = await userApi.getLoanDebts();
+  } catch (error: any) {
+    console.error("Error fetching loan debts:", error);
+    loanDebtBreakdown.value = null;
+    loanDebtError.value =
+      error.data?.message || error.message || "خطا در دریافت جزئیات تسهیلات";
+  } finally {
+    isLoadingLoanDebts.value = false;
+  }
+};
 
 // Fetch dashboard data
 const fetchDashboardData = async () => {
@@ -35,9 +54,13 @@ const fetchDashboardData = async () => {
       await authStore.fetchProfile();
     }
 
-    const [installmentsRes, transactionsRes] = await Promise.all([
+    const [installmentsRes, transactionsRes, allInstallmentsRes, allTransactionsRes] = await Promise.all([
       userApi.getInstallments({ limit: 5 }),
       userApi.getTransactions({ limit: 5 }),
+      userApi.getInstallments({}),
+      userApi.getTransactions({
+        status: "SUCCESS",
+      }),
     ]);
 
     stats.value.totalDebt = authStore.user?.totalDebt || "0";
@@ -45,7 +68,6 @@ const fetchDashboardData = async () => {
     recentTransactions.value = transactionsRes.data || [];
 
     // Calculate stats from installments
-    const allInstallmentsRes = await userApi.getInstallments({});
     const allInstallments = allInstallmentsRes.data || [];
     stats.value.overdueInstallments = allInstallments.filter(
       (i) => i.status === "OVERDUE"
@@ -55,9 +77,6 @@ const fetchDashboardData = async () => {
     ).length;
 
     // Calculate successful transactions
-    const allTransactionsRes = await userApi.getTransactions({
-      status: "SUCCESS",
-    });
     stats.value.successfulTransactions = allTransactionsRes.total || 0;
   } catch (error) {
     console.error("Error fetching dashboard data:", error);
@@ -117,6 +136,7 @@ const transactionColumns = [
 // Fetch data on mount
 onMounted(() => {
   fetchDashboardData();
+  fetchLoanDebts();
 });
 </script>
 
@@ -184,6 +204,15 @@ onMounted(() => {
             </NuxtLink>
           </div>
         </BaseCard>
+
+        <LoanDebtBreakdownSection
+          title="جزئیات تسهیلات"
+          :breakdown="loanDebtBreakdown"
+          :loading="isLoadingLoanDebts"
+          :error="loanDebtError"
+          empty-message="در حال حاضر موردی برای شما ثبت نشده است."
+          @retry="fetchLoanDebts"
+        />
 
         <!-- Upcoming Installments -->
         <!-- <BaseCard>

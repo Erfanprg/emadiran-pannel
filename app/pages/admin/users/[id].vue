@@ -27,6 +27,7 @@ import type {
   ContactHistoryItem,
   ContactHistoriesMeta,
 } from "~/types/admin";
+import type { LoanDebtBreakdown } from "~/types/debt";
 
 useHead({
   title: "جزئیات کاربر - عماد ایران",
@@ -57,6 +58,9 @@ const debtAmountInput = useCurrencyInput();
 const user = ref<any>(null);
 const isLoading = ref(false);
 const error = ref<string | null>(null);
+const loanDebtBreakdown = ref<LoanDebtBreakdown | null>(null);
+const isLoadingLoanDebtBreakdown = ref(false);
+const loanDebtBreakdownError = ref<string | null>(null);
 
 // Debt Modal State
 const showDebtModal = ref(false);
@@ -151,12 +155,29 @@ const paymentDeadlineLabel = computed(() => {
   return "ثبت مهلت پرداخت";
 });
 
+const fetchUserLoanDebtBreakdown = async () => {
+  try {
+    isLoadingLoanDebtBreakdown.value = true;
+    loanDebtBreakdownError.value = null;
+    loanDebtBreakdown.value = await adminApi.getUserLoanDebts(userId);
+  } catch (err: any) {
+    console.error("Error fetching user loan debts:", err);
+    loanDebtBreakdown.value = null;
+    loanDebtBreakdownError.value =
+      err.data?.message || "خطا در دریافت جزئیات بدهی تسهیلات";
+  } finally {
+    isLoadingLoanDebtBreakdown.value = false;
+  }
+};
+
 // Fetch user details
 const fetchUserDetails = async () => {
   try {
     isLoading.value = true;
     error.value = null;
+    loanDebtBreakdownError.value = null;
     user.value = await adminApi.getUserById(userId);
+    await fetchUserLoanDebtBreakdown();
   } catch (err: any) {
     error.value = err.data?.message || "خطا در دریافت اطلاعات کاربر";
     console.error("Error fetching user:", err);
@@ -1171,6 +1192,16 @@ onMounted(() => {
             </div>
           </div>
         </div>
+
+        <LoanDebtBreakdownSection
+          title="جزئیات بدهی به تفکیک تسهیلات"
+          :breakdown="loanDebtBreakdown"
+          :loading="isLoadingLoanDebtBreakdown"
+          :error="loanDebtBreakdownError"
+          :show-discrepancy-warning="true"
+          empty-message="در حال حاضر تسهیلات بدهکاری برای این کاربر ثبت نشده است."
+          @retry="fetchUserLoanDebtBreakdown"
+        />
 
         <!-- Transactions -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200">

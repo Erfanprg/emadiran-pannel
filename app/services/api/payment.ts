@@ -1,12 +1,21 @@
+import type { PaymentAllocationPreview, PaymentAllocationPreviewRequest } from '~/types/debt'
+
 export interface PaymentInitiateRequest {
   amount: string
   gatewayName: string
   description?: string
+  selectedLoanId?: number
 }
 
 export interface PaymentInitiateResponse {
   paymentUrl: string
   transactionId: number
+}
+
+export interface PaymentInitiateApiResponse {
+  success: boolean
+  data: PaymentInitiateResponse
+  message?: string
 }
 
 export interface PaymentTransactionDetail {
@@ -31,12 +40,12 @@ export const paymentApi = {
    * Initiate Payment
    * POST /payments/me/initiate
    */
-  async initiatePayment(data: PaymentInitiateRequest): Promise<PaymentInitiateResponse> {
+  async initiatePayment(data: PaymentInitiateRequest): Promise<PaymentInitiateApiResponse> {
     const config = useRuntimeConfig()
     const baseURL = config.public.apiBaseUrl
     const token = useCookie('auth_token')
 
-    const response = await $fetch<PaymentInitiateResponse>(`${baseURL}/payments/me/initiate`, {
+    const response = await $fetch<PaymentInitiateApiResponse>(`${baseURL}/payments/me/initiate`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token.value}`,
@@ -65,5 +74,26 @@ export const paymentApi = {
     })
 
     return response
+  },
+
+  /**
+   * Preview payment allocation across loans
+   * POST /payments/me/allocation-preview
+   */
+  async getAllocationPreview(data: PaymentAllocationPreviewRequest): Promise<PaymentAllocationPreview> {
+    const config = useRuntimeConfig()
+    const baseURL = config.public.apiBaseUrl
+    const token = useCookie('auth_token')
+
+    const response = await $fetch<{ success: boolean; data: PaymentAllocationPreview }>(`${baseURL}/payments/me/allocation-preview`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token.value}`,
+        'Content-Type': 'application/json'
+      },
+      body: data
+    })
+
+    return response.data
   }
 }

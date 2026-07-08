@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
+import { userApi } from '~/services/api/user'
 import { formatCurrency, formatDate } from '~/utils/formatters'
 import { getUserDisplayName } from '~/func/getUserDisplayName'
+import type { LoanDebtBreakdown } from '~/types/debt'
 
 useHead({
   title: 'پروفایل کاربری - عماد ایران'
@@ -12,12 +14,30 @@ definePageMeta({
 })
 
 const authStore = useAuthStore()
+const loanDebtBreakdown = ref<LoanDebtBreakdown | null>(null)
+const isLoadingLoanDebts = ref(false)
+const loanDebtError = ref<string | null>(null)
+
+const fetchLoanDebts = async () => {
+  try {
+    isLoadingLoanDebts.value = true
+    loanDebtError.value = null
+    loanDebtBreakdown.value = await userApi.getLoanDebts()
+  } catch (error: any) {
+    console.error('Error fetching loan debts:', error)
+    loanDebtError.value = error.data?.message || error.message || 'خطا در دریافت جزئیات بدهی'
+  } finally {
+    isLoadingLoanDebts.value = false
+  }
+}
 
 // Ensure user data is loaded
 onMounted(async () => {
   if (!authStore.user) {
     await authStore.fetchProfile()
   }
+
+  await fetchLoanDebts()
 })
 
 // User info computed
@@ -156,6 +176,15 @@ const getStatusBadge = (isActive: boolean) => {
             </NuxtLink>
           </div>
         </BaseCard>
+
+        <LoanDebtBreakdownSection
+          title="جزئیات بدهی به تفکیک تسهیلات"
+          :breakdown="loanDebtBreakdown"
+          :loading="isLoadingLoanDebts"
+          :error="loanDebtError"
+          empty-message="در حال حاضر تسهیلات بدهکاری برای شما ثبت نشده است."
+          @retry="fetchLoanDebts"
+        />
 
         <!-- Quick Actions -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
