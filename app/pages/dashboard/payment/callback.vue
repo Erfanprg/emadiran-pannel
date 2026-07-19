@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
-import { formatCurrency } from '~/utils/formatters'
-import { paymentApi } from '~/services/api/payment'
-import type { Transaction } from '~/types'
+import { formatCurrency, formatDate } from '~/utils/formatters'
+import { userApi } from '~/services/api/user'
+import type { Transaction } from '~/types/transaction'
 
 useHead({
   title: 'نتیجه پرداخت - عماد ایران'
@@ -33,10 +33,7 @@ const fetchTransactionDetails = async () => {
 
   try {
     loadingDetails.value = true
-    const response = await paymentApi.getTransactionDetail(Number(transactionId.value))
-    if (response.data) {
-      transactionDetails.value = response.data
-    }
+    transactionDetails.value = await userApi.getTransactionById(Number(transactionId.value))
   } catch (error) {
     console.error('Error fetching transaction details:', error)
   } finally {
@@ -107,15 +104,24 @@ onMounted(async () => {
                 <div class="flex justify-between items-center">
                   <span class="text-gray-600">تاریخ:</span>
                   <span class="font-bold text-gray-900">
-                    {{ transactionDetails?.transactionDate 
-                      ? new Date(transactionDetails.transactionDate).toLocaleDateString('fa-IR') 
-                      : transactionDetails?.createdAt 
-                        ? new Date(transactionDetails.createdAt).toLocaleDateString('fa-IR')
-                        : new Date().toLocaleDateString('fa-IR') 
+                    {{
+                      transactionDetails?.transactionDate
+                        ? formatDate(transactionDetails.transactionDate)
+                        : transactionDetails?.createdAt
+                        ? formatDate(transactionDetails.createdAt)
+                        : formatDate(new Date())
                     }}
                   </span>
                 </div>
               </div>
+            </div>
+
+            <div v-if="transactionDetails" class="bg-white border border-gray-200 rounded-lg p-4 mb-6 text-right">
+              <p class="text-sm text-gray-600 mb-2">جزئیات تسهیلات</p>
+              <TransactionAllocationsSummary
+                :transaction="transactionDetails"
+                :default-expanded="true"
+              />
             </div>
 
             <!-- Action Buttons -->

@@ -1,10 +1,11 @@
 import type { PaymentAllocationPreview, PaymentAllocationPreviewRequest } from '~/types/debt'
+import type { Transaction } from '~/types/transaction'
 
 export interface PaymentInitiateRequest {
   amount: string
   gatewayName: string
   description?: string
-  selectedLoanId?: number
+  loanId: number
 }
 
 export interface PaymentInitiateResponse {
@@ -16,20 +17,6 @@ export interface PaymentInitiateApiResponse {
   success: boolean
   data: PaymentInitiateResponse
   message?: string
-}
-
-export interface PaymentTransactionDetail {
-  id: number
-  userId: number
-  loanId?: number
-  amount: string
-  gatewayName: string
-  status: 'SUCCESS' | 'FAILED' | 'PENDING'
-  description: string | null
-  refId?: string | null
-  transactionDate?: string | null
-  createdAt: string
-  updatedAt: string
 }
 
 /**
@@ -59,14 +46,14 @@ export const paymentApi = {
 
   /**
    * Get Transaction Detail
-   * GET /payments/me/transaction/:id
+   * GET /me/transactions/:id
    */
   async getTransactionDetail(transactionId: number) {
     const config = useRuntimeConfig()
     const baseURL = config.public.apiBaseUrl
     const token = useCookie('auth_token')
 
-    const response = await $fetch<{ success: boolean; data: PaymentTransactionDetail }>(`${baseURL}/payments/me/transaction/${transactionId}`, {
+    const response = await $fetch<{ success: boolean; data: Transaction }>(`${baseURL}/me/transactions/${transactionId}`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token.value}`

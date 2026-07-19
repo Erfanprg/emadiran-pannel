@@ -5,6 +5,7 @@ import { formatCurrency, formatDate } from "~/utils/formatters";
 import type { Installment } from "~/types/installment";
 import type { Transaction } from "~/types/transaction";
 import type { LoanDebtBreakdown } from "~/types/debt";
+import { getTransactionAllocations } from "~/utils/transactionAllocations";
 
 useHead({
   title: "داشبورد - عماد ایران",
@@ -27,6 +28,7 @@ const stats = ref({
   remainingInstallments: 0,
   successfulTransactions: 0,
 });
+const expandedRecentTransactionId = ref<number | null>(null);
 
 const authStore = useAuthStore();
 
@@ -114,6 +116,14 @@ const getTypeBadge = (type: string) => {
   );
 };
 
+const canExpandTransaction = (transaction: Transaction) =>
+  getTransactionAllocations(transaction).length > 0;
+
+const toggleRecentTransactionDetails = (transactionId: number) => {
+  expandedRecentTransactionId.value =
+    expandedRecentTransactionId.value === transactionId ? null : transactionId;
+};
+
 // Installments table columns
 const installmentColumns = [
   { key: "index", label: "ردیف" },
@@ -128,7 +138,7 @@ const transactionColumns = [
   { key: "index", label: "ردیف" },
   { key: "amount", label: "مبلغ" },
   { key: "type", label: "نوع" },
-  { key: "loanNumber", label: "شماره تسهیلات" },
+  { key: "allocationSummary", label: "جزئیات تسهیلات" },
   { key: "status", label: "وضعیت" },
   { key: "createdAt", label: "تاریخ" },
 ];
@@ -286,6 +296,7 @@ onMounted(() => {
             v-else
             :columns="transactionColumns"
             :data="recentTransactions"
+            :expanded-row-key="expandedRecentTransactionId"
           >
             <template #cell-index="{ index }">
               {{ index + 1 }}
@@ -300,10 +311,20 @@ onMounted(() => {
                 {{ getTypeBadge(row.type).text }}
               </BaseBadge>
             </template>
-            <template #cell-loanNumber="{ row }">
-              <span dir="ltr">{{
-                row.loanNumber ?? row.loan?.loanNumber ?? "-"
-              }}</span>
+            <template #cell-allocationSummary="{ row }">
+              <TransactionAllocationsSummary
+                :transaction="row"
+                trigger-only
+                :expanded="expandedRecentTransactionId === row.id"
+                @toggle="toggleRecentTransactionDetails(row.id)"
+              />
+            </template>
+            <template #expanded-row="{ row }">
+              <TransactionAllocationsSummary
+                v-if="canExpandTransaction(row)"
+                :transaction="row"
+                default-expanded
+              />
             </template>
             <template #cell-status="{ row }">
               <BaseBadge :variant="getStatusBadge(row.status).variant as any">

@@ -135,6 +135,25 @@ export const userApi = {
   },
 
   /**
+   * Get User Transaction Detail
+   * GET /me/transactions/:id
+   */
+  async getTransactionById(transactionId: number): Promise<Transaction> {
+    const config = useRuntimeConfig()
+    const baseURL = config.public.apiBaseUrl
+    const token = useCookie('auth_token')
+
+    const response = await $fetch<{ success: boolean; data: Transaction }>(`${baseURL}/me/transactions/${transactionId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token.value}`
+      }
+    })
+
+    return response.data
+  },
+
+  /**
    * Get User Loan Debt Breakdown
    * GET /me/loan-debts
    */

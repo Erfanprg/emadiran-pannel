@@ -8,10 +8,15 @@ export interface LoanDebtItem {
 }
 
 export interface MissingLoanTransaction {
-  transactionId: number
-  transactionType: string
+  id?: number
+  transactionId?: number
+  loanId?: number | null
+  loanNumber?: string | null
+  type?: string | null
+  transactionType?: string | null
   amount: string
-  transactionDate: string
+  transactionDate?: string | null
+  createdAt?: string | null
   description: string | null
 }
 

@@ -93,6 +93,35 @@ export interface BulkPaymentImportResponse {
   }
 }
 
+export interface DebtReport {
+  summary: {
+    totalDebt: string
+    averageDebt: string
+    maxDebt: string
+    usersWithDebt: number
+    totalPaymentTransactions: number
+    totalPaymentAmount: string
+  }
+  recentChanges: Array<{
+    type: string
+    totalAmount: string
+    count: number
+  }>
+  topDebtors: Array<{
+    id: number
+    firstName: string | null
+    lastName: string | null
+    fullName: string | null
+    phoneNumber: string
+    totalDebt: string
+  }>
+}
+
+export interface DebtReportResponse {
+  success: boolean
+  data: DebtReport
+}
+
 export interface PaymentDeadline {
   id: number
   userId: number

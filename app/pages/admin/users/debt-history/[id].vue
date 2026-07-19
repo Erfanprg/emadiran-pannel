@@ -4,6 +4,7 @@ import { adminApi } from '~/services/api/admin'
 import { useToast } from '~/composables/useToast'
 import { formatDate, formatCurrency } from '~/utils/formatters'
 import { getUserDisplayName } from '~/func/getUserDisplayName'
+import { getTransactionAllocations } from '~/utils/transactionAllocations'
 
 useHead({
   title: 'تاریخچه بدهی - عماد ایران'
@@ -35,6 +36,7 @@ const error = ref<string | null>(null)
 const page = ref(1)
 const limit = 20
 const total = ref(0)
+const expandedTransactionId = ref<number | null>(null)
 
 // Fetch user info
 const fetchUserInfo = async () => {
@@ -50,6 +52,7 @@ const fetchDebtHistory = async () => {
   try {
     isLoading.value = true
     error.value = null
+    expandedTransactionId.value = null
     const offset = (page.value - 1) * limit
     const response = await adminApi.getDebtHistory(userId, limit, offset)
     history.value = response.data.transactions || []
@@ -60,6 +63,12 @@ const fetchDebtHistory = async () => {
   } finally {
     isLoading.value = false
   }
+}
+
+const canExpandTransaction = (transaction: any) => getTransactionAllocations(transaction).length > 0
+
+const toggleTransactionDetails = (transactionId: number) => {
+  expandedTransactionId.value = expandedTransactionId.value === transactionId ? null : transactionId
 }
 
 // Load data on mount
@@ -118,15 +127,20 @@ watch(page, () => {
         <StateError v-else-if="error" :message="error" @retry="fetchDebtHistory" />
 
         <!-- Table -->
-        <BaseTable v-else-if="history.length > 0" :columns="[
-          { key: 'id', label: 'شناسه', align: 'center' },
-          { key: 'type', label: 'نوع عملیات', align: 'center' },
-          { key: 'amount', label: 'مبلغ', align: 'center' },
-          { key: 'loanNumber', label: 'شماره تسهیلات', align: 'center' },
-          { key: 'status', label: 'وضعیت', align: 'center' },
-          { key: 'description', label: 'توضیحات', align: 'center', format: (val) => val || '-' },
-          { key: 'transactionDate', label: 'تاریخ', align: 'center', format: (val) => formatDate(val) }
-        ]" :data="history">
+        <BaseTable
+          v-else-if="history.length > 0"
+          :columns="[
+            { key: 'id', label: 'شناسه', align: 'center' },
+            { key: 'type', label: 'نوع عملیات', align: 'center' },
+            { key: 'amount', label: 'مبلغ', align: 'center' },
+            { key: 'allocationSummary', label: 'جزئیات تسهیلات', align: 'center' },
+            { key: 'status', label: 'وضعیت', align: 'center' },
+            { key: 'description', label: 'توضیحات', align: 'center', format: (val) => val || '-' },
+            { key: 'transactionDate', label: 'تاریخ', align: 'center', format: (val) => formatDate(val) }
+          ]"
+          :data="history"
+          :expanded-row-key="expandedTransactionId"
+        >
           <!-- Type Cell -->
           <template #cell-type="{ row }">
             <BaseBadge
@@ -148,10 +162,23 @@ watch(page, () => {
           </template>
 
           <!-- Loan Cell -->
-          <template #cell-loanNumber="{ row }">
-            <div dir="ltr" class="font-medium">
-              {{ row.loanNumber ?? row.loan?.loanNumber ?? '-' }}
+          <template #cell-allocationSummary="{ row }">
+            <div class="flex justify-center">
+              <TransactionAllocationsSummary
+                :transaction="row"
+                trigger-only
+                :expanded="expandedTransactionId === row.id"
+                @toggle="toggleTransactionDetails(row.id)"
+              />
             </div>
+          </template>
+
+          <template #expanded-row="{ row }">
+            <TransactionAllocationsSummary
+              v-if="canExpandTransaction(row)"
+              :transaction="row"
+              default-expanded
+            />
           </template>
 
           <!-- Status Cell -->

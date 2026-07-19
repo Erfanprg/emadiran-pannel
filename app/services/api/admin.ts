@@ -6,6 +6,7 @@ import type {
   CreateUserDto,
   UpdateUserDto,
   BulkPaymentImportResponse,
+  DebtReportResponse,
   PaymentDeadlineCurrentResponse,
   PaymentDeadlinesListResponse,
   CreatePaymentDeadlineDto,
@@ -270,12 +271,12 @@ export const adminApi = {
    * Get Debt Report
    * GET /admin/users/debts/report
    */
-  async getDebtReport(): Promise<{ success: boolean; data: any }> {
+  async getDebtReport(): Promise<DebtReportResponse> {
     const config = useRuntimeConfig()
     const baseURL = config.public.apiBaseUrl 
     const token = useCookie('auth_token')
 
-    const response = await $fetch<{ success: boolean; data: any }>(`${baseURL}/admin/users/debts/report`, {
+    const response = await $fetch<DebtReportResponse>(`${baseURL}/admin/users/debts/report`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token.value}`

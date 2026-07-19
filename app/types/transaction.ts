@@ -1,20 +1,34 @@
 export type DebtTransactionType = 'ADMIN_DEBT_ADD' | 'LEGAL_DEBT_ADD' | 'ADMIN_DEBT_REDUCE'
 export type TransactionType = 'DEBT_PAYMENT' | DebtTransactionType
+export type TransactionStatus = 'SUCCESS' | 'FAILED' | 'PENDING'
+
+export interface TransactionAllocation {
+  loanId: number
+  loanNumber: string
+  amount: string
+  allocationOrder: number
+  allocationType: string
+  paymentTransactionId?: number | null
+  allocatedTransactionId?: number | null
+}
 
 export interface Transaction {
   id: number
   userId: number
-  loanId?: number
+  loanId?: number | null
   loanNumber?: string | null
   amount: string
   type: TransactionType
-  status: 'SUCCESS' | 'FAILED' | 'PENDING'
-  gatewayName?: string
-  description?: string
-  refId?: string
-  transactionDate?: string
+  status: TransactionStatus
+  gatewayName?: string | null
+  description?: string | null
+  refId?: string | null
+  transactionDate?: string | null
   createdAt: string
   updatedAt?: string
+  allocationRole?: string | null
+  allocationSummary?: string | null
+  allocations?: TransactionAllocation[]
   user?: {
     id: number
     firstName?: string | null
@@ -31,8 +45,15 @@ export interface Transaction {
 export interface TransactionsListResponse {
   success: boolean
   data: {
-    data: Transaction[]
-    total: number
+    data?: Transaction[]
+    items?: Transaction[]
+    total?: number
+    meta?: {
+      total: number
+      limit?: number
+      offset?: number
+      hasMore?: boolean
+    }
   }
 }
 
@@ -40,7 +61,7 @@ export interface GetTransactionsQuery {
   limit?: number
   offset?: number
   userId?: number
-  status?: 'SUCCESS' | 'FAILED' | 'PENDING'
+  status?: TransactionStatus
   type?: TransactionType
   phoneNumber?: string
   nationalCode?: string

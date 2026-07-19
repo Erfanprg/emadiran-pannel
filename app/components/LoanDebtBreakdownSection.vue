@@ -72,8 +72,22 @@ const hasMissingTransactions = computed(() => {
   return (props.breakdown?.missingLoanTransactions?.length || 0) > 0;
 });
 
+const hasVisibleDebt = computed(() => {
+  if (!props.breakdown) return false;
+
+  return (
+    parseAmount(props.breakdown.storedTotalDebt) > 0 ||
+    parseAmount(props.breakdown.computedTotalDebt) > 0 ||
+    positiveLoans.value.length > 0
+  );
+});
+
+const shouldRenderSection = computed(() => {
+  return props.loading || !!props.error || hasVisibleDebt.value;
+});
+
 const shouldShowEmptyState = computed(() => {
-  if (!props.breakdown) return true;
+  if (!props.breakdown || !hasVisibleDebt.value) return false;
 
   return (
     positiveLoans.value.length === 0 &&
@@ -105,7 +119,7 @@ const getLoanBadge = (loan: LoanDebtItem) => {
 </script>
 
 <template>
-  <BaseCard>
+  <BaseCard v-if="shouldRenderSection">
     <div class="flex items-center justify-between gap-3 mb-6">
       <div>
         <h3 class="text-xl font-bold text-gray-900">{{ title }}</h3>

@@ -15,6 +15,7 @@ import {
   getTransactionTypeLabel,
 } from "~/utils/adminTransactionPayload";
 import type { DebtTransactionType } from "~/types/transaction";
+import { getTransactionAllocations } from "~/utils/transactionAllocations";
 
 useHead({
   title: "تاریخچه پرداخت - عماد ایران",
@@ -63,6 +64,7 @@ const editErrors = ref<{
   transactionDate?: string;
 }>({});
 const deleteError = ref("");
+const expandedTransactionId = ref<number | null>(null);
 
 // Filters
 const filters = ref<GetTransactionsQuery>({
@@ -158,7 +160,12 @@ const columns: TableColumn<Transaction>[] = [
   },
   { key: "type", label: "نوع", align: "center", class: "align-middle" },
   { key: "status", label: "وضعیت", align: "center", class: "align-middle" },
-  { key: "loanNumber", label: "شماره تسهیلات", align: "center", class: "align-middle" },
+  {
+    key: "allocationSummary",
+    label: "جزئیات تسهیلات",
+    align: "center",
+    class: "align-middle",
+  },
   {
     key: "description",
     label: "توضیحات",
@@ -203,6 +210,14 @@ const handleEditDateChange = (value: string) => {
 
 const canManageTransaction = (row: Transaction): boolean => {
   return EDITABLE_TRANSACTION_TYPES.includes(row.type as DebtTransactionType);
+};
+
+const canExpandTransaction = (transaction: Transaction) =>
+  getTransactionAllocations(transaction).length > 0;
+
+const toggleTransactionDetails = (transactionId: number) => {
+  expandedTransactionId.value =
+    expandedTransactionId.value === transactionId ? null : transactionId;
 };
 
 const selectedTransactionTypeLabel = computed(() => {
@@ -359,6 +374,7 @@ const fetchTransactions = async () => {
   try {
     isLoading.value = true;
     error.value = null;
+    expandedTransactionId.value = null;
     filters.value.offset = (page.value - 1) * (filters.value.limit || 20);
 
 
@@ -373,8 +389,8 @@ const fetchTransactions = async () => {
     const response = await transactionsApi.getTransactions(
       cleanedFilters as GetTransactionsQuery
     );
-    transactions.value = response.data.data || [];
-    total.value = response.data.meta?.total || 0;
+    transactions.value = response.data.data || response.data.items || [];
+    total.value = response.data.meta?.total || response.data.total || 0;
   } catch (err: any) {
     error.value =
       err.data?.message || err.message || "خطا در دریافت تاریخچه پرداخت";
@@ -551,6 +567,7 @@ watch(page, () => {
           v-else-if="transactions.length > 0"
           :columns="columns"
           :data="transactions"
+          :expanded-row-key="expandedTransactionId"
         >
           <!-- User Cell -->
           <template #cell-userId="{ row }">
@@ -612,10 +629,23 @@ watch(page, () => {
           </template>
 
           <!-- Loan Cell -->
-          <template #cell-loanNumber="{ row }">
-            <div dir="ltr" class="font-medium">
-              {{ row.loanNumber ?? row.loan?.loanNumber ?? "-" }}
+          <template #cell-allocationSummary="{ row }">
+            <div class="flex justify-center">
+              <TransactionAllocationsSummary
+                :transaction="row"
+                trigger-only
+                :expanded="expandedTransactionId === row.id"
+                @toggle="toggleTransactionDetails(row.id)"
+              />
             </div>
+          </template>
+
+          <template #expanded-row="{ row }">
+            <TransactionAllocationsSummary
+              v-if="canExpandTransaction(row)"
+              :transaction="row"
+              default-expanded
+            />
           </template>
 
           <!-- Date Cell -->

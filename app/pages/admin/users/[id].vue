@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useAuthStore } from "~/stores/auth";
 import { adminApi } from "~/services/api/admin";
+import { transactionsApi } from "~/services/api/transactions";
 import { loansApi } from "~/services/api/loans";
 import { useToast } from "~/composables/useToast";
 import { useConfirm } from "~/composables/useConfirm";
@@ -28,6 +29,9 @@ import type {
   ContactHistoriesMeta,
 } from "~/types/admin";
 import type { LoanDebtBreakdown } from "~/types/debt";
+import type { Transaction } from "~/types/transaction";
+import type { TableColumn } from "~/components/Base/Table.vue";
+import { getTransactionAllocations } from "~/utils/transactionAllocations";
 
 useHead({
   title: "جزئیات کاربر - عماد ایران",
@@ -61,6 +65,57 @@ const error = ref<string | null>(null);
 const loanDebtBreakdown = ref<LoanDebtBreakdown | null>(null);
 const isLoadingLoanDebtBreakdown = ref(false);
 const loanDebtBreakdownError = ref<string | null>(null);
+const userTransactions = ref<Transaction[]>([]);
+const isLoadingTransactions = ref(false);
+const transactionsError = ref<string | null>(null);
+const transactionsPage = ref(1);
+const transactionsLimit = 10;
+const transactionsTotal = ref(0);
+const expandedTransactionId = ref<number | null>(null);
+
+const canExpandTransaction = (transaction: any) =>
+  getTransactionAllocations(transaction).length > 0;
+
+const toggleTransactionDetails = (transactionId: number) => {
+  expandedTransactionId.value =
+    expandedTransactionId.value === transactionId ? null : transactionId;
+};
+
+const transactionColumns: TableColumn<Transaction>[] = [
+  { key: "id", label: "شناسه", align: "center" },
+  { key: "amount", label: "مبلغ", align: "center" },
+  { key: "type", label: "نوع", align: "center" },
+  { key: "allocationSummary", label: "جزئیات تسهیلات", align: "center" },
+  { key: "status", label: "وضعیت", align: "center" },
+  { key: "transactionDate", label: "تاریخ", align: "center" },
+  {
+    key: "description",
+    label: "توضیحات",
+    align: "center",
+    class: "whitespace-normal"
+  }
+];
+
+const getTransactionTypeBadge = (type: string) => {
+  const badges = {
+    DEBT_PAYMENT: { text: "پرداخت", variant: "success" },
+    ADMIN_DEBT_ADD: { text: "افزایش بدهی", variant: "danger" },
+    LEGAL_DEBT_ADD: { text: "افزایش بدهی حقوقی", variant: "danger" },
+    ADMIN_DEBT_REDUCE: { text: "کاهش بدهی", variant: "warning" }
+  };
+
+  return badges[type as keyof typeof badges] || { text: type, variant: "default" };
+};
+
+const getTransactionStatusBadge = (status: string) => {
+  const badges = {
+    SUCCESS: { text: "موفق", variant: "success" },
+    FAILED: { text: "ناموفق", variant: "danger" },
+    PENDING: { text: "در انتظار", variant: "gray" }
+  };
+
+  return badges[status as keyof typeof badges] || { text: status, variant: "default" };
+};
 
 // Debt Modal State
 const showDebtModal = ref(false);
@@ -168,6 +223,37 @@ const fetchUserLoanDebtBreakdown = async () => {
   } finally {
     isLoadingLoanDebtBreakdown.value = false;
   }
+};
+
+const fetchUserTransactions = async () => {
+  try {
+    isLoadingTransactions.value = true;
+    transactionsError.value = null;
+    expandedTransactionId.value = null;
+
+    const offset = (transactionsPage.value - 1) * transactionsLimit;
+    const response = await transactionsApi.getTransactions({
+      userId,
+      limit: transactionsLimit,
+      offset,
+    });
+
+    userTransactions.value = response.data.data || response.data.items || [];
+    transactionsTotal.value = response.data.meta?.total || response.data.total || 0;
+  } catch (err: any) {
+    console.error("Error fetching user transactions:", err);
+    userTransactions.value = [];
+    transactionsTotal.value = 0;
+    transactionsError.value =
+      err.data?.message || err.message || "خطا در دریافت تاریخچه تراکنش‌ها";
+  } finally {
+    isLoadingTransactions.value = false;
+  }
+};
+
+const handleTransactionsPageChange = (page: number) => {
+  transactionsPage.value = page;
+  fetchUserTransactions();
 };
 
 // Fetch user details
@@ -471,6 +557,7 @@ const handleDebtSubmit = async () => {
     onSuccess: () => {
       closeDebtModal();
       fetchUserDetails();
+      fetchUserTransactions();
     },
   });
 
@@ -843,6 +930,7 @@ const handleCreateContactHistory = async () => {
 onMounted(() => {
   fetchUserDetails();
   fetchCurrentPaymentDeadline();
+  fetchUserTransactions();
 });
 </script>
 
@@ -1204,161 +1292,96 @@ onMounted(() => {
         />
 
         <!-- Transactions -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
-          <div class="px-6 py-4 border-b border-gray-200">
-            <h3 class="text-lg font-bold text-gray-900">
-              تاریخچه پرداخت‌های اخیر
-            </h3>
+        <BaseCard :padding="false">
+          <div class="flex items-center justify-between gap-3 border-b border-gray-200 px-6 py-4">
+            <div>
+              <h3 class="text-lg font-bold text-gray-900">
+                تاریخچه تراکنش‌های کاربر
+              </h3>
+            
+            </div>
+         
           </div>
 
-          <div
-            v-if="user.transactions && user.transactions.length > 0"
-            class="overflow-x-auto"
-          >
-            <table class="w-full">
-              <thead class="bg-gray-50">
-                <tr>
-                  <th
-                    class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase"
-                  >
-                    شناسه
-                  </th>
-                  <th
-                    class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase"
-                  >
-                    مبلغ
-                  </th>
-                  <th
-                    class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase"
-                  >
-                    نوع
-                  </th>
-                  <th
-                    class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase"
-                  >
-                    شماره تسهیلات
-                  </th>
-                  <th
-                    class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase"
-                  >
-                    وضعیت
-                  </th>
-                  <th
-                    class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase"
-                  >
-                    تاریخ
-                  </th>
-                  <th
-                    class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase"
-                  >
-                    توضیحات
-                  </th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-200">
-                <tr
-                  v-for="transaction in user.transactions"
-                  :key="transaction.id"
-                  class="hover:bg-gray-50"
-                >
-                  <td
-                    class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center"
-                  >
-                    {{ transaction.id }}
-                  </td>
-                  <td
-                    class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center"
-                    dir="ltr"
-                  >
-                    {{ formatCurrency(transaction.amount) }}
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-center">
-                    <span
-                      class="px-2 py-1 text-xs font-medium rounded-full inline-block"
-                      :class="{
-                        'bg-green-100 text-green-800':
-                          transaction.type === 'DEBT_PAYMENT',
-                        'bg-red-100 text-red-800':
-                          transaction.type === 'ADMIN_DEBT_ADD',
-                        'bg-purple-100 text-purple-800':
-                          transaction.type === 'LEGAL_DEBT_ADD',
-                        'bg-yellow-100 text-yellow-800':
-                          transaction.type === 'ADMIN_DEBT_REDUCE',
-                      }"
-                    >
-                      {{
-                        transaction.type === "DEBT_PAYMENT"
-                          ? "پرداخت"
-                          : transaction.type === "ADMIN_DEBT_ADD"
-                          ? "افزایش بدهی"
-                          : transaction.type === "LEGAL_DEBT_ADD"
-                          ? "افزایش بدهی حقوقی"
-                          : "کاهش بدهی"
-                      }}
-                    </span>
-                  </td>
-                  <td
-                    class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center"
-                    dir="ltr"
-                  >
-                    {{
-                      transaction.loanNumber ??
-                      transaction.loan?.loanNumber ??
-                      "-"
-                    }}
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-center">
-                    <span
-                      class="px-2 py-1 text-xs font-medium rounded-full inline-block"
-                      :class="{
-                        'bg-green-100 text-green-800':
-                          transaction.status === 'SUCCESS',
-                        'bg-red-100 text-red-800':
-                          transaction.status === 'FAILED',
-                        'bg-gray-100 text-gray-800':
-                          transaction.status === 'PENDING',
-                      }"
-                    >
-                      {{
-                        transaction.status === "SUCCESS"
-                          ? "موفق"
-                          : transaction.status === "FAILED"
-                          ? "ناموفق"
-                          : "در انتظار"
-                      }}
-                    </span>
-                  </td>
-                  <td
-                    class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center"
-                  >
-                    {{ formatDate(transaction.transactionDate) }}
-                  </td>
-                  <td
-                    class="max-w-[230px] px-6 py-4 text-sm text-gray-900 text-center"
-                  >
-                    {{ transaction.description }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div v-else class="text-center py-12">
-            <svg
-              class="w-16 h-16 text-gray-400 mx-auto mb-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+          <StateLoader
+            v-if="isLoadingTransactions"
+            message="در حال بارگذاری تاریخچه تراکنش‌ها..."
+          />
+
+          <StateError
+            v-else-if="transactionsError"
+            :message="transactionsError"
+            @retry="fetchUserTransactions"
+          />
+
+          <template v-else>
+            <BaseTable
+              v-if="userTransactions.length > 0"
+              :columns="transactionColumns"
+              :data="userTransactions"
+              :expanded-row-key="expandedTransactionId"
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-              />
-            </svg>
-            <p class="text-gray-600">موردی یافت نشد</p>
-          </div>
-        </div>
+              <template #cell-amount="{ row }">
+                <span class="font-medium" dir="ltr">{{ formatCurrency(row.amount) }}</span>
+              </template>
+
+              <template #cell-type="{ row }">
+                <BaseBadge :variant="getTransactionTypeBadge(row.type).variant as any">
+                  {{ getTransactionTypeBadge(row.type).text }}
+                </BaseBadge>
+              </template>
+
+              <template #cell-allocationSummary="{ row }">
+                <div class="flex justify-center">
+                  <TransactionAllocationsSummary
+                    :transaction="row"
+                    trigger-only
+                    :expanded="expandedTransactionId === row.id"
+                    @toggle="toggleTransactionDetails(row.id)"
+                  />
+                </div>
+              </template>
+
+              <template #expanded-row="{ row }">
+                <TransactionAllocationsSummary
+                  v-if="canExpandTransaction(row)"
+                  :transaction="row"
+                  default-expanded
+                />
+              </template>
+
+              <template #cell-status="{ row }">
+                <BaseBadge :variant="getTransactionStatusBadge(row.status).variant as any">
+                  {{ getTransactionStatusBadge(row.status).text }}
+                </BaseBadge>
+              </template>
+
+              <template #cell-transactionDate="{ row }">
+                {{ formatDate(row.transactionDate) }}
+              </template>
+
+              <template #cell-description="{ row }">
+                <div class="max-w-[230px] mx-auto whitespace-normal break-words text-center leading-6">
+                  {{ row.description || "-" }}
+                </div>
+              </template>
+            </BaseTable>
+
+            <StateEmpty
+              v-else
+              icon="document"
+              message="تراکنشی برای این کاربر یافت نشد"
+            />
+
+            <BasePagination
+              v-if="transactionsTotal > 0"
+              :page="transactionsPage"
+              :total="transactionsTotal"
+              :limit="transactionsLimit"
+              @update:page="handleTransactionsPageChange"
+            />
+          </template>
+        </BaseCard>
 
         <!-- Installments -->
         <!-- <div class="bg-white rounded-xl shadow-sm border border-gray-200">

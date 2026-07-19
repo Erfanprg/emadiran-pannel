@@ -323,7 +323,7 @@ const handlePayment = async () => {
       amount: amountInput.rawValue.value,
       gatewayName: selectedGateway.value,
       description: description.value || undefined,
-      selectedLoanId: selectedLoanId.value!,
+      loanId: selectedLoanId.value!,
     });
 
     toast.success("در حال انتقال به درگاه پرداخت...");

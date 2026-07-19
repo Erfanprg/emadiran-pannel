@@ -16,11 +16,13 @@ const props = withDefaults(
     keyField?: string
     hover?: boolean
     striped?: boolean
+    expandedRowKey?: string | number | null
   }>(),
   {
     keyField: 'id',
     hover: true,
-    striped: false
+    striped: false,
+    expandedRowKey: null
   }
 )
 
@@ -33,6 +35,10 @@ const getAlignClass = (align?: string) => {
   if (align === 'left') return 'text-left'
   if (align === 'right') return 'text-right'
   return 'text-center'
+}
+
+const isRowExpanded = (row: T) => {
+  return props.expandedRowKey !== null && row[props.keyField] === props.expandedRowKey
 }
 </script>
 
@@ -65,43 +71,55 @@ const getAlignClass = (align?: string) => {
 
       <!-- Body -->
       <tbody class="divide-y divide-gray-200">
-        <tr
+        <template
           v-for="(row, index) in data"
           :key="row[keyField] || index"
-          :class="[
-            hover ? 'hover:bg-gray-50 transition-colors' : '',
-            striped && index % 2 === 1 ? 'bg-gray-50' : ''
-          ]"
         >
-          <!-- Data Cells -->
-          <td
-            v-for="column in columns"
-            :key="column.key"
+          <tr
             :class="[
-              'px-6 py-4 whitespace-nowrap text-sm text-gray-900',
-              getAlignClass(column.align),
-              column.class || ''
+              hover ? 'hover:bg-gray-50 transition-colors' : '',
+              striped && index % 2 === 1 ? 'bg-gray-50' : ''
             ]"
           >
-            <slot
-              :name="`cell-${column.key}`"
-              :value="getCellValue(row, column)"
-              :row="row"
-              :column="column"
-              :index="index"
+            <!-- Data Cells -->
+            <td
+              v-for="column in columns"
+              :key="column.key"
+              :class="[
+                'px-6 py-4 whitespace-nowrap text-sm text-gray-900',
+                getAlignClass(column.align),
+                column.class || ''
+              ]"
             >
-              {{ getCellValue(row, column) }}
-            </slot>
-          </td>
+              <slot
+                :name="`cell-${column.key}`"
+                :value="getCellValue(row, column)"
+                :row="row"
+                :column="column"
+                :index="index"
+              >
+                {{ getCellValue(row, column) }}
+              </slot>
+            </td>
 
-          <!-- Actions Cell -->
-          <td
-            v-if="$slots.actions"
-            class="px-6 py-4 whitespace-nowrap text-sm font-medium"
-          >
-            <slot name="actions" :row="row" :index="index" />
-          </td>
-        </tr>
+            <!-- Actions Cell -->
+            <td
+              v-if="$slots.actions"
+              class="px-6 py-4 whitespace-nowrap text-sm font-medium"
+            >
+              <slot name="actions" :row="row" :index="index" />
+            </td>
+          </tr>
+
+          <tr v-if="$slots['expanded-row'] && isRowExpanded(row)">
+            <td
+              :colspan="columns.length + ($slots.actions ? 1 : 0)"
+              class="bg-gray-50 px-6 py-4"
+            >
+              <slot name="expanded-row" :row="row" :index="index" />
+            </td>
+          </tr>
+        </template>
 
         <!-- Empty State -->
         <tr v-if="data.length === 0">

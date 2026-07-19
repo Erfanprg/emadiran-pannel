@@ -3,6 +3,7 @@ import { useAuthStore } from '~/stores/auth'
 import { userApi } from '~/services/api/user'
 import { formatCurrency, formatDate } from '~/utils/formatters'
 import type { Transaction } from '~/types/transaction'
+import { getTransactionAllocations } from '~/utils/transactionAllocations'
 
 useHead({
   title: 'تاریخچه بدهی‌ها - عماد ایران'
@@ -16,6 +17,7 @@ const authStore = useAuthStore()
 
 // State
 const loading = ref(true)
+const error = ref<string | null>(null)
 const transactions = ref<Transaction[]>([])
 const allTransactions = ref<Transaction[]>([])
 const selectedStatus = ref<'ALL' | 'SUCCESS' | 'FAILED' | 'PENDING'>('ALL')
@@ -23,6 +25,7 @@ const selectedType = ref<'ALL' | 'DEBT_PAYMENT' | 'ADMIN_DEBT_ADD' | 'LEGAL_DEBT
 const currentPage = ref(1)
 const itemsPerPage = 10
 const totalItems = ref(0)
+const expandedTransactionId = ref<number | null>(null)
 
 // Stats
 const stats = computed(() => {
@@ -44,6 +47,8 @@ const stats = computed(() => {
 // Fetch transactions
 const fetchTransactions = async () => {
   loading.value = true
+  error.value = null
+  expandedTransactionId.value = null
   try {
     const params: any = {
       limit: itemsPerPage,
@@ -64,8 +69,10 @@ const fetchTransactions = async () => {
     // Fetch all transactions for stats (without pagination)
     const allResponse = await userApi.getTransactions({})
     allTransactions.value = allResponse.data || []
-  } catch (error) {
-    console.error('Error fetching transactions:', error)
+  } catch (err) {
+    console.error('Error fetching transactions:', err)
+    const apiError = err as { data?: { message?: string }; message?: string }
+    error.value = apiError.data?.message || apiError.message || 'خطا در دریافت تاریخچه تراکنش‌ها'
     transactions.value = []
   } finally {
     loading.value = false
@@ -110,12 +117,18 @@ const getTypeBadge = (type: string) => {
   return badges[type as keyof typeof badges] || { text: type, variant: 'default' }
 }
 
+const canExpandTransaction = (transaction: Transaction) => getTransactionAllocations(transaction).length > 0
+
+const toggleTransactionDetails = (transactionId: number) => {
+  expandedTransactionId.value = expandedTransactionId.value === transactionId ? null : transactionId
+}
+
 // Table columns
 const columns = [
   { key: 'index', label: 'ردیف' },
   { key: 'amount', label: 'مبلغ' },
   { key: 'type', label: 'نوع' },
-  { key: 'loanNumber', label: 'شماره تسهیلات' },
+  { key: 'allocationSummary', label: 'جزئیات تسهیلات' },
   { key: 'status', label: 'وضعیت' },
   { key: 'createdAt', label: 'تاریخ' },
   { key: 'description', label: 'توضیحات' }
@@ -200,22 +213,28 @@ onMounted(() => {
         </template>
 
         <!-- Loading State -->
-        <div v-if="loading" class="flex items-center justify-center py-12">
-          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        </div>
+        <StateLoader v-if="loading" message="در حال بارگذاری..." />
+
+        <StateError
+          v-else-if="error"
+          :message="error"
+          @retry="fetchTransactions"
+        />
 
         <!-- Empty State -->
-        <div v-else-if="!transactions || transactions.length === 0" class="text-center py-12">
-          <div class="w-16 h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
-            <Icon name="mdi:receipt-text-outline" size="32" class="text-gray-400" />
-          </div>
-          <p class="text-gray-500 text-lg font-medium mb-2">هیچ موردی یافت نشد</p>
-          <p class="text-gray-400 text-sm">در حال حاضر موردی برای نمایش وجود ندارد</p>
-        </div>
+        <StateEmpty
+          v-else-if="!transactions || transactions.length === 0"
+          icon="document"
+          message="موردی برای نمایش وجود ندارد"
+        />
 
         <!-- Table -->
         <div v-else>
-          <BaseTable :columns="columns" :data="transactions">
+          <BaseTable
+            :columns="columns"
+            :data="transactions"
+            :expanded-row-key="expandedTransactionId"
+          >
             <template #cell-index="{ index }">
               {{ (currentPage - 1) * itemsPerPage + index + 1 }}
             </template>
@@ -227,8 +246,20 @@ onMounted(() => {
                 {{ getTypeBadge(row.type).text }}
               </BaseBadge>
             </template>
-            <template #cell-loanNumber="{ row }">
-              <span dir="ltr">{{ row.loanNumber ?? row.loan?.loanNumber ?? '-' }}</span>
+            <template #cell-allocationSummary="{ row }">
+              <TransactionAllocationsSummary
+                :transaction="row"
+                trigger-only
+                :expanded="expandedTransactionId === row.id"
+                @toggle="toggleTransactionDetails(row.id)"
+              />
+            </template>
+            <template #expanded-row="{ row }">
+              <TransactionAllocationsSummary
+                v-if="canExpandTransaction(row)"
+                :transaction="row"
+                default-expanded
+              />
             </template>
             <template #cell-status="{ row }">
               <BaseBadge :variant="getStatusBadge(row.status).variant as any">
@@ -244,12 +275,12 @@ onMounted(() => {
           </BaseTable>
 
           <!-- Pagination -->
-          <div class="mt-6 flex justify-center">
+          <div class="mt-6">
             <BasePagination
-              :current-page="currentPage"
-              :total-items="totalItems"
-              :items-per-page="itemsPerPage"
-              @update:current-page="currentPage = $event"
+              :page="currentPage"
+              :total="totalItems"
+              :limit="itemsPerPage"
+              @update:page="currentPage = $event"
             />
           </div>
         </div>

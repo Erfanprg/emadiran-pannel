@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
 import { adminApi } from '~/services/api/admin'
+import type { DebtReport } from '~/types/admin'
 import { formatCurrency } from '~/utils/formatters'
 
 useHead({
@@ -33,33 +34,9 @@ interface DashboardData {
     maxDebt: string
   }
   transactions: {
-    total: number
-    successful: number
-    successRate: string
-    totalSuccessAmount: string
+    totalPaymentTransactions: number
+    totalPaymentAmount: string
   }
-}
-
-interface DebtReport {
-  summary: {
-    totalDebt: string
-    averageDebt: string
-    maxDebt: string
-    usersWithDebt: number
-  }
-  recentChanges: Array<{
-    type: string
-    totalAmount: string
-    count: number
-  }>
-  topDebtors: Array<{
-    id: number
-    firstName: string | null
-    lastName: string | null
-    fullName: string | null
-    phoneNumber: string
-    totalDebt: string
-  }>
 }
 
 const dashboardData = ref<DashboardData | null>(null)
@@ -93,10 +70,8 @@ const fetchDashboard = async () => {
         maxDebt: debtResponse.data.summary.maxDebt
       },
       transactions: {
-        total: 0,
-        successful: 0,
-        successRate: '0%',
-        totalSuccessAmount: '0'
+        totalPaymentTransactions: debtResponse.data.summary.totalPaymentTransactions,
+        totalPaymentAmount: debtResponse.data.summary.totalPaymentAmount
       }
     }
     
@@ -217,18 +192,18 @@ onMounted(() => {
         <!-- Transaction Stats -->
         <div>
           <h3 class="text-lg font-bold text-gray-900 mb-4">آمار پرداخت‌ها</h3>
-          <div class="grid gap-6 md:grid-cols-4">
+          <div class="grid gap-6 md:grid-cols-2">
             <BaseStatsCard
               title="کل تراکنش‌ها"
-              :value="dashboardData.transactions.total"
+              :value="dashboardData.transactions.totalPaymentTransactions"
+              v-bind="{ title: 'تعداد پرداخت‌های موفق', description: 'ADMIN_DEBT_REDUCE و DEBT_PAYMENT' }"
               description="تعداد کل تراکنش‌ها"
               icon="document"
               icon-color="primary"
-              class="md:col-span-2"
             />
 
 
-            <BaseCard class="md:col-span-2">
+            <BaseCard>
               <div class="text-center">
                 <div class="w-16 h-16 bg-green-100 rounded-xl mx-auto mb-4 flex items-center justify-center">
                   <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -236,7 +211,7 @@ onMounted(() => {
                   </svg>
                 </div>
                 <p class="text-sm text-gray-600 mb-2">مجموع مبلغ پرداخت‌های موفق</p>
-                <p class="text-3xl font-bold text-green-600" dir="ltr">{{ formatCurrency(dashboardData.transactions.totalSuccessAmount) }}</p>
+                <p class="text-3xl font-bold text-green-600" dir="ltr">{{ formatCurrency(dashboardData.transactions.totalPaymentAmount) }}</p>
                 <p class="text-xs text-gray-500 mt-1">ریال</p>
               </div>
             </BaseCard>
