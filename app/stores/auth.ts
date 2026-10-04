@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import type { User, AuthResponse } from '~/types/auth'
+import type { User, AuthResponse, LoginMethod } from '~/types/auth'
 import { authApi } from '~/services/api/auth'
 import { userApi } from '~/services/api/user'
 import { useToast } from '~/composables/useToast'
@@ -29,16 +29,18 @@ export const useAuthStore = defineStore('auth', {
   actions: {
     /**
      * Request OTP Code
+     * Returns the login method for this phone ('password' = no OTP sent), or null on error
      */
-    async requestOtp(phoneNumber: string): Promise<boolean> {
+    async requestOtp(phoneNumber: string): Promise<LoginMethod | null> {
       try {
         this.isLoading = true
         const response = await authApi.requestOtp(phoneNumber)
-        return response.ok
+        if (!response.ok) return null
+        return response.method ?? 'otp'
       } catch (error: any) {
         const toast = useToast()
         toast.error(error.data?.message || 'خطا در ارسال کد تایید')
-        return false
+        return null
       } finally {
         this.isLoading = false
       }
@@ -51,29 +53,7 @@ export const useAuthStore = defineStore('auth', {
       try {
         this.isLoading = true
         const response: AuthResponse = await authApi.verifyOtp(phoneNumber, code)
-
-        // Save token in cookie FIRST
-        const tokenCookie = useCookie('auth_token', {
-          maxAge: 60 * 60 * 24 * 30, // 30 days
-          path: '/',
-          sameSite: 'lax'
-        })
-        tokenCookie.value = response.accessToken
-
-        // Update state
-        this.token = response.accessToken
-        this.isAuthenticated = true
-
-        // Wait a bit for cookie to be set
-        await new Promise(resolve => setTimeout(resolve, 100))
-
-        // Fetch complete user profile from /me endpoint
-        const userProfile = await userApi.getProfile()
-        this.user = userProfile as any
-
-        const toast = useToast()
-        toast.success('ورود موفقیت‌آمیز بود')
-
+        await this.completeLogin(response)
         return true
       } catch (error: any) {
         const toast = useToast()
@@ -82,6 +62,51 @@ export const useAuthStore = defineStore('auth', {
       } finally {
         this.isLoading = false
       }
+    },
+
+    /**
+     * Login with Password (allow-listed admins only)
+     */
+    async loginWithPassword(phoneNumber: string, password: string): Promise<boolean> {
+      try {
+        this.isLoading = true
+        const response: AuthResponse = await authApi.loginWithPassword(phoneNumber, password)
+        await this.completeLogin(response)
+        return true
+      } catch (error: any) {
+        const toast = useToast()
+        toast.error(error.data?.message || 'شماره موبایل یا رمز عبور اشتباه است')
+        return false
+      } finally {
+        this.isLoading = false
+      }
+    },
+
+    /**
+     * Store token and load profile after a successful login
+     */
+    async completeLogin(response: AuthResponse): Promise<void> {
+      // Save token in cookie FIRST
+      const tokenCookie = useCookie('auth_token', {
+        maxAge: 60 * 60 * 24 * 30, // 30 days
+        path: '/',
+        sameSite: 'lax'
+      })
+      tokenCookie.value = response.accessToken
+
+      // Update state
+      this.token = response.accessToken
+      this.isAuthenticated = true
+
+      // Wait a bit for cookie to be set
+      await new Promise(resolve => setTimeout(resolve, 100))
+
+      // Fetch complete user profile from /me endpoint
+      const userProfile = await userApi.getProfile()
+      this.user = userProfile as any
+
+      const toast = useToast()
+      toast.success('ورود موفقیت‌آمیز بود')
     },
 
     /**

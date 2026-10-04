@@ -16,9 +16,11 @@ const toast = useToast()
 const router = useRouter()
 
 // Form state
-const step = ref<'phone' | 'otp'>('phone')
+const step = ref<'phone' | 'otp' | 'password'>('phone')
 const phoneNumber = ref('')
 const otpCode = ref('')
+const password = ref('')
+const showPassword = ref(false)
 const countdown = ref(0)
 const isSubmitting = ref(false)
 
@@ -56,7 +58,20 @@ const isOtpValid = computed(() => {
   return /^\d{6}$/.test(otpCode.value)
 })
 
-// Request OTP
+const isPasswordValid = computed(() => {
+  return password.value.length > 0
+})
+
+// Redirect based on user role
+const redirectAfterLogin = async () => {
+  if (authStore.isAdmin) {
+    await router.push('/admin')
+  } else {
+    await router.push('/dashboard')
+  }
+}
+
+// Request OTP (allow-listed admins are sent to the password step instead)
 const handleRequestOtp = async () => {
   if (!isPhoneValid.value) {
     toast.error('شماره موبایل معتبر نیست')
@@ -64,10 +79,12 @@ const handleRequestOtp = async () => {
   }
 
   isSubmitting.value = true
-  const success = await authStore.requestOtp(phoneNumber.value)
+  const method = await authStore.requestOtp(phoneNumber.value)
   isSubmitting.value = false
 
-  if (success) {
+  if (method === 'password') {
+    step.value = 'password'
+  } else if (method === 'otp') {
     toast.success('کد تایید ارسال شد')
     step.value = 'otp'
     startCountdown()
@@ -86,24 +103,37 @@ const handleVerifyOtp = async () => {
   isSubmitting.value = false
 
   if (success) {
-    // Redirect based on user role
-    if (authStore.isAdmin) {
-      await router.push('/admin')
-    } else {
-      await router.push('/dashboard')
-    }
+    await redirectAfterLogin()
+  }
+}
+
+// Login with password
+const handlePasswordLogin = async () => {
+  if (!isPasswordValid.value) {
+    toast.error('رمز عبور را وارد کنید')
+    return
+  }
+
+  isSubmitting.value = true
+  const success = await authStore.loginWithPassword(phoneNumber.value, password.value)
+  isSubmitting.value = false
+
+  if (success) {
+    await redirectAfterLogin()
+  } else {
+    password.value = ''
   }
 }
 
 // Resend OTP
 const handleResendOtp = async () => {
   if (countdown.value > 0) return
-  
+
   isSubmitting.value = true
-  const success = await authStore.requestOtp(phoneNumber.value)
+  const method = await authStore.requestOtp(phoneNumber.value)
   isSubmitting.value = false
 
-  if (success) {
+  if (method === 'otp') {
     toast.success('کد تایید مجدد ارسال شد')
     otpCode.value = ''
     startCountdown()
@@ -114,6 +144,8 @@ const handleResendOtp = async () => {
 const handleBackToPhone = () => {
   step.value = 'phone'
   otpCode.value = ''
+  password.value = ''
+  showPassword.value = false
   if (countdownInterval) {
     clearInterval(countdownInterval)
     countdownInterval = null
@@ -240,6 +272,59 @@ onUnmounted(() => {
                 ارسال مجدد کد تایید
               </button>
             </div>
+          </div>
+        </div>
+
+        <!-- Password Step (allow-listed admins) -->
+        <div v-else-if="step === 'password'" class="space-y-6">
+          <div>
+            <button
+              @click="handleBackToPhone"
+              class="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition-colors duration-200"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+              </svg>
+              بازگشت
+            </button>
+            <h2 class="text-xl font-bold text-gray-900 mb-2">رمز عبور را وارد کنید</h2>
+            <p class="text-sm text-gray-600">
+              ورود با شماره
+              <span class="font-bold text-gray-900" dir="ltr">{{ phoneNumber }}</span>
+            </p>
+          </div>
+
+          <div class="space-y-4">
+            <div>
+              <label for="login-password" class="block text-sm font-medium text-gray-900 mb-2">رمز عبور</label>
+              <div class="relative">
+                <input
+                  id="login-password"
+                  v-model="password"
+                  :type="showPassword ? 'text' : 'password'"
+                  autocomplete="current-password"
+                  dir="ltr"
+                  class="w-full pl-12 pr-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-gray-900 placeholder:text-gray-400 focus:border-primary focus:outline-none transition-colors duration-200"
+                  @keyup.enter="handlePasswordLogin"
+                />
+                <button
+                  type="button"
+                  @click="showPassword = !showPassword"
+                  class="absolute inset-y-0 left-0 px-3 text-sm text-gray-500 hover:text-gray-900 transition-colors duration-200"
+                >
+                  {{ showPassword ? 'پنهان' : 'نمایش' }}
+                </button>
+              </div>
+            </div>
+
+            <button
+              @click="handlePasswordLogin"
+              :disabled="!isPasswordValid || isSubmitting"
+              class="w-full py-3 bg-gradient-to-r from-primary via-accent to-secondary text-white rounded-xl font-bold hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover:scale-[1.02]"
+            >
+              <span v-if="isSubmitting">در حال بررسی...</span>
+              <span v-else>ورود</span>
+            </button>
           </div>
         </div>
       </div>

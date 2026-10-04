@@ -24,6 +24,9 @@ export interface AuthResponse {
   }
 }
 
+export type LoginMethod = 'otp' | 'password'
+
 export interface OtpRequestResponse {
   ok: boolean
+  method?: LoginMethod
 }
