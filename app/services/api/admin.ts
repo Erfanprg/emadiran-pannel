@@ -14,7 +14,10 @@ import type {
   PaymentDeadlineMutationResponse,
   ContactHistoriesListResponse,
   CreateContactHistoryDto,
-  ContactHistoryMutationResponse
+  ContactHistoryMutationResponse,
+  GetSystemSmsQuery,
+  SystemSmsListResponse,
+  RetrySystemSmsResponse
 } from '~/types/admin'
 import type { AddDebtRequest, ReduceDebtRequest } from '~/types/transaction'
 import type { LoanDebtBreakdown } from '~/types/debt'
@@ -24,6 +27,50 @@ import type { LoanDebtBreakdown } from '~/types/debt'
  * Handles admin operations (requires ADMIN role)
  */
 export const adminApi = {
+  /**
+   * Get System SMS List with Filters
+   * GET /admin/system-sms
+   */
+  async getSystemSms(query: GetSystemSmsQuery = {}): Promise<SystemSmsListResponse> {
+    const config = useRuntimeConfig()
+    const baseURL = config.public.apiBaseUrl
+    const token = useCookie('auth_token')
+
+    const params = new URLSearchParams()
+    if (query.limit !== undefined) params.append('limit', query.limit.toString())
+    if (query.offset !== undefined) params.append('offset', query.offset.toString())
+    if (query.startDate) params.append('startDate', query.startDate)
+    if (query.endDate) params.append('endDate', query.endDate)
+    if (query.type) params.append('type', query.type)
+    if (query.status) params.append('status', query.status)
+
+    const response = await $fetch<SystemSmsListResponse>(`${baseURL}/admin/system-sms?${params.toString()}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token.value}`
+      }
+    })
+
+    return response
+  },
+
+  /**
+   * Retry a System SMS
+   * POST /admin/system-sms/:id/retry
+   */
+  async retrySystemSms(id: number): Promise<RetrySystemSmsResponse> {
+    const config = useRuntimeConfig()
+    const baseURL = config.public.apiBaseUrl
+    const token = useCookie('auth_token')
+
+    return await $fetch<RetrySystemSmsResponse>(`${baseURL}/admin/system-sms/${id}/retry`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token.value}`
+      }
+    })
+  },
+
   /**
    * Get User Statistics
    * GET /admin/users/stats

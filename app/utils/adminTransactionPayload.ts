@@ -18,7 +18,7 @@ export const EDITABLE_TRANSACTION_TYPES: DebtTransactionType[] = [
 
 export interface DebtFormInput {
   amount: number
-  type: DebtTransactionType
+  type: DebtTransactionType | ''
   jalaliDate?: string
 }
 
@@ -60,11 +60,13 @@ export const getTransactionTypeLabel = (type: DebtTransactionType): string => {
 export const validateDebtForm = (input: DebtFormInput): DebtFormValidationResult => {
   const errors: DebtFormValidationResult['errors'] = {}
 
-  if (!Number.isFinite(input.amount) || input.amount < 1000) {
-    errors.amount = 'حداقل مبلغ باید ۱,۰۰۰ ریال باشد'
+  if (!Number.isFinite(input.amount) || input.amount <= 0) {
+    errors.amount = 'مبلغ باید بیشتر از صفر باشد'
   }
 
-  if (!EDITABLE_TRANSACTION_TYPES.includes(input.type)) {
+  if (!input.type) {
+    errors.transactionType = 'لطفاً نوع تراکنش را مشخص کنید'
+  } else if (!EDITABLE_TRANSACTION_TYPES.includes(input.type)) {
     errors.transactionType = 'نوع تراکنش معتبر نیست'
   }
 
