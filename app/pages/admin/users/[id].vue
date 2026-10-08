@@ -29,7 +29,7 @@ import type {
   ContactHistoriesMeta,
 } from "~/types/admin";
 import type { LoanDebtBreakdown } from "~/types/debt";
-import type { Transaction } from "~/types/transaction";
+import type { DebtTransactionType, Transaction } from "~/types/transaction";
 import type { TableColumn } from "~/components/Base/Table.vue";
 import { getTransactionAllocations } from "~/utils/transactionAllocations";
 
@@ -125,10 +125,7 @@ const debtForm = ref({
   newLoanNumber: "",
   description: "",
   sendSms: true,
-  transactionType: "ADMIN_DEBT_ADD" as
-    | "ADMIN_DEBT_ADD"
-    | "LEGAL_DEBT_ADD"
-    | "ADMIN_DEBT_REDUCE",
+  transactionType: "" as DebtTransactionType | "",
   transactionDate: "",
 });
 const debtFieldErrors = ref<{
@@ -317,10 +314,7 @@ const fetchUserLoans = async () => {
     const response = await loansApi.getUserLoans(userId);
     loans.value = response.data;
 
-    if (loans.value.length > 0) {
-      // انتخاب خودکار آخرین تسهیلات
-      debtForm.value.loanId = loans.value[0].id;
-    } else {
+    if (loans.value.length === 0) {
       // نمایش input برای ایجاد تسهیلات جدید
       showLoanWarning.value = true;
       showNewLoanInput.value = true;
@@ -371,9 +365,7 @@ const toggleNewLoanInput = () => {
     debtForm.value.newLoanNumber = "";
   } else {
     debtForm.value.newLoanNumber = "";
-    if (loans.value.length > 0) {
-      debtForm.value.loanId = loans.value[0].id;
-    }
+    debtForm.value.loanId = undefined;
   }
 };
 
@@ -408,7 +400,7 @@ const handleToggleStatus = async () => {
 const openDebtModal = async (type: "add" | "reduce") => {
   debtModalType.value = type;
   debtForm.value.transactionType =
-    type === "add" ? "ADMIN_DEBT_ADD" : "ADMIN_DEBT_REDUCE";
+    type === "add" ? "" : "ADMIN_DEBT_REDUCE";
   debtForm.value.sendSms = true;
   debtFieldErrors.value = {};
   showDebtModal.value = true;
@@ -496,7 +488,7 @@ const handleDebtSubmit = async () => {
       ? `آیا از افزودن ${formatCurrency(
           debtAmountInput.rawValue.value
         )} ریال به بدهی کاربر (${getTransactionTypeLabel(
-          debtForm.value.transactionType
+          debtForm.value.transactionType as DebtTransactionType
         )}) اطمینان دارید؟`
       : `آیا از کاهش ${formatCurrency(
           debtAmountInput.rawValue.value
@@ -572,7 +564,7 @@ const closeDebtModal = () => {
     newLoanNumber: "",
     description: "",
     sendSms: true,
-    transactionType: "ADMIN_DEBT_ADD",
+    transactionType: "",
     transactionDate: "",
   };
   debtFieldErrors.value = {};
@@ -1616,6 +1608,9 @@ onMounted(() => {
                 "
                 dir="ltr"
               >
+                <option disabled :value="undefined">
+                  تسهیلات کاربر را انتخاب کنید
+                </option>
                 <option v-for="loan in loans" :key="loan.id" :value="loan.id">
                   {{ formatLoanOption(loan) }}
                 </option>
@@ -1747,9 +1742,12 @@ onMounted(() => {
               >
                 کاهش بدهی
               </option>
+              <option v-else disabled value="">
+                نوع تراکنش را مشخص کنید.
+              </option>
               <option
                 v-for="option in ADD_DEBT_TRANSACTION_TYPES"
-                v-else
+                v-if="debtModalType === 'add'"
                 :key="option.value"
                 :value="option.value"
               >

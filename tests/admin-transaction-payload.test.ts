@@ -6,9 +6,9 @@ import {
 import type { Transaction } from '../app/types/transaction'
 
 describe('admin transaction payload helpers', () => {
-  it('validates debt form minimum amount and invalid date', () => {
+  it('rejects non-positive debt amount and invalid date', () => {
     const result = validateDebtForm({
-      amount: 900,
+      amount: 0,
       type: 'ADMIN_DEBT_ADD',
       jalaliDate: 'invalid-date'
     })
@@ -16,6 +16,17 @@ describe('admin transaction payload helpers', () => {
     expect(result.isValid).toBe(false)
     expect(result.errors.amount).toBeTruthy()
     expect(result.errors.transactionDate).toBeTruthy()
+  })
+
+  it('allows admin debt amounts below 1000 rials', () => {
+    const result = validateDebtForm({
+      amount: 900,
+      type: 'ADMIN_DEBT_REDUCE',
+      jalaliDate: ''
+    })
+
+    expect(result.isValid).toBe(true)
+    expect(result.errors.amount).toBeUndefined()
   })
 
   it('converts valid jalali date to iso for debt payload', () => {
@@ -27,6 +38,17 @@ describe('admin transaction payload helpers', () => {
 
     expect(result.isValid).toBe(true)
     expect(result.transactionDateIso).toMatch(/\d{4}-\d{2}-\d{2}T/)
+  })
+
+  it('requires selecting a transaction type', () => {
+    const result = validateDebtForm({
+      amount: 150000,
+      type: '',
+      jalaliDate: ''
+    })
+
+    expect(result.isValid).toBe(false)
+    expect(result.errors.transactionType).toBe('لطفاً نوع تراکنش را مشخص کنید')
   })
 
   it('creates edit payload with only changed fields and reason', () => {

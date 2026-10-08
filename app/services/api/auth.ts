@@ -1,19 +1,20 @@
-import type { AuthResponse, User } from '~/types/auth'
+import type { AuthResponse, OtpRequestResponse, User } from '~/types/auth'
 
 /**
  * Auth API Service
- * Handles OTP-based authentication
+ * Handles OTP-based authentication (and password login for allow-listed admins)
  */
 export const authApi = {
   /**
    * Request OTP Code
    * POST /auth/otp/request
+   * method === 'password' means no OTP was sent; ask for the password instead
    */
-  async requestOtp(phoneNumber: string): Promise<{ ok: boolean }> {
+  async requestOtp(phoneNumber: string): Promise<OtpRequestResponse> {
     const config = useRuntimeConfig()
-    const baseURL = config.public.apiBaseUrl 
+    const baseURL = config.public.apiBaseUrl
 
-    const response = await $fetch<{ ok: boolean }>(`${baseURL}/auth/otp/request`, {
+    const response = await $fetch<OtpRequestResponse>(`${baseURL}/auth/otp/request`, {
       method: 'POST',
       body: { phoneNumber }
     })
@@ -32,6 +33,22 @@ export const authApi = {
     const response = await $fetch<AuthResponse>(`${baseURL}/auth/otp/verify`, {
       method: 'POST',
       body: { phoneNumber, code }
+    })
+
+    return response
+  },
+
+  /**
+   * Login with Password
+   * POST /auth/password/login
+   */
+  async loginWithPassword(phoneNumber: string, password: string): Promise<AuthResponse> {
+    const config = useRuntimeConfig()
+    const baseURL = config.public.apiBaseUrl
+
+    const response = await $fetch<AuthResponse>(`${baseURL}/auth/password/login`, {
+      method: 'POST',
+      body: { phoneNumber, password }
     })
 
     return response

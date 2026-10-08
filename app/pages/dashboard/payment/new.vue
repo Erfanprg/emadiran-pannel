@@ -44,7 +44,7 @@ const fieldErrors = ref<{
   amount?: string;
   selectedLoanId?: string;
 }>({});
-const iban = "IR520130100000000405012032";
+const iban = "IR370130100000000441275655";
 let previewDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 let latestPreviewRequestId = 0;
 
@@ -160,7 +160,12 @@ const syncSelectedLoan = () => {
 };
 
 const normalizeAqayePardakhtAmount = () => {
-  if (selectedGateway.value !== "AQAYE_PARDAKHT") return;
+  if (
+    selectedGateway.value !== "AQAYE_PARDAKHT" &&
+    selectedGateway.value !== "PAYPING"
+  ) {
+    return;
+  }
 
   const raw = amountInput.rawValue.value;
   if (!raw) return;
@@ -213,12 +218,18 @@ const fetchPaymentPageData = async () => {
       userApi.getLoanDebts(),
     ]);
 
-    gateways.value = gatewayData;
+    gateways.value = [...gatewayData].sort((first, second) => {
+      if (first.name === "PAYPING") return -1;
+      if (second.name === "PAYPING") return 1;
+      return 0;
+    });
     loanDebtBreakdown.value = loanDebtData;
     syncSelectedLoan();
 
     if (gateways.value.length > 0) {
-      selectedGateway.value = gateways.value[0].name;
+      selectedGateway.value =
+        gateways.value.find((gateway) => gateway.name === "PAYPING")?.name ||
+        gateways.value[0].name;
     }
   } catch (error: any) {
     console.error("Error fetching payment page data:", error);
@@ -384,7 +395,9 @@ onBeforeUnmount(() => {
   <div class="min-h-screen bg-gray-50 w-full">
     <UserHeader title="پرداخت بدهی" />
 
-    <main class="w-full max-w-[1200px] mx-auto px-3 sm:px-4 pt-5 md:pt-8 pb-28 md:pb-8">
+    <main
+      class="w-full max-w-[1200px] mx-auto px-3 sm:px-4 pt-5 md:pt-8 pb-28 md:pb-8"
+    >
       <StateLoader
         v-if="loading"
         message="در حال آماده‌سازی اطلاعات پرداخت..."
@@ -404,7 +417,6 @@ onBeforeUnmount(() => {
                 <p class="text-sm opacity-90 mb-1">مبلغ کل</p>
                 <div
                   class="inline-flex flex-row-reverse items-baseline gap-1 text-3xl font-bold"
-               
                 >
                   <span>{{ formatCurrency(positiveDebtTotal) }}</span>
                   <span class="text-lg">ریال</span>
@@ -421,21 +433,29 @@ onBeforeUnmount(() => {
         </BaseCard>
 
         <template v-if="hasPayableLoans">
-          <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_380px] gap-3 md:gap-4 items-start">
+          <div
+            class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_380px] gap-3 md:gap-4 items-start"
+          >
             <div class="space-y-3 md:space-y-4">
               <BaseCard class="!p-4 md:!p-5">
                 <div class="space-y-4">
                   <div>
-                    <h3 class="text-lg font-bold text-gray-900">انتخاب تسهیلات</h3>
+                    <h3 class="text-lg font-bold text-gray-900">
+                      انتخاب تسهیلات
+                    </h3>
                   </div>
 
                   <div
                     v-if="positiveDebtLoans.length === 1 && selectedLoan"
                     class="rounded-xl border border-gray-200 bg-white p-4"
                   >
-                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                    <div
+                      class="flex flex-col md:flex-row md:items-center md:justify-between gap-3"
+                    >
                       <div>
-                        <p class="text-sm text-gray-500 mb-1">تسهیلات دارای بدهی</p>
+                        <p class="text-sm text-gray-500 mb-1">
+                          تسهیلات دارای بدهی
+                        </p>
                         <p class="text-lg font-bold text-gray-900" dir="ltr">
                           {{ selectedLoan.loanNumber }}
                         </p>
@@ -486,7 +506,9 @@ onBeforeUnmount(() => {
                           placeholder="مبلغ را به ریال وارد کنید"
                           class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-left"
                           :class="
-                            fieldErrors.amount ? 'border-red-500' : 'border-gray-300'
+                            fieldErrors.amount
+                              ? 'border-red-500'
+                              : 'border-gray-300'
                           "
                           dir="ltr"
                         />
@@ -503,7 +525,10 @@ onBeforeUnmount(() => {
                         کل بدهی
                       </button>
                     </div>
-                    <p v-if="fieldErrors.amount" class="mt-2 text-sm text-red-600">
+                    <p
+                      v-if="fieldErrors.amount"
+                      class="mt-2 text-sm text-red-600"
+                    >
                       {{ fieldErrors.amount }}
                     </p>
                   </div>
@@ -551,7 +576,9 @@ onBeforeUnmount(() => {
                         : 'border-gray-200 bg-white',
                     ]"
                   >
-                    <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3 mb-4">
+                    <div
+                      class="flex flex-col md:flex-row md:items-start md:justify-between gap-3 mb-4"
+                    >
                       <div>
                         <div class="flex items-center gap-2">
                           <p class="text-lg font-bold text-gray-900" dir="ltr">
@@ -574,7 +601,9 @@ onBeforeUnmount(() => {
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <div class="rounded-lg bg-gray-50 border border-gray-200 px-3 py-3">
+                      <div
+                        class="rounded-lg bg-gray-50 border border-gray-200 px-3 py-3"
+                      >
                         <p class="text-xs text-gray-500 mb-1">مبلغ بدهی فعلی</p>
                         <p class="font-bold text-gray-900">
                           {{
@@ -585,7 +614,9 @@ onBeforeUnmount(() => {
                           }}
                         </p>
                       </div>
-                      <div class="rounded-lg bg-gray-50 border border-gray-200 px-3 py-3">
+                      <div
+                        class="rounded-lg bg-gray-50 border border-gray-200 px-3 py-3"
+                      >
                         <p class="text-xs text-gray-500 mb-1">
                           باقی‌مانده بعد از پرداخت
                         </p>
@@ -626,8 +657,8 @@ onBeforeUnmount(() => {
                   </svg>
                   <div class="text-blue-900 w-full space-y-2 leading-7">
                     <p class="font-semibold">
-                      مشتری گرامی به دلیل اختلالات بستر پرداخت، در صورت خطای درگاه
-                      می‌توانید مبلغ موردنظر را به شماره شبای:
+                      مشتری گرامی به دلیل اختلالات بستر پرداخت، در صورت خطای
+                      درگاه می‌توانید مبلغ موردنظر را به شماره شبای:
                     </p>
                     <div
                       class="w-full bg-white border border-blue-200 rounded-lg px-3 py-2 flex items-center justify-between gap-3"
@@ -649,14 +680,16 @@ onBeforeUnmount(() => {
                     </div>
                     <p>
                       به نام شرکت
-                      <span class="font-semibold">"عماد نماد اعتماد"</span> نزد بانک
-                      رفاه، واریز نموده و رسید واریز را در شبکه اجتماعی بله برای
-                      شماره زیر ارسال نمایید:
+                      <span class="font-semibold">"عماد نماد اعتماد"</span> نزد
+                      بانک رفاه، واریز نموده و رسید واریز را در شبکه اجتماعی بله
+                      برای شماره زیر ارسال نمایید:
                     </p>
                     <div class="text-lg font-bold text-gray-900" dir="ltr">
                       09905036181
                     </div>
-                    <p class="font-semibold text-blue-800">با تشکر - عماد ایران</p>
+                    <p class="font-semibold text-blue-800">
+                      با تشکر - عماد ایران
+                    </p>
                   </div>
                 </div>
               </BaseCard>
@@ -741,7 +774,9 @@ onBeforeUnmount(() => {
                       class="flex justify-between text-sm gap-4"
                     >
                       <span class="text-gray-600">درگاه:</span>
-                      <span class="font-bold">{{ selectedGatewayDisplayName }}</span>
+                      <span class="font-bold">{{
+                        selectedGatewayDisplayName
+                      }}</span>
                     </div>
                     <div
                       v-if="description"

@@ -25,7 +25,7 @@ export const useApi = () => {
   const config = useRuntimeConfig()
   const { locale } = useI18n()
   
-  const baseURL: string = (config.public.apiBaseUrl as string) || 'https://core.hashtpa.ai/api'
+  const baseURL: string = (config.public.apiBaseUrl as string)
 
   /**
    * Get auth token from cookie or store

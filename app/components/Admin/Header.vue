@@ -13,6 +13,7 @@ const navItems = [
   { title: "داشبورد", path: "/admin", icon: "mdi:view-dashboard" },
   { title: "کاربران", path: "/admin/users", icon: "mdi:account-group" },
   { title: "تاریخچه پرداخت", path: "/admin/transactions", icon: "mdi:receipt-text" },
+  { title: "مدیریت پیامک‌ها", path: "/admin/system-sms", icon: "mdi:message-text-clock" },
   // { title: "اقساط", path: "/admin/installments", icon: "mdi:calendar-clock" },
   {
     title: "درگاه‌های پرداخت",

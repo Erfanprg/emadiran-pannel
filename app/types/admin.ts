@@ -205,3 +205,82 @@ export interface ContactHistoryMutationResponse {
   message: string
   data: ContactHistoryItem
 }
+
+export type SystemSmsType =
+  | 'DEADLINE_DUE_NO_PAYMENT'
+  | 'DEADLINE_DUE_WITH_PAYMENT'
+  | 'PAYMENT_WITHOUT_DEADLINE'
+
+export type SystemSmsStatus =
+  | 'QUEUED'
+  | 'PROCESSING'
+  | 'SENT'
+  | 'SKIPPED'
+  | 'FAILED'
+
+export type SystemSmsFilterStatus = SystemSmsStatus | 'NOT_SENT'
+
+export interface SystemSmsUser {
+  id: number
+  firstName: string | null
+  lastName: string | null
+  fullName: string | null
+  phoneNumber: string
+  nationalCode: string
+}
+
+export interface SystemSmsPaymentDeadline {
+  id: number
+  deadlineAt: string
+  createdAt: string
+}
+
+export interface SystemSmsItem {
+  id: number
+  type: SystemSmsType
+  templateName: string
+  status: SystemSmsStatus
+  notificationDate: string
+  paidAmount: string
+  remainingDebt: string
+  attempts: number
+  lastError: string | null
+  sentAt: string | null
+  createdAt: string
+  updatedAt: string
+  user: SystemSmsUser
+  paymentDeadline: SystemSmsPaymentDeadline | null
+}
+
+export interface SystemSmsMeta {
+  total: number
+  limit: number
+  offset: number
+  hasMore: boolean
+}
+
+export interface SystemSmsListResponse {
+  success: boolean
+  data: {
+    items: SystemSmsItem[]
+    meta: SystemSmsMeta
+  }
+}
+
+export interface RetrySystemSmsResponse {
+  success: boolean
+  message: string
+  data: {
+    id: number
+    status: 'QUEUED'
+  }
+}
+
+export interface GetSystemSmsQuery {
+  limit?: number
+  offset?: number
+  startDate?: string
+  endDate?: string
+  type?: SystemSmsType
+  status?: SystemSmsFilterStatus
+}
