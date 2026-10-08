@@ -8,6 +8,7 @@ import { useApiCall } from '~/composables/useApiCall'
 import { getUserDisplayName } from '~/func/getUserDisplayName'
 import type { UserPhone } from '~/types/userPhone'
 import type { AdminUser } from '~/types/admin'
+import PhoneFormModal from '~/components/Admin/users/PhoneFormModal.vue'
 
 useHead({
   title: 'مدیریت شماره تلفن‌ها - عماد ایران'
@@ -285,86 +286,30 @@ onMounted(() => {
 
     <template #overlays>
       <!-- Add Phone Modal -->
-      <BaseModal v-if="showAddModal" title="افزودن شماره تلفن جدید" @close="showAddModal = false">
-        <form @submit.prevent="handleAddPhone" class="space-y-4">
-          <BaseInput
-            v-model="addForm.phoneNumber"
-            label="شماره تلفن"
-            required
-            placeholder="09123456789 "
-            dir="ltr"
-            :error="errors.phoneNumber"
-          />
-          
-          <BaseInput
-            v-model="addForm.label"
-            label="برچسب (اختیاری)"
-            placeholder="مثلاً: تلفن منزل، شماره پدر، شماره دوم"
-            :error="errors.label"
-          />
-          
-          <div class="flex items-center gap-3 pt-4">
-            <BaseButton
-              type="submit"
-              variant="primary"
-              size="lg"
-              full-width
-            >
-              افزودن شماره
-            </BaseButton>
-            <BaseButton
-              type="button"
-              variant="secondary"
-              size="lg"
-              full-width
-              @click="showAddModal = false"
-            >
-              انصراف
-            </BaseButton>
-          </div>
-        </form>
-      </BaseModal>
+      <PhoneFormModal
+        v-if="showAddModal"
+        v-model:phone-number="addForm.phoneNumber"
+        v-model:label="addForm.label"
+        title="افزودن شماره تلفن جدید"
+        submit-text="افزودن شماره"
+        phone-placeholder="09123456789 "
+        :errors="errors"
+        @submit="handleAddPhone"
+        @close="showAddModal = false"
+      />
 
       <!-- Edit Phone Modal -->
-      <BaseModal v-if="showEditModal" title="ویرایش شماره تلفن" @close="showEditModal = false">
-        <form @submit.prevent="handleUpdatePhone" class="space-y-4">
-          <BaseInput
-            v-model="editForm.phoneNumber"
-            label="شماره تلفن"
-            required
-            placeholder="09123456789 یا 02188776655"
-            dir="ltr"
-            :error="errors.phoneNumber"
-          />
-          
-          <BaseInput
-            v-model="editForm.label"
-            label="برچسب (اختیاری)"
-            placeholder="مثلاً: تلفن منزل، شماره پدر، شماره دوم"
-            :error="errors.label"
-          />
-          
-          <div class="flex items-center gap-3 pt-4">
-            <BaseButton
-              type="submit"
-              variant="primary"
-              size="lg"
-              full-width
-            >
-              ذخیره تغییرات
-            </BaseButton>
-            <BaseButton
-              type="button"
-              variant="secondary"
-              size="lg"
-              full-width
-              @click="showEditModal = false"
-            >
-              انصراف
-            </BaseButton>
-          </div>
-        </form>
-      </BaseModal>
+      <PhoneFormModal
+        v-if="showEditModal"
+        v-model:phone-number="editForm.phoneNumber"
+        v-model:label="editForm.label"
+        title="ویرایش شماره تلفن"
+        submit-text="ذخیره تغییرات"
+        phone-placeholder="09123456789 یا 02188776655"
+        :errors="errors"
+        @submit="handleUpdatePhone"
+        @close="showEditModal = false"
+      />
     </template>
   </AdminPage>
 </template>

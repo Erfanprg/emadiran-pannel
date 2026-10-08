@@ -16,6 +16,10 @@ export const EDITABLE_TRANSACTION_TYPES: DebtTransactionType[] = [
   'ADMIN_DEBT_REDUCE'
 ]
 
+/** Only admin debt transactions can be edited or deleted */
+export const canManageTransaction = (transaction: Pick<Transaction, 'type'>): boolean =>
+  EDITABLE_TRANSACTION_TYPES.includes(transaction.type as DebtTransactionType)
+
 export interface DebtFormInput {
   amount: number
   type: DebtTransactionType | ''

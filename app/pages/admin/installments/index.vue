@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useAdminGuard } from '~/composables/useAdminGuard'
+import { useListFilters } from '~/composables/useListFilters'
 import { installmentsApi } from '~/services/api/installments'
 import { useToast } from '~/composables/useToast'
 import { useConfirm } from '~/composables/useConfirm'
@@ -29,15 +30,24 @@ const isLoading = ref(false)
 const error = ref<string | null>(null)
 
 // Filters
-const filters = ref<GetInstallmentsQuery>({
-  limit: 20,
-  offset: 0,
-  status: undefined,
-  phoneNumber: undefined,
-  firstName: undefined,
-  lastName: undefined,
-  loanNumber: undefined
-})
+const {
+  filters,
+  updateFilter: handleFilterUpdate,
+  resetFilterValues,
+  getCleanedFilters
+} = useListFilters<GetInstallmentsQuery>(
+  () => ({
+    limit: 20,
+    offset: 0,
+    status: undefined,
+    phoneNumber: undefined,
+    firstName: undefined,
+    lastName: undefined,
+    loanNumber: undefined
+  }),
+  ['phoneNumber', 'firstName', 'lastName', 'loanNumber'],
+  ['status']
+)
 
 // Filter fields definition
 const filterFields = computed(() => [
@@ -98,14 +108,8 @@ const fetchInstallments = async () => {
     isLoading.value = true
     error.value = null
     filters.value.offset = (page.value - 1) * (filters.value.limit || 20)
-        
-    // Clean filters - remove undefined/empty values
-    const cleanedFilters = Object.fromEntries(
-      Object.entries(filters.value).filter(([_, v]) => v !== undefined && v !== '' && v !== null)
-    )
-    
-    
-    const response = await installmentsApi.getInstallments(cleanedFilters as GetInstallmentsQuery)
+
+    const response = await installmentsApi.getInstallments(getCleanedFilters() as GetInstallmentsQuery)
     installments.value = response.data.data || []
     total.value = response.data.meta?.total || 0
   } catch (err: any) {
@@ -116,31 +120,6 @@ const fetchInstallments = async () => {
   }
 }
 
-// Handle filter field updates
-const handleFilterUpdate = (key: string, val: any) => {
-  
-  if (key === 'phoneNumber') {
-    const trimmed = val?.trim()
-    filters.value.phoneNumber = trimmed || undefined
-  }
-  else if (key === 'firstName') {
-    const trimmed = val?.trim()
-    filters.value.firstName = trimmed || undefined
-  }
-  else if (key === 'lastName') {
-    const trimmed = val?.trim()
-    filters.value.lastName = trimmed || undefined
-  }
-  else if (key === 'loanNumber') {
-    const trimmed = val?.trim()
-    filters.value.loanNumber = trimmed || undefined
-  }
-  else if (key === 'status') {
-    filters.value.status = val === 'undefined' ? undefined : val
-  }
-  
-}
-
 // Handle search
 const handleSearch = () => {
   page.value = 1
@@ -149,15 +128,7 @@ const handleSearch = () => {
 
 // Reset filters
 const resetFilters = () => {
-  filters.value = {
-    limit: 20,
-    offset: 0,
-    status: undefined,
-    phoneNumber: undefined,
-    firstName: undefined,
-    lastName: undefined,
-    loanNumber: undefined
-  }
+  resetFilterValues()
   page.value = 1
   fetchInstallments()
 }
@@ -240,11 +211,7 @@ watch(page, () => {
 
     <!-- Table -->
     <BaseCard :padding="false">
-      <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-        <div>
-          <h3 class="text-lg font-bold text-gray-900">لیست اقساط</h3>
-          <p class="text-sm text-gray-600">تعداد: {{ formatNumber(total) }} قسط</p>
-        </div>
+      <BaseCardHeader title="لیست اقساط" :subtitle="`تعداد: ${formatNumber(total)} قسط`">
         <button
           @click="showCreateModal = true"
           class="px-4 py-2 bg-gradient-to-r from-primary to-accent text-white rounded-lg hover:shadow-lg transition-all duration-300 flex items-center gap-2 font-medium"
@@ -252,7 +219,7 @@ watch(page, () => {
           <IconsOutline name="plus" class="w-5 h-5" />
           ایجاد قسط جدید
         </button>
-      </div>
+      </BaseCardHeader>
 
       <!-- Loading State -->
       <StateLoader v-if="isLoading" message="در حال بارگذاری..." />

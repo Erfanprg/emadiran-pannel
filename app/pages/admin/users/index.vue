@@ -5,10 +5,9 @@ import { useToast } from '~/composables/useToast'
 import { useConfirm } from '~/composables/useConfirm'
 import { useApiCall } from '~/composables/useApiCall'
 import type { AdminUser, UsersListResponse } from '~/types/admin'
-import type { TableColumn } from '~/components/Base/Table.vue'
 import { formatNumber } from '~/utils/formatters'
 import { getUserDisplayName } from '~/func/getUserDisplayName'
-import { ACTIVE_STATUS_BADGES, USER_ROLE_BADGES } from '~/constants/badges'
+import UsersTable from '~/components/Admin/users/UsersTable.vue'
 
 useHead({
   title: 'مدیریت کاربران - عماد ایران'
@@ -64,27 +63,6 @@ const filterFields = computed(() => [
     ]
   }
 ])
-
-// Table columns
-const columns: TableColumn<AdminUser>[] = [
-  { key: 'id', label: 'شناسه', align: 'center' },
-  { 
-    key: 'fullName', 
-    label: 'نام', 
-    align: 'center', 
-    format: (val, row) => getUserDisplayName(row)
-  },
-  { key: 'phoneNumber', label: 'موبایل', align: 'center' },
-  { key: 'nationalCode', label: 'کد ملی', align: 'center' },
-  { key: 'role', label: 'نقش', align: 'center' },
-  { 
-    key: 'totalDebt', 
-    label: 'بدهی', 
-    align: 'center',
-    format: (val) => formatNumber(val)
-  },
-  { key: 'isActive', label: 'وضعیت', align: 'center' }
-]
 
 // Computed
 const totalPages = computed(() => Math.ceil(total.value / limit.value))
@@ -231,11 +209,7 @@ onMounted(() => {
     <!-- Users Table -->
     <BaseCard v-else :padding="false">
       <!-- Table Header -->
-      <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-        <div>
-          <h3 class="text-lg font-bold text-gray-900">لیست کاربران</h3>
-          <p class="text-sm text-gray-600">تعداد: {{ formatNumber(total) }} کاربر</p>
-        </div>
+      <BaseCardHeader title="لیست کاربران" :subtitle="`تعداد: ${formatNumber(total)} کاربر`">
         <div class="flex items-center gap-3">
           <!-- <button
             @click="showCsvImportModal = true"
@@ -252,70 +226,14 @@ onMounted(() => {
             ایجاد کاربر جدید
           </NuxtLink>
         </div>
-      </div>
+      </BaseCardHeader>
 
       <!-- Table -->
-      <BaseTable :columns="columns" :data="users">
-        <!-- Phone Number Cell -->
-        <template #cell-phoneNumber="{ value }">
-          <div class="text-sm text-gray-900" dir="ltr">{{ value }}</div>
-        </template>
-
-        <!-- Role Cell -->
-        <template #cell-role="{ row }">
-          <BaseStatusBadge :map="USER_ROLE_BADGES" :value="row.role" />
-        </template>
-
-        <!-- Total Debt Cell -->
-        <template #cell-totalDebt="{ value }">
-          <div dir="ltr">{{ value }}</div>
-        </template>
-
-        <!-- Status Cell -->
-        <template #cell-isActive="{ row }">
-          <BaseStatusBadge :map="ACTIVE_STATUS_BADGES" :value="row.isActive" />
-        </template>
-
-        <!-- Actions -->
-        <template #actions="{ row }">
-          <div class="flex items-center justify-center gap-2">
-            <NuxtLink
-              :to="`/admin/users/${row.id}`"
-              title="مشاهده جزئیات"
-              class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors duration-200"
-            >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-              </svg>
-            </NuxtLink>
-            <NuxtLink
-              :to="`/admin/users/edit/${row.id}`"
-              title="ویرایش"
-              class="p-2 text-primary hover:bg-blue-50 rounded-lg transition-colors duration-200"
-            >
-              <IconsOutline name="edit" class="w-5 h-5" />
-            </NuxtLink>
-            <button
-              v-if="row.role !== 'ADMIN'"
-              @click="handleToggleStatus(row)"
-              :title="row.isActive ? 'غیرفعال کردن' : 'فعال کردن'"
-              class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200"
-            >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-              </svg>
-            </button>
-            <button
-              @click="handleDeleteUser(row)"
-              title="حذف"
-              class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
-            >
-              <IconsOutline name="trash" class="w-5 h-5" />
-            </button>
-          </div>
-        </template>
-      </BaseTable>
+      <UsersTable
+        :users="users"
+        @toggle-status="handleToggleStatus"
+        @delete="handleDeleteUser"
+      />
 
       <!-- Pagination -->
       <BasePagination
