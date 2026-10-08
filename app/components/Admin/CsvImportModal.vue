@@ -2,6 +2,7 @@
 import { adminApi } from '~/services/api/admin'
 import { useToast } from '~/composables/useToast'
 import type { CsvImportResponse } from '~/types/admin'
+import { formatNumber } from '~/utils/formatters'
 
 const props = defineProps<{
   modelValue: boolean
@@ -120,9 +121,7 @@ watch(() => props.modelValue, (newVal) => {
           for="csv-file-input"
           class="cursor-pointer flex flex-col items-center gap-3"
         >
-          <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-          </svg>
+          <IconsOutline name="upload" class="w-16 h-16 text-gray-400" />
           <div>
             <p class="text-lg font-medium text-gray-700">
               {{ selectedFile ? selectedFile.name : 'انتخاب فایل CSV' }}
@@ -141,43 +140,41 @@ watch(() => props.modelValue, (newVal) => {
       <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
         <div class="bg-green-50 border border-green-200 rounded-lg p-4">
           <p class="text-sm text-green-700 mb-1">موفق</p>
-          <p class="text-2xl font-bold text-green-900">{{ importResult.data.successCount.toLocaleString('fa-IR') }}</p>
+          <p class="text-2xl font-bold text-green-900">{{ formatNumber(importResult.data.successCount) }}</p>
         </div>
         <div class="bg-red-50 border border-red-200 rounded-lg p-4">
           <p class="text-sm text-red-700 mb-1">ناموفق</p>
-          <p class="text-2xl font-bold text-red-900">{{ importResult.data.failedCount.toLocaleString('fa-IR') }}</p>
+          <p class="text-2xl font-bold text-red-900">{{ formatNumber(importResult.data.failedCount) }}</p>
         </div>
         <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <p class="text-sm text-blue-700 mb-1">کل ردیف‌ها</p>
-          <p class="text-2xl font-bold text-blue-900">{{ importResult.data.metadata.totalRows.toLocaleString('fa-IR') }}</p>
+          <p class="text-2xl font-bold text-blue-900">{{ formatNumber(importResult.data.metadata.totalRows) }}</p>
         </div>
         <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
           <p class="text-sm text-purple-700 mb-1">کاربران پردازش شده</p>
-          <p class="text-2xl font-bold text-purple-900">{{ importResult.data.processedUsers.toLocaleString('fa-IR') }}</p>
+          <p class="text-2xl font-bold text-purple-900">{{ formatNumber(importResult.data.processedUsers) }}</p>
         </div>
         <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
           <p class="text-sm text-yellow-700 mb-1">کاربران جدید</p>
-          <p class="text-2xl font-bold text-yellow-900">{{ importResult.data.newUsers.toLocaleString('fa-IR') }}</p>
+          <p class="text-2xl font-bold text-yellow-900">{{ formatNumber(importResult.data.newUsers) }}</p>
         </div>
         <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
           <p class="text-sm text-indigo-700 mb-1">تسهیلات جدید</p>
-          <p class="text-2xl font-bold text-indigo-900">{{ importResult.data.newLoans.toLocaleString('fa-IR') }}</p>
+          <p class="text-2xl font-bold text-indigo-900">{{ formatNumber(importResult.data.newLoans) }}</p>
         </div>
       </div>
 
       <!-- Metadata -->
       <div class="bg-gray-50 rounded-lg p-4 text-sm text-gray-700">
         <p><span class="font-medium">زمان پردازش:</span> {{ importResult.data.metadata.processingTime }}</p>
-        <p><span class="font-medium">ردیف‌های رد شده:</span> {{ importResult.data.metadata.skippedRows.toLocaleString('fa-IR') }}</p>
+        <p><span class="font-medium">ردیف‌های رد شده:</span> {{ formatNumber(importResult.data.metadata.skippedRows) }}</p>
       </div>
 
       <!-- Errors List -->
       <div v-if="importResult.data.errors.length > 0" class="bg-red-50 border border-red-200 rounded-lg p-4">
         <h4 class="font-bold text-red-900 mb-3 flex items-center gap-2">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          خطاها ({{ importResult.data.errors.length.toLocaleString('fa-IR') }})
+          <IconsOutline name="exclamation-circle" class="w-5 h-5" />
+          خطاها ({{ formatNumber(importResult.data.errors.length) }})
         </h4>
         <div class="max-h-60 overflow-y-auto space-y-2">
           <div
@@ -192,9 +189,7 @@ watch(() => props.modelValue, (newVal) => {
 
       <!-- Success Message -->
       <div v-else class="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
-        <svg class="w-12 h-12 text-green-600 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
+        <IconsOutline name="check-circle" class="w-12 h-12 text-green-600 mx-auto mb-2" />
         <p class="text-green-900 font-bold">همه تراکنش‌ها با موفقیت ثبت شدند!</p>
       </div>
     </div>

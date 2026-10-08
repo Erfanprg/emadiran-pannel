@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { LoanDebtBreakdown, LoanDebtItem } from "~/types/debt";
-import { formatCurrency, formatDate } from "~/utils/formatters";
+import { formatCurrency, formatDate, formatNumber } from "~/utils/formatters";
 
 const props = withDefaults(
   defineProps<{
@@ -217,7 +217,7 @@ const getLoanBadge = (loan: LoanDebtItem) => {
             >
               <p class="text-xs text-gray-500 mb-1">تعداد تراکنش</p>
               <p class="text-lg font-bold text-gray-900">
-                {{ loan.transactionCount.toLocaleString("fa-IR") }}
+                {{ formatNumber(loan.transactionCount) }}
               </p>
             </div>
           </div>

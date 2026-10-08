@@ -4,6 +4,7 @@ import type { Gateway } from "~/types/gateway";
 import { gatewaysApi } from "~/services/api/gateways";
 import { useApiCall } from "~/composables/useApiCall";
 import { useConfirm } from "~/composables/useConfirm";
+import { ACTIVE_STATUS_BADGES } from "~/constants/badges";
 
 useHead({
   title: 'مدیریت درگاه‌های پرداخت - عماد ایران'
@@ -79,65 +80,57 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 w-full">
-    <!-- Header -->
-    <AdminHeader title="درگاه‌های پرداخت" />
+  <AdminPage title="درگاه‌های پرداخت">
+    <!-- Content -->
+    <BaseCard class="mt-6">
+      <StateLoader v-if="loading" />
+      <StateError v-else-if="error" :message="error" @retry="fetchGateways" />
+      <StateEmpty
+        v-else-if="!gateways.length"
+        message="درگاه پرداختی یافت نشد"
+      />
 
-    <!-- Main Content -->
-    <main class="max-w-[1330px] mx-auto px-4 py-8">
-      <!-- Content -->
-      <BaseCard class="mt-6">
-        <StateLoader v-if="loading" />
-        <StateError v-else-if="error" :message="error" @retry="fetchGateways" />
-        <StateEmpty
-          v-else-if="!gateways.length"
-          message="درگاه پرداختی یافت نشد"
-        />
-
-        <BaseTable v-else :columns="columns" :data="gatewaysWithIndex">
-          <!-- Gateway Name -->
-          <template #cell-displayName="{ row }">
-            <div class="text-center">
-              <div class="font-medium text-gray-900">
-                {{ row.displayName }}
-              </div>
+      <BaseTable v-else :columns="columns" :data="gatewaysWithIndex">
+        <!-- Gateway Name -->
+        <template #cell-displayName="{ row }">
+          <div class="text-center">
+            <div class="font-medium text-gray-900">
+              {{ row.displayName }}
             </div>
-          </template>
+          </div>
+        </template>
 
-          <!-- Status Badge -->
-          <template #cell-isActive="{ row }">
-            <BaseBadge :variant="row.isActive ? 'success' : 'danger'">
-              {{ row.isActive ? 'فعال' : 'غیرفعال' }}
-            </BaseBadge>
-          </template>
+        <!-- Status Badge -->
+        <template #cell-isActive="{ row }">
+          <BaseStatusBadge :map="ACTIVE_STATUS_BADGES" :value="row.isActive" />
+        </template>
 
-          <!-- Actions -->
-          <template #actions="{ row }">
-            <div class="flex items-center justify-center gap-2">
-              <button
-                @click="handleToggle(row)"
-                class="inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 border border-transparent active:translate-y-0"
-                :class="
+        <!-- Actions -->
+        <template #actions="{ row }">
+          <div class="flex items-center justify-center gap-2">
+            <button
+              @click="handleToggle(row)"
+              class="inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 border border-transparent active:translate-y-0"
+              :class="
+                row.isActive
+                  ? 'bg-red-600 text-white border-red-600 hover:bg-red-700 hover:-translate-y-0.5 hover:shadow-[0_2px_8px_rgba(220,38,38,0.3)]'
+                  : 'bg-green-600 text-white border-green-600 hover:bg-green-700 hover:-translate-y-0.5 hover:shadow-[0_2px_8px_rgba(22,163,74,0.3)]'
+              "
+              :title="row.isActive ? 'غیرفعال کردن' : 'فعال کردن'"
+            >
+              <Icon
+                :name="
                   row.isActive
-                    ? 'bg-red-600 text-white border-red-600 hover:bg-red-700 hover:-translate-y-0.5 hover:shadow-[0_2px_8px_rgba(220,38,38,0.3)]'
-                    : 'bg-green-600 text-white border-green-600 hover:bg-green-700 hover:-translate-y-0.5 hover:shadow-[0_2px_8px_rgba(22,163,74,0.3)]'
+                    ? 'mdi:toggle-switch'
+                    : 'mdi:toggle-switch-off-outline'
                 "
-                :title="row.isActive ? 'غیرفعال کردن' : 'فعال کردن'"
-              >
-                <Icon
-                  :name="
-                    row.isActive
-                      ? 'mdi:toggle-switch'
-                      : 'mdi:toggle-switch-off-outline'
-                  "
-                  size="18"
-                />
-                {{ row.isActive ? "غیرفعال کردن" : "فعال کردن" }}
-              </button>
-            </div>
-          </template>
-        </BaseTable>
-      </BaseCard>
-    </main>
-  </div>
+                size="18"
+              />
+              {{ row.isActive ? "غیرفعال کردن" : "فعال کردن" }}
+            </button>
+          </div>
+        </template>
+      </BaseTable>
+    </BaseCard>
+  </AdminPage>
 </template>

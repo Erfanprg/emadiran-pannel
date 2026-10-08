@@ -3,6 +3,7 @@ import { useAuthStore } from '~/stores/auth'
 import { userApi } from '~/services/api/user'
 import { formatCurrency, formatDate } from '~/utils/formatters'
 import type { Installment } from '~/types/installment'
+import { INSTALLMENT_STATUS_BADGES } from '~/constants/badges'
 
 useHead({
   title: 'اقساط من - عماد ایران'
@@ -73,16 +74,6 @@ const statusOptions = [
   { value: 'OVERDUE', label: 'عقب افتاده' }
 ]
 
-// Status badge config
-const getStatusBadge = (status: string) => {
-  const badges = {
-    PENDING: { text: 'در انتظار', variant: 'warning' },
-    PAID: { text: 'پرداخت شده', variant: 'success' },
-    OVERDUE: { text: 'عقب افتاده', variant: 'danger' }
-  }
-  return badges[status as keyof typeof badges] || { text: status, variant: 'default' }
-}
-
 // Table columns
 const columns = [
   { key: 'index', label: 'ردیف' },
@@ -105,115 +96,107 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 w-full">
-    <!-- Header -->
-    <UserHeader title="اقساط من" />
+  <UserPage title="اقساط من">
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+      <BaseStatsCard
+        title="اقساط عقب افتاده"
+        :value="stats.overdue.toString()"
+        unit="قسط"
+        icon="mdi:alert-circle"
+        color="red"
+      />
+      <BaseStatsCard
+        title="مبلغ اقساط عقب افتاده"
+        :value="formatCurrency(stats.overdueAmount)"
+        unit="ریال"
+        icon="mdi:cash-remove"
+        color="orange"
+      />
+      <BaseStatsCard
+        title="اقساط باقی‌مانده"
+        :value="stats.remaining.toString()"
+        unit="قسط"
+        icon="mdi:calendar-clock"
+        color="blue"
+      />
+      <BaseStatsCard
+        title="اقساط پرداخت شده"
+        :value="stats.paid.toString()"
+        unit="قسط"
+        icon="mdi:check-circle"
+        color="green"
+      />
+    </div>
 
-    <!-- Main Content -->
-    <main class="max-w-[1330px] mx-auto px-4 py-8">
-      <!-- Stats Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        <BaseStatsCard
-          title="اقساط عقب افتاده"
-          :value="stats.overdue.toString()"
-          unit="قسط"
-          icon="mdi:alert-circle"
-          color="red"
-        />
-        <BaseStatsCard
-          title="مبلغ اقساط عقب افتاده"
-          :value="formatCurrency(stats.overdueAmount)"
-          unit="ریال"
-          icon="mdi:cash-remove"
-          color="orange"
-        />
-        <BaseStatsCard
-          title="اقساط باقی‌مانده"
-          :value="stats.remaining.toString()"
-          unit="قسط"
-          icon="mdi:calendar-clock"
-          color="blue"
-        />
-        <BaseStatsCard
-          title="اقساط پرداخت شده"
-          :value="stats.paid.toString()"
-          unit="قسط"
-          icon="mdi:check-circle"
-          color="green"
-        />
+    <!-- Filters & Table Card -->
+    <BaseCard>
+      <template #header>
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <h2 class="text-xl font-bold text-gray-900">لیست اقساط</h2>
+          
+          <!-- Status Filter -->
+          <div class="flex items-center gap-2">
+            <label class="text-sm font-medium text-gray-700">وضعیت:</label>
+            <select
+              v-model="selectedStatus"
+              class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            >
+              <option v-for="option in statusOptions" :key="option.value" :value="option.value">
+                {{ option.label }}
+              </option>
+            </select>
+          </div>
+        </div>
+      </template>
+
+      <!-- Loading State -->
+      <div v-if="loading" class="flex items-center justify-center py-12">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
 
-      <!-- Filters & Table Card -->
-      <BaseCard>
-        <template #header>
-          <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <h2 class="text-xl font-bold text-gray-900">لیست اقساط</h2>
-            
-            <!-- Status Filter -->
-            <div class="flex items-center gap-2">
-              <label class="text-sm font-medium text-gray-700">وضعیت:</label>
-              <select
-                v-model="selectedStatus"
-                class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              >
-                <option v-for="option in statusOptions" :key="option.value" :value="option.value">
-                  {{ option.label }}
-                </option>
-              </select>
-            </div>
-          </div>
-        </template>
-
-        <!-- Loading State -->
-        <div v-if="loading" class="flex items-center justify-center py-12">
-          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <!-- Empty State -->
+      <div v-else-if="!installments || installments.length === 0" class="text-center py-12">
+        <div class="w-16 h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+          <Icon name="mdi:calendar-blank" size="32" class="text-gray-400" />
         </div>
+        <p class="text-gray-500 text-lg font-medium mb-2">هیچ قسطی یافت نشد</p>
+        <p class="text-gray-400 text-sm">در حال حاضر قسطی برای نمایش وجود ندارد</p>
+      </div>
 
-        <!-- Empty State -->
-        <div v-else-if="!installments || installments.length === 0" class="text-center py-12">
-          <div class="w-16 h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
-            <Icon name="mdi:calendar-blank" size="32" class="text-gray-400" />
-          </div>
-          <p class="text-gray-500 text-lg font-medium mb-2">هیچ قسطی یافت نشد</p>
-          <p class="text-gray-400 text-sm">در حال حاضر قسطی برای نمایش وجود ندارد</p>
+      <!-- Table -->
+      <div v-else>
+        <BaseTable :columns="columns" :data="installments">
+          <template #cell-index="{ index }">
+            {{ (currentPage - 1) * itemsPerPage + index + 1 }}
+          </template>
+          <template #cell-amount="{ row }">
+            <span class="font-medium" dir="ltr">{{ formatCurrency(row.amount) }}</span>
+          </template>
+          <template #cell-loanNumber="{ row }">
+            <span dir="ltr">{{ row.loan?.loanNumber || 'ندارد' }}</span>
+          </template>
+          <template #cell-dueDate="{ row }">
+            {{ formatDate(row.dueDate) }}
+          </template>
+          <template #cell-status="{ row }">
+            <BaseStatusBadge :map="INSTALLMENT_STATUS_BADGES" :value="row.status" />
+          </template>
+          <template #cell-description="{ row }">
+            <span class="text-gray-600 text-sm">{{ row.description || '-' }}</span>
+          </template>
+        </BaseTable>
+
+        <!-- Pagination -->
+        <div class="mt-6 flex justify-center">
+          <BasePagination
+            :current-page="currentPage"
+            :total-items="totalItems"
+            :items-per-page="itemsPerPage"
+            @update:current-page="currentPage = $event"
+          />
         </div>
-
-        <!-- Table -->
-        <div v-else>
-          <BaseTable :columns="columns" :data="installments">
-            <template #cell-index="{ index }">
-              {{ (currentPage - 1) * itemsPerPage + index + 1 }}
-            </template>
-            <template #cell-amount="{ row }">
-              <span class="font-medium" dir="ltr">{{ formatCurrency(row.amount) }}</span>
-            </template>
-            <template #cell-loanNumber="{ row }">
-              <span dir="ltr">{{ row.loan?.loanNumber || 'ندارد' }}</span>
-            </template>
-            <template #cell-dueDate="{ row }">
-              {{ formatDate(row.dueDate) }}
-            </template>
-            <template #cell-status="{ row }">
-              <BaseBadge :variant="getStatusBadge(row.status).variant as any">
-                {{ getStatusBadge(row.status).text }}
-              </BaseBadge>
-            </template>
-            <template #cell-description="{ row }">
-              <span class="text-gray-600 text-sm">{{ row.description || '-' }}</span>
-            </template>
-          </BaseTable>
-
-          <!-- Pagination -->
-          <div class="mt-6 flex justify-center">
-            <BasePagination
-              :current-page="currentPage"
-              :total-items="totalItems"
-              :items-per-page="itemsPerPage"
-              @update:current-page="currentPage = $event"
-            />
-          </div>
-        </div>
-      </BaseCard>
-    </main>
-  </div>
+      </div>
+    </BaseCard>
+  </UserPage>
 </template>

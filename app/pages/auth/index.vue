@@ -218,9 +218,7 @@ onUnmounted(() => {
               @click="handleBackToPhone"
               class="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition-colors duration-200"
             >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-              </svg>
+              <IconsOutline name="chevron-left" class="w-5 h-5" />
               بازگشت
             </button>
             <h2 class="text-xl font-bold text-gray-900 mb-2">کد تایید را وارد کنید</h2>
@@ -282,9 +280,7 @@ onUnmounted(() => {
               @click="handleBackToPhone"
               class="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition-colors duration-200"
             >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-              </svg>
+              <IconsOutline name="chevron-left" class="w-5 h-5" />
               بازگشت
             </button>
             <h2 class="text-xl font-bold text-gray-900 mb-2">رمز عبور را وارد کنید</h2>

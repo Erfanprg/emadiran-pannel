@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { SMS_DELIVERY_DETAILS, SMS_EVENT_LABELS, SMS_STATUS_DETAILS } from '~/constants/sms'
-import { formatDate } from '~/utils/formatters'
+import { formatDate, formatNumber } from '~/utils/formatters'
 import { canCheckSmsStatus, canRetrySms, getSmsUserName } from '~/utils/sms'
 import type { SmsDispatch } from '~/types/sms'
 
@@ -34,7 +34,7 @@ const emit = defineEmits<{ close: []; retry: [dispatch: SmsDispatch]; checkStatu
       </div>
 
       <div class="grid gap-2 text-xs text-gray-600 sm:grid-cols-2">
-        <p>شناسه رکورد: {{ dispatch.id.toLocaleString('fa-IR') }}</p>
+        <p>شناسه رکورد: {{ formatNumber(dispatch.id) }}</p>
         <p>شناسه پیامک قاصدک: <span dir="ltr">{{ dispatch.providerMessageId || '-' }}</span></p>
         <p>آخرین تلاش: {{ formatDate(dispatch.lastAttemptAt, true) }}</p>
         <p>آخرین استعلام: {{ formatDate(dispatch.lastStatusCheckedAt, true) }}</p>

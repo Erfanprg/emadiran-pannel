@@ -1,4 +1,5 @@
 import type { Transaction, TransactionAllocation } from '~/types/transaction'
+import { formatNumber } from '~/utils/formatters'
 
 const allocationTypeLabels: Record<string, string> = {
   SELECTED_LOAN: 'تسهیلات انتخاب‌شده',
@@ -25,7 +26,7 @@ export const getTransactionLoanSummary = (
   const allocations = getTransactionAllocations(transaction)
 
   if (allocations.length > 0) {
-    return `${allocations.length.toLocaleString('fa-IR')} تسهیلات`
+    return `${formatNumber(allocations.length)} تسهیلات`
   }
 
   return getTransactionLoanFallback(transaction)

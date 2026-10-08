@@ -3,7 +3,7 @@ import { SMS_DELIVERY_DETAILS, SMS_EVENT_LABELS, SMS_STATUS_DETAILS } from '~/co
 import { useConfirm } from '~/composables/useConfirm'
 import { useToast } from '~/composables/useToast'
 import { smsApi } from '~/services/api/sms'
-import { formatDate } from '~/utils/formatters'
+import { formatDate, formatNumber } from '~/utils/formatters'
 import { canCheckSmsStatus, canRetrySms, getSmsApiError, getSmsUserName } from '~/utils/sms'
 import type { TableColumn } from '~/components/Base/Table.vue'
 import type { SmsDeliveryStatus, SmsDispatch, SmsDispatchQuery, SmsDispatchStats, SmsEventCode } from '~/types/sms'
@@ -152,7 +152,7 @@ watch(page, fetchData)
 
     <BaseCard :padding="false">
       <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-        <div><h3 class="font-bold text-gray-900">آرشیو ارسال پیامک</h3><p class="mt-1 text-xs text-gray-500">{{ total.toLocaleString('fa-IR') }} رکورد</p></div>
+        <div><h3 class="font-bold text-gray-900">آرشیو ارسال پیامک</h3><p class="mt-1 text-xs text-gray-500">{{ formatNumber(total) }} رکورد</p></div>
         <BaseButton size="sm" variant="secondary" :loading="loading" @click="fetchData"><Icon name="mdi:refresh" class="ml-1" />به‌روزرسانی</BaseButton>
       </div>
       <StateLoader v-if="loading" message="در حال دریافت پیامک‌ها..." />
@@ -162,7 +162,7 @@ watch(page, fetchData)
         <template #cell-eventCode="{ row }"><div class="min-w-[150px] leading-6">{{ SMS_EVENT_LABELS[row.eventCode] }}</div></template>
         <template #cell-status="{ row }"><BaseBadge :variant="SMS_STATUS_DETAILS[row.status].variant">{{ SMS_STATUS_DETAILS[row.status].label }}</BaseBadge></template>
         <template #cell-deliveryStatus="{ row }"><BaseBadge :variant="SMS_DELIVERY_DETAILS[row.deliveryStatus].variant">{{ SMS_DELIVERY_DETAILS[row.deliveryStatus].label }}</BaseBadge></template>
-        <template #cell-attempts="{ row }">{{ row.attempts.toLocaleString('fa-IR') }}</template>
+        <template #cell-attempts="{ row }">{{ formatNumber(row.attempts) }}</template>
         <template #cell-createdAt="{ row }"><span class="whitespace-nowrap">{{ formatDate(row.createdAt, true) }}</span></template>
         <template #actions="{ row }"><div class="flex min-w-[170px] justify-center gap-2"><BaseButton size="sm" variant="secondary" :loading="detailLoading && selected?.id === row.id" @click="openDetail(row)">جزئیات</BaseButton><BaseButton v-if="canRetrySms(row)" size="sm" variant="warning" :loading="busyAction === 'retry' && selected?.id === row.id" @click="retryDispatch(row)">تلاش مجدد</BaseButton></div></template>
       </BaseTable>

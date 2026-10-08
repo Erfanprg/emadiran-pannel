@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { formatNumber } from '~/utils/formatters'
+
 interface Props {
   title: string
   value: string | number
@@ -38,7 +40,7 @@ const iconPaths = {
 
 const formattedValue = computed(() => {
   if (typeof props.value === 'number') {
-    return props.value.toLocaleString('fa-IR')
+    return formatNumber(props.value)
   }
   return props.value
 })

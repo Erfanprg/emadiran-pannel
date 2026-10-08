@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useToast } from '~/composables/useToast'
 import { smsApi } from '~/services/api/sms'
-import { formatDate } from '~/utils/formatters'
+import { formatDate, formatNumber } from '~/utils/formatters'
 import { getSmsApiError } from '~/utils/sms'
 import type { TableColumn } from '~/components/Base/Table.vue'
 import type { SmsTemplatePayload, SmsTemplateSummary } from '~/types/sms'
@@ -66,7 +66,7 @@ onMounted(fetchTemplates)
     <BaseTable v-else :columns="columns" :data="templates">
       <template #cell-title="{ row }"><div class="min-w-[155px]"><p class="font-bold">{{ row.title }}</p><code class="mt-1 block text-xs text-gray-500">{{ row.code }}</code></div></template>
       <template #cell-content="{ row }"><p class="max-w-[370px] whitespace-pre-line leading-6 text-gray-600 line-clamp-3">{{ row.content }}</p></template>
-      <template #cell-eventBindings="{ row }">{{ (row.eventBindings?.length || 0).toLocaleString('fa-IR') }}</template>
+      <template #cell-eventBindings="{ row }">{{ formatNumber(row.eventBindings?.length || 0) }}</template>
       <template #cell-isActive="{ row }"><BaseBadge :variant="row.isActive ? 'success' : 'gray'">{{ row.isActive ? 'فعال' : 'غیرفعال' }}</BaseBadge></template>
       <template #cell-updatedAt="{ row }"><span class="whitespace-nowrap">{{ formatDate(row.updatedAt, true) }}</span></template>
       <template #actions="{ row }"><BaseButton size="sm" variant="secondary" @click="openEdit(row)">ویرایش</BaseButton></template>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Transaction } from '~/types/transaction'
-import { formatCurrency } from '~/utils/formatters'
+import { formatCurrency, formatNumber } from '~/utils/formatters'
 import {
   getTransactionAllocations,
   getTransactionAllocationTypeLabel,
@@ -30,7 +30,7 @@ const allocations = computed(() => getTransactionAllocations(props.transaction))
 const hasAllocations = computed(() => allocations.value.length > 0)
 const fallbackLoan = computed(() => getTransactionLoanFallback(props.transaction))
 const summaryLabel = computed(() => getTransactionLoanSummary(props.transaction))
-const allocationsCountLabel = computed(() => `${allocations.value.length.toLocaleString('fa-IR')} تسهیلات`)
+const allocationsCountLabel = computed(() => `${formatNumber(allocations.value.length)} تسهیلات`)
 
 const handleToggle = () => {
   if (hasAllocations.value) {

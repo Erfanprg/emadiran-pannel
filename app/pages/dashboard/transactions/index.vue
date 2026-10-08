@@ -4,6 +4,7 @@ import { userApi } from '~/services/api/user'
 import { formatCurrency, formatDate } from '~/utils/formatters'
 import type { Transaction } from '~/types/transaction'
 import { getTransactionAllocations } from '~/utils/transactionAllocations'
+import { TRANSACTION_STATUS_BADGES, TRANSACTION_TYPE_BADGES } from '~/constants/badges'
 
 useHead({
   title: 'تاریخچه بدهی‌ها - عماد ایران'
@@ -96,27 +97,6 @@ const typeOptions = [
   { value: 'ADMIN_DEBT_REDUCE', label: 'کاهش بدهی' }
 ]
 
-// Status badge config
-const getStatusBadge = (status: string) => {
-  const badges = {
-    SUCCESS: { text: 'موفق', variant: 'success' },
-    FAILED: { text: 'ناموفق', variant: 'danger' },
-    PENDING: { text: 'در انتظار', variant: 'warning' }
-  }
-  return badges[status as keyof typeof badges] || { text: status, variant: 'default' }
-}
-
-// Type badge config
-const getTypeBadge = (type: string) => {
-  const badges = {
-    DEBT_PAYMENT: { text: 'پرداخت بدهی', variant: 'success' },
-    ADMIN_DEBT_ADD: { text: 'افزایش بدهی', variant: 'danger' },
-    LEGAL_DEBT_ADD: { text: 'افزایش بدهی حقوقی', variant: 'danger' },
-    ADMIN_DEBT_REDUCE: { text: 'کاهش بدهی', variant: 'success' }
-  }
-  return badges[type as keyof typeof badges] || { text: type, variant: 'default' }
-}
-
 const canExpandTransaction = (transaction: Transaction) => getTransactionAllocations(transaction).length > 0
 
 const toggleTransactionDetails = (transactionId: number) => {
@@ -146,145 +126,135 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 w-full">
-    <!-- Header -->
-    <UserHeader title="تاریخچه بدهی‌های من" />
+  <UserPage title="تاریخچه بدهی‌های من">
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+      <BaseStatsCard
+        title="تعداد پرداخت‌های موفق"
+        :value="stats.successfulCount.toString()"
+        unit="مورد"
+        icon="mdi:check-circle"
+        color="green"
+      />
+      <BaseStatsCard
+        title="مجموع بدهی‌های پرداخت شده"
+        :value="formatCurrency(stats.successfulAmount)"
+        unit="ریال"
+        icon="mdi:cash-check"
+        color="blue"
+      />
+      <BaseStatsCard
+        title="آخرین بدهی پرداخت شده"
+        :value="formatCurrency(stats.lastPaymentAmount)"
+        unit="ریال"
+        icon="mdi:calendar-check"
+        color="purple"
+      />
+    </div>
 
-    <!-- Main Content -->
-    <main class="max-w-[1330px] mx-auto px-4 py-8">
-      <!-- Stats Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-        <BaseStatsCard
-          title="تعداد پرداخت‌های موفق"
-          :value="stats.successfulCount.toString()"
-          unit="مورد"
-          icon="mdi:check-circle"
-          color="green"
-        />
-        <BaseStatsCard
-          title="مجموع بدهی‌های پرداخت شده"
-          :value="formatCurrency(stats.successfulAmount)"
-          unit="ریال"
-          icon="mdi:cash-check"
-          color="blue"
-        />
-        <BaseStatsCard
-          title="آخرین بدهی پرداخت شده"
-          :value="formatCurrency(stats.lastPaymentAmount)"
-          unit="ریال"
-          icon="mdi:calendar-check"
-          color="purple"
-        />
-      </div>
-
-      <!-- Filters & Table Card -->
-      <BaseCard>
-        <template #header>
-          <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <h2 class="text-xl font-bold text-gray-900">لیست تاریخچه بدهی‌ها</h2>
+    <!-- Filters & Table Card -->
+    <BaseCard>
+      <template #header>
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <h2 class="text-xl font-bold text-gray-900">لیست تاریخچه بدهی‌ها</h2>
+          
+          <!-- Filters -->
+          <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div class="flex items-center gap-2">
+              <label class="text-sm font-medium text-gray-700">وضعیت:</label>
+              <select
+                v-model="selectedStatus"
+                class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              >
+                <option v-for="option in statusOptions" :key="option.value" :value="option.value">
+                  {{ option.label }}
+                </option>
+              </select>
+            </div>
             
-            <!-- Filters -->
-            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-              <div class="flex items-center gap-2">
-                <label class="text-sm font-medium text-gray-700">وضعیت:</label>
-                <select
-                  v-model="selectedStatus"
-                  class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                >
-                  <option v-for="option in statusOptions" :key="option.value" :value="option.value">
-                    {{ option.label }}
-                  </option>
-                </select>
-              </div>
-              
-              <div class="flex items-center gap-2">
-                <label class="text-sm font-medium text-gray-700">نوع:</label>
-                <select
-                  v-model="selectedType"
-                  class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                >
-                  <option v-for="option in typeOptions" :key="option.value" :value="option.value">
-                    {{ option.label }}
-                  </option>
-                </select>
-              </div>
+            <div class="flex items-center gap-2">
+              <label class="text-sm font-medium text-gray-700">نوع:</label>
+              <select
+                v-model="selectedType"
+                class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              >
+                <option v-for="option in typeOptions" :key="option.value" :value="option.value">
+                  {{ option.label }}
+                </option>
+              </select>
             </div>
           </div>
-        </template>
-
-        <!-- Loading State -->
-        <StateLoader v-if="loading" message="در حال بارگذاری..." />
-
-        <StateError
-          v-else-if="error"
-          :message="error"
-          @retry="fetchTransactions"
-        />
-
-        <!-- Empty State -->
-        <StateEmpty
-          v-else-if="!transactions || transactions.length === 0"
-          icon="document"
-          message="موردی برای نمایش وجود ندارد"
-        />
-
-        <!-- Table -->
-        <div v-else>
-          <BaseTable
-            :columns="columns"
-            :data="transactions"
-            :expanded-row-key="expandedTransactionId"
-          >
-            <template #cell-index="{ index }">
-              {{ (currentPage - 1) * itemsPerPage + index + 1 }}
-            </template>
-            <template #cell-amount="{ row }">
-              <span class="font-medium" dir="ltr">{{ formatCurrency(row.amount) }}</span>
-            </template>
-            <template #cell-type="{ row }">
-              <BaseBadge :variant="getTypeBadge(row.type).variant as any">
-                {{ getTypeBadge(row.type).text }}
-              </BaseBadge>
-            </template>
-            <template #cell-allocationSummary="{ row }">
-              <TransactionAllocationsSummary
-                :transaction="row"
-                trigger-only
-                :expanded="expandedTransactionId === row.id"
-                @toggle="toggleTransactionDetails(row.id)"
-              />
-            </template>
-            <template #expanded-row="{ row }">
-              <TransactionAllocationsSummary
-                v-if="canExpandTransaction(row)"
-                :transaction="row"
-                default-expanded
-              />
-            </template>
-            <template #cell-status="{ row }">
-              <BaseBadge :variant="getStatusBadge(row.status).variant as any">
-                {{ getStatusBadge(row.status).text }}
-              </BaseBadge>
-            </template>
-            <template #cell-createdAt="{ row }">
-              {{ formatDate(row.transactionDate) }}
-            </template>
-            <template #cell-description="{ row }">
-              <span class="text-gray-600 text-sm">{{ row.description || '-' }}</span>
-            </template>
-          </BaseTable>
-
-          <!-- Pagination -->
-          <div class="mt-6">
-            <BasePagination
-              :page="currentPage"
-              :total="totalItems"
-              :limit="itemsPerPage"
-              @update:page="currentPage = $event"
-            />
-          </div>
         </div>
-      </BaseCard>
-    </main>
-  </div>
+      </template>
+
+      <!-- Loading State -->
+      <StateLoader v-if="loading" message="در حال بارگذاری..." />
+
+      <StateError
+        v-else-if="error"
+        :message="error"
+        @retry="fetchTransactions"
+      />
+
+      <!-- Empty State -->
+      <StateEmpty
+        v-else-if="!transactions || transactions.length === 0"
+        icon="document"
+        message="موردی برای نمایش وجود ندارد"
+      />
+
+      <!-- Table -->
+      <div v-else>
+        <BaseTable
+          :columns="columns"
+          :data="transactions"
+          :expanded-row-key="expandedTransactionId"
+        >
+          <template #cell-index="{ index }">
+            {{ (currentPage - 1) * itemsPerPage + index + 1 }}
+          </template>
+          <template #cell-amount="{ row }">
+            <span class="font-medium" dir="ltr">{{ formatCurrency(row.amount) }}</span>
+          </template>
+          <template #cell-type="{ row }">
+            <BaseStatusBadge :map="TRANSACTION_TYPE_BADGES" :value="row.type" />
+          </template>
+          <template #cell-allocationSummary="{ row }">
+            <TransactionAllocationsSummary
+              :transaction="row"
+              trigger-only
+              :expanded="expandedTransactionId === row.id"
+              @toggle="toggleTransactionDetails(row.id)"
+            />
+          </template>
+          <template #expanded-row="{ row }">
+            <TransactionAllocationsSummary
+              v-if="canExpandTransaction(row)"
+              :transaction="row"
+              default-expanded
+            />
+          </template>
+          <template #cell-status="{ row }">
+            <BaseStatusBadge :map="TRANSACTION_STATUS_BADGES" :value="row.status" />
+          </template>
+          <template #cell-createdAt="{ row }">
+            {{ formatDate(row.transactionDate) }}
+          </template>
+          <template #cell-description="{ row }">
+            <span class="text-gray-600 text-sm">{{ row.description || '-' }}</span>
+          </template>
+        </BaseTable>
+
+        <!-- Pagination -->
+        <div class="mt-6">
+          <BasePagination
+            :page="currentPage"
+            :total="totalItems"
+            :limit="itemsPerPage"
+            @update:page="currentPage = $event"
+          />
+        </div>
+      </div>
+    </BaseCard>
+  </UserPage>
 </template>

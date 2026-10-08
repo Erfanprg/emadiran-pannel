@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useAuthStore } from "~/stores/auth";
+import { useAdminGuard } from "~/composables/useAdminGuard";
 import { transactionsApi } from "~/services/api/transactions";
 import { useToast } from "~/composables/useToast";
 import { useApiCall } from "~/composables/useApiCall";
@@ -16,6 +16,7 @@ import {
 } from "~/utils/adminTransactionPayload";
 import type { DebtTransactionType } from "~/types/transaction";
 import { getTransactionAllocations } from "~/utils/transactionAllocations";
+import { ADMIN_TRANSACTION_STATUS_BADGES, ADMIN_TRANSACTION_TYPE_BADGES } from "~/constants/badges";
 
 useHead({
   title: "تاریخچه پرداخت - عماد ایران",
@@ -25,15 +26,10 @@ definePageMeta({
   middleware: "auth",
 });
 
-const authStore = useAuthStore();
-const router = useRouter();
 const toast = useToast();
 const { execute } = useApiCall();
 
-// Check if user is admin
-if (!authStore.isAdmin) {
-  router.push("/dashboard");
-}
+useAdminGuard();
 
 const amountInput = useCurrencyInput();
 
@@ -483,367 +479,345 @@ watch(page, () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 w-full">
-    <!-- Header -->
-    <AdminHeader title="تاریخچه پرداخت" />
+  <AdminPage title="تاریخچه پرداخت">
+    <!-- Filters -->
+    <BaseFiltersBar
+      :fields="filterFields"
+      @apply="handleSearch"
+      @reset="resetFilters"
+      @update:field="handleFilterUpdate"
+    />
 
-    <!-- Main Content -->
-    <main class="max-w-[1330px] mx-auto px-4 py-8">
-      <!-- Filters -->
-      <BaseFiltersBar
-        :fields="filterFields"
-        @apply="handleSearch"
-        @reset="resetFilters"
-        @update:field="handleFilterUpdate"
+    <!-- Table -->
+    <BaseCard :padding="false">
+      <div
+        class="px-6 py-4 border-b border-gray-200 flex items-center justify-between"
+      >
+        <div>
+          <h3 class="text-lg font-bold text-gray-900">تاریخچه پرداخت‌ها</h3>
+          <p class="text-sm text-gray-600">
+            تعداد: {{ formatNumber(total) }} مورد
+          </p>
+        </div>
+
+        <div class="flex items-center gap-3 flex-wrap justify-end">
+          <button
+            @click="showCsvImportModal = true"
+            class="px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:shadow-lg transition-all duration-300 flex items-center gap-2 font-medium"
+          >
+            <IconsOutline name="upload" class="w-5 h-5" />
+            بدهی گروهی
+          </button>
+
+          <button
+            @click="showPaymentImportModal = true"
+            class="px-4 py-2 bg-gradient-to-r from-primary to-accent text-white rounded-lg hover:shadow-lg transition-all duration-300 flex items-center gap-2 font-medium"
+          >
+            <IconsOutline name="download" class="w-5 h-5" />
+            پرداخت گروهی
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <StateLoader v-if="isLoading" message="در حال بارگذاری..." />
+
+      <!-- Error State -->
+      <StateError
+        v-else-if="error"
+        :message="error"
+        @retry="fetchTransactions"
       />
 
       <!-- Table -->
-      <BaseCard :padding="false">
-        <div
-          class="px-6 py-4 border-b border-gray-200 flex items-center justify-between"
-        >
-          <div>
-            <h3 class="text-lg font-bold text-gray-900">تاریخچه پرداخت‌ها</h3>
-            <p class="text-sm text-gray-600">
-              تعداد: {{ total.toLocaleString("fa-IR") }} مورد
-            </p>
-          </div>
-
-          <div class="flex items-center gap-3 flex-wrap justify-end">
-            <button
-              @click="showCsvImportModal = true"
-              class="px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:shadow-lg transition-all duration-300 flex items-center gap-2 font-medium"
-            >
-              <svg
-                class="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                />
-              </svg>
-              بدهی گروهی
-            </button>
-
-            <button
-              @click="showPaymentImportModal = true"
-              class="px-4 py-2 bg-gradient-to-r from-primary to-accent text-white rounded-lg hover:shadow-lg transition-all duration-300 flex items-center gap-2 font-medium"
-            >
-              <svg
-                class="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M12 12v8m0 0l-3-3m3 3l3-3"
-                />
-              </svg>
-              پرداخت گروهی
-            </button>
-          </div>
-        </div>
-
-        <!-- Loading State -->
-        <StateLoader v-if="isLoading" message="در حال بارگذاری..." />
-
-        <!-- Error State -->
-        <StateError
-          v-else-if="error"
-          :message="error"
-          @retry="fetchTransactions"
-        />
-
-        <!-- Table -->
-        <BaseTable
-          v-else-if="transactions.length > 0"
-          :columns="columns"
-          :data="transactions"
-          :expanded-row-key="expandedTransactionId"
-        >
-          <!-- User Cell -->
-          <template #cell-userId="{ row }">
-            <NuxtLink
-              :to="`/admin/users/${row.userId}`"
-              class="text-primary hover:underline font-medium"
-            >
-              {{ row.user ? getUserDisplayName(row.user) : `#${row.userId}` }}
-            </NuxtLink>
-          </template>
-
-          <!-- Amount Cell -->
-          <template #cell-amount="{ value }">
-            <div class="font-bold" dir="ltr">{{ value }}</div>
-          </template>
-
-          <!-- Type Cell -->
-          <template #cell-type="{ row }">
-            <BaseBadge
-              :variant="
-                row.type === 'DEBT_PAYMENT'
-                  ? 'success'
-                  : row.type === 'ADMIN_DEBT_REDUCE'
-                  ? 'warning'
-                  : 'danger'
-              "
-            >
-              {{
-                row.type === "DEBT_PAYMENT"
-                  ? "پرداخت"
-                  : row.type === "ADMIN_DEBT_ADD"
-                  ? "افزایش بدهی"
-                  : row.type === "LEGAL_DEBT_ADD"
-                  ? "افزایش بدهی حقوقی"
-                  : "کاهش بدهی"
-              }}
-            </BaseBadge>
-          </template>
-
-          <!-- Status Cell -->
-          <template #cell-status="{ row }">
-            <BaseBadge
-              :variant="
-                row.status === 'SUCCESS'
-                  ? 'success'
-                  : row.status === 'FAILED'
-                  ? 'danger'
-                  : 'gray'
-              "
-            >
-              {{
-                row.status === "SUCCESS"
-                  ? "موفق"
-                  : row.status === "FAILED"
-                  ? "ناموفق"
-                  : "در انتظار"
-              }}
-            </BaseBadge>
-          </template>
-
-          <!-- Loan Cell -->
-          <template #cell-allocationSummary="{ row }">
-            <div class="flex justify-center">
-              <TransactionAllocationsSummary
-                :transaction="row"
-                trigger-only
-                :expanded="expandedTransactionId === row.id"
-                @toggle="toggleTransactionDetails(row.id)"
-              />
-            </div>
-          </template>
-
-          <template #expanded-row="{ row }">
-            <TransactionAllocationsSummary
-              v-if="canExpandTransaction(row)"
-              :transaction="row"
-              default-expanded
-            />
-          </template>
-
-          <!-- Date Cell -->
-          <template #cell-transactionDate="{ value }">
-            {{ value }}
-          </template>
-
-          <!-- Description Cell -->
-          <template #cell-description="{ value }">
-            <div
-              class="max-w-[280px] mx-auto whitespace-normal break-words text-center leading-6"
-            >
-              {{ value || "-" }}
-            </div>
-          </template>
-
-          <!-- Actions Cell -->
-          <template #cell-actions="{ row }">
-            <div
-              v-if="canManageTransaction(row)"
-              class="flex items-center justify-center gap-2"
-            >
-              <button
-                @click="openEditModal(row)"
-                class="px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors duration-200 text-xs font-medium"
-              >
-                ویرایش
-              </button>
-              <button
-                @click="openDeleteModal(row)"
-                class="px-3 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors duration-200 text-xs font-medium"
-              >
-                حذف
-              </button>
-            </div>
-            <span v-else class="text-xs text-gray-400">-</span>
-          </template>
-        </BaseTable>
-
-        <!-- Empty State -->
-        <StateEmpty v-else icon="document" message="موردی یافت نشد" />
-
-        <!-- Pagination -->
-        <BasePagination
-          v-if="!isLoading"
-          :page="page"
-          :total="total"
-          :limit="filters.limit || 20"
-          @update:page="(newPage) => (page = newPage)"
-        />
-      </BaseCard>
-    </main>
-
-    <AdminCsvImportModal
-      v-model="showCsvImportModal"
-      @success="handleCsvImportSuccess"
-    />
-
-    <AdminBulkPaymentImportModal
-      v-model="showPaymentImportModal"
-      @success="handlePaymentImportSuccess"
-    />
-
-    <!-- Edit Transaction Modal -->
-    <div
-      v-if="showEditModal"
-      class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
-    >
-      <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6">
-        <div class="flex items-center justify-between mb-5">
-          <h3 class="text-lg font-bold text-gray-900">ویرایش تراکنش</h3>
-          <button
-            @click="closeEditModal"
-            class="text-gray-400 hover:text-gray-700"
+      <BaseTable
+        v-else-if="transactions.length > 0"
+        :columns="columns"
+        :data="transactions"
+        :expanded-row-key="expandedTransactionId"
+      >
+        <!-- User Cell -->
+        <template #cell-userId="{ row }">
+          <NuxtLink
+            :to="`/admin/users/${row.userId}`"
+            class="text-primary hover:underline font-medium"
           >
-            <svg
-              class="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-        </div>
+            {{ row.user ? getUserDisplayName(row.user) : `#${row.userId}` }}
+          </NuxtLink>
+        </template>
 
-        <div class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2"
-              >مبلغ (ریال)</label
-            >
-            <input
-              :value="amountInput.displayValue.value"
-              @input="(e) => amountInput.handleInput(e)"
-              type="text"
-              inputmode="numeric"
-              class="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              :class="editErrors.amount ? 'border-red-500' : 'border-gray-300'"
-              dir="ltr"
+        <!-- Amount Cell -->
+        <template #cell-amount="{ value }">
+          <div class="font-bold" dir="ltr">{{ value }}</div>
+        </template>
+
+        <!-- Type Cell -->
+        <template #cell-type="{ row }">
+          <BaseStatusBadge :map="ADMIN_TRANSACTION_TYPE_BADGES" :value="row.type" />
+        </template>
+
+        <!-- Status Cell -->
+        <template #cell-status="{ row }">
+          <BaseStatusBadge :map="ADMIN_TRANSACTION_STATUS_BADGES" :value="row.status" />
+        </template>
+
+        <!-- Loan Cell -->
+        <template #cell-allocationSummary="{ row }">
+          <div class="flex justify-center">
+            <TransactionAllocationsSummary
+              :transaction="row"
+              trigger-only
+              :expanded="expandedTransactionId === row.id"
+              @toggle="toggleTransactionDetails(row.id)"
             />
-            <p v-if="editErrors.amount" class="text-xs text-red-600 mt-1">
-              {{ editErrors.amount }}
-            </p>
           </div>
+        </template>
 
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2"
-              >نوع تراکنش</label
-            >
-            <select
-              v-model="editForm.type"
-              class="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              :class="editErrors.type ? 'border-red-500' : 'border-gray-300'"
-            >
-              <option value="ADMIN_DEBT_ADD">افزایش بدهی</option>
-              <option value="LEGAL_DEBT_ADD">افزایش بدهی حقوقی</option>
-              <option value="ADMIN_DEBT_REDUCE">کاهش بدهی</option>
-            </select>
-            <p v-if="editErrors.type" class="text-xs text-red-600 mt-1">
-              {{ editErrors.type }}
-            </p>
+        <template #expanded-row="{ row }">
+          <TransactionAllocationsSummary
+            v-if="canExpandTransaction(row)"
+            :transaction="row"
+            default-expanded
+          />
+        </template>
+
+        <!-- Date Cell -->
+        <template #cell-transactionDate="{ value }">
+          {{ value }}
+        </template>
+
+        <!-- Description Cell -->
+        <template #cell-description="{ value }">
+          <div
+            class="max-w-[280px] mx-auto whitespace-normal break-words text-center leading-6"
+          >
+            {{ value || "-" }}
           </div>
+        </template>
 
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2"
-              >تاریخ تراکنش (اختیاری)</label
-            >
-            <input
-              :value="editTransactionDateDisplay"
-              type="text"
-              readonly
-              placeholder="1405/02/08"
-              class="admin-transaction-edit-date w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              :class="
-                editErrors.transactionDate
-                  ? 'border-red-500'
-                  : 'border-gray-300'
-              "
-              dir="ltr"
-            />
-            <date-picker
-              :model-value="editForm.transactionDate"
-              @update:model-value="handleEditDateChange"
-              custom-input=".admin-transaction-edit-date"
-              format="YYYY-MM-DD"
-              display-format="jYYYY/jMM/jDD"
-            />
-            <p
-              v-if="editErrors.transactionDate"
-              class="text-xs text-red-600 mt-1"
-            >
-              {{ editErrors.transactionDate }}
-            </p>
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2"
-              >توضیحات</label
-            >
-            <textarea
-              v-model="editForm.description"
-              rows="3"
-              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
-            ></textarea>
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2"
-              >دلیل ویرایش <span class="text-red-500">*</span></label
-            >
-            <textarea
-              v-model="editForm.reason"
-              rows="2"
-              class="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
-              :class="editErrors.reason ? 'border-red-500' : 'border-gray-300'"
-            ></textarea>
-            <p v-if="editErrors.reason" class="text-xs text-red-600 mt-1">
-              {{ editErrors.reason }}
-            </p>
-          </div>
-
-          <div class="grid grid-cols-2 gap-3 pt-2">
+        <!-- Actions Cell -->
+        <template #cell-actions="{ row }">
+          <div
+            v-if="canManageTransaction(row)"
+            class="flex items-center justify-center gap-2"
+          >
             <button
-              @click="handleEditSubmit"
-              :disabled="isUpdating"
-              class="py-2.5 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 text-white font-medium disabled:opacity-60"
+              @click="openEditModal(row)"
+              class="px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors duration-200 text-xs font-medium"
             >
-              <span v-if="isUpdating">در حال ذخیره...</span>
-              <span v-else>ذخیره</span>
+              ویرایش
             </button>
+            <button
+              @click="openDeleteModal(row)"
+              class="px-3 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors duration-200 text-xs font-medium"
+            >
+              حذف
+            </button>
+          </div>
+          <span v-else class="text-xs text-gray-400">-</span>
+        </template>
+      </BaseTable>
+
+      <!-- Empty State -->
+      <StateEmpty v-else icon="document" message="موردی یافت نشد" />
+
+      <!-- Pagination -->
+      <BasePagination
+        v-if="!isLoading"
+        :page="page"
+        :total="total"
+        :limit="filters.limit || 20"
+        @update:page="(newPage) => (page = newPage)"
+      />
+    </BaseCard>
+
+    <template #overlays>
+      <AdminCsvImportModal
+        v-model="showCsvImportModal"
+        @success="handleCsvImportSuccess"
+      />
+
+      <AdminBulkPaymentImportModal
+        v-model="showPaymentImportModal"
+        @success="handlePaymentImportSuccess"
+      />
+
+      <!-- Edit Transaction Modal -->
+      <div
+        v-if="showEditModal"
+        class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+      >
+        <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6">
+          <div class="flex items-center justify-between mb-5">
+            <h3 class="text-lg font-bold text-gray-900">ویرایش تراکنش</h3>
             <button
               @click="closeEditModal"
-              :disabled="isUpdating"
+              class="text-gray-400 hover:text-gray-700"
+            >
+              <IconsOutline name="x" class="w-5 h-5" />
+            </button>
+          </div>
+
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >مبلغ (ریال)</label
+              >
+              <input
+                :value="amountInput.displayValue.value"
+                @input="(e) => amountInput.handleInput(e)"
+                type="text"
+                inputmode="numeric"
+                class="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                :class="editErrors.amount ? 'border-red-500' : 'border-gray-300'"
+                dir="ltr"
+              />
+              <p v-if="editErrors.amount" class="text-xs text-red-600 mt-1">
+                {{ editErrors.amount }}
+              </p>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >نوع تراکنش</label
+              >
+              <select
+                v-model="editForm.type"
+                class="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                :class="editErrors.type ? 'border-red-500' : 'border-gray-300'"
+              >
+                <option value="ADMIN_DEBT_ADD">افزایش بدهی</option>
+                <option value="LEGAL_DEBT_ADD">افزایش بدهی حقوقی</option>
+                <option value="ADMIN_DEBT_REDUCE">کاهش بدهی</option>
+              </select>
+              <p v-if="editErrors.type" class="text-xs text-red-600 mt-1">
+                {{ editErrors.type }}
+              </p>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >تاریخ تراکنش (اختیاری)</label
+              >
+              <input
+                :value="editTransactionDateDisplay"
+                type="text"
+                readonly
+                placeholder="1405/02/08"
+                class="admin-transaction-edit-date w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                :class="
+                  editErrors.transactionDate
+                    ? 'border-red-500'
+                    : 'border-gray-300'
+                "
+                dir="ltr"
+              />
+              <date-picker
+                :model-value="editForm.transactionDate"
+                @update:model-value="handleEditDateChange"
+                custom-input=".admin-transaction-edit-date"
+                format="YYYY-MM-DD"
+                display-format="jYYYY/jMM/jDD"
+              />
+              <p
+                v-if="editErrors.transactionDate"
+                class="text-xs text-red-600 mt-1"
+              >
+                {{ editErrors.transactionDate }}
+              </p>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >توضیحات</label
+              >
+              <textarea
+                v-model="editForm.description"
+                rows="3"
+                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+              ></textarea>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >دلیل ویرایش <span class="text-red-500">*</span></label
+              >
+              <textarea
+                v-model="editForm.reason"
+                rows="2"
+                class="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+                :class="editErrors.reason ? 'border-red-500' : 'border-gray-300'"
+              ></textarea>
+              <p v-if="editErrors.reason" class="text-xs text-red-600 mt-1">
+                {{ editErrors.reason }}
+              </p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 pt-2">
+              <button
+                @click="handleEditSubmit"
+                :disabled="isUpdating"
+                class="py-2.5 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 text-white font-medium disabled:opacity-60"
+              >
+                <span v-if="isUpdating">در حال ذخیره...</span>
+                <span v-else>ذخیره</span>
+              </button>
+              <button
+                @click="closeEditModal"
+                :disabled="isUpdating"
+                class="py-2.5 rounded-lg bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 disabled:opacity-60"
+              >
+                انصراف
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Delete Transaction Modal -->
+      <div
+        v-if="showDeleteModal"
+        class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+      >
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+          <h3 class="text-lg font-bold text-gray-900 mb-2">حذف تراکنش</h3>
+          <p class="text-sm text-gray-600 mb-4">
+            آیا از حذف تراکنش {{ selectedTransactionTypeLabel }} اطمینان دارید؟
+          </p>
+
+          <div class="mb-4 rounded-lg bg-gray-50 border border-gray-200 p-3">
+            <p class="text-sm text-gray-700">
+              {{ selectedTransactionDeleteSummary }}
+            </p>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >دلیل حذف <span class="text-red-500">*</span></label
+            >
+            <textarea
+              v-model="deleteReason"
+              rows="3"
+              class="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+              :class="deleteError ? 'border-red-500' : 'border-gray-300'"
+            ></textarea>
+            <p v-if="deleteError" class="text-xs text-red-600 mt-1">
+              {{ deleteError }}
+            </p>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 pt-4">
+            <button
+              @click="handleDeleteSubmit"
+              :disabled="isDeleting || deleteReason.trim().length < 5"
+              class="py-2.5 rounded-lg bg-gradient-to-r from-red-600 to-red-500 text-white font-medium disabled:opacity-60"
+            >
+              <span v-if="isDeleting">در حال حذف...</span>
+              <span v-else>تایید حذف</span>
+            </button>
+            <button
+              @click="closeDeleteModal"
+              :disabled="isDeleting"
               class="py-2.5 rounded-lg bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 disabled:opacity-60"
             >
               انصراف
@@ -851,58 +825,6 @@ watch(page, () => {
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- Delete Transaction Modal -->
-    <div
-      v-if="showDeleteModal"
-      class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
-    >
-      <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
-        <h3 class="text-lg font-bold text-gray-900 mb-2">حذف تراکنش</h3>
-        <p class="text-sm text-gray-600 mb-4">
-          آیا از حذف تراکنش {{ selectedTransactionTypeLabel }} اطمینان دارید؟
-        </p>
-
-        <div class="mb-4 rounded-lg bg-gray-50 border border-gray-200 p-3">
-          <p class="text-sm text-gray-700">
-            {{ selectedTransactionDeleteSummary }}
-          </p>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2"
-            >دلیل حذف <span class="text-red-500">*</span></label
-          >
-          <textarea
-            v-model="deleteReason"
-            rows="3"
-            class="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
-            :class="deleteError ? 'border-red-500' : 'border-gray-300'"
-          ></textarea>
-          <p v-if="deleteError" class="text-xs text-red-600 mt-1">
-            {{ deleteError }}
-          </p>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3 pt-4">
-          <button
-            @click="handleDeleteSubmit"
-            :disabled="isDeleting || deleteReason.trim().length < 5"
-            class="py-2.5 rounded-lg bg-gradient-to-r from-red-600 to-red-500 text-white font-medium disabled:opacity-60"
-          >
-            <span v-if="isDeleting">در حال حذف...</span>
-            <span v-else>تایید حذف</span>
-          </button>
-          <button
-            @click="closeDeleteModal"
-            :disabled="isDeleting"
-            class="py-2.5 rounded-lg bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 disabled:opacity-60"
-          >
-            انصراف
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
+    </template>
+  </AdminPage>
 </template>

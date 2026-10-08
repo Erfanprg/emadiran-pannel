@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useAuthStore } from "~/stores/auth";
+import { useAdminGuard } from "~/composables/useAdminGuard";
 import { adminApi } from "~/services/api/admin";
 import { transactionsApi } from "~/services/api/transactions";
 import { loansApi } from "~/services/api/loans";
@@ -32,6 +32,7 @@ import type { LoanDebtBreakdown } from "~/types/debt";
 import type { DebtTransactionType, Transaction } from "~/types/transaction";
 import type { TableColumn } from "~/components/Base/Table.vue";
 import { getTransactionAllocations } from "~/utils/transactionAllocations";
+import { ADMIN_TRANSACTION_STATUS_BADGES, ADMIN_TRANSACTION_TYPE_BADGES } from "~/constants/badges";
 
 useHead({
   title: "جزئیات کاربر - عماد ایران",
@@ -41,17 +42,12 @@ definePageMeta({
   middleware: "auth",
 });
 
-const authStore = useAuthStore();
-const router = useRouter();
 const route = useRoute();
 const toast = useToast();
 const { confirm } = useConfirm();
 const { execute } = useApiCall();
 
-// Check if user is admin
-if (!authStore.isAdmin) {
-  router.push("/dashboard");
-}
+useAdminGuard();
 
 const userId = parseInt(route.params.id as string);
 
@@ -95,27 +91,6 @@ const transactionColumns: TableColumn<Transaction>[] = [
     class: "whitespace-normal"
   }
 ];
-
-const getTransactionTypeBadge = (type: string) => {
-  const badges = {
-    DEBT_PAYMENT: { text: "پرداخت", variant: "success" },
-    ADMIN_DEBT_ADD: { text: "افزایش بدهی", variant: "danger" },
-    LEGAL_DEBT_ADD: { text: "افزایش بدهی حقوقی", variant: "danger" },
-    ADMIN_DEBT_REDUCE: { text: "کاهش بدهی", variant: "warning" }
-  };
-
-  return badges[type as keyof typeof badges] || { text: type, variant: "default" };
-};
-
-const getTransactionStatusBadge = (status: string) => {
-  const badges = {
-    SUCCESS: { text: "موفق", variant: "success" },
-    FAILED: { text: "ناموفق", variant: "danger" },
-    PENDING: { text: "در انتظار", variant: "gray" }
-  };
-
-  return badges[status as keyof typeof badges] || { text: status, variant: "default" };
-};
 
 // Debt Modal State
 const showDebtModal = ref(false);
@@ -927,708 +902,105 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 w-full">
-    <!-- Header -->
-    <AdminHeader title="جزئیات کاربر" />
-
-    <!-- Main Content -->
-    <main class="max-w-[1330px] mx-auto px-4 py-8">
-      <!-- Loading State -->
-      <div v-if="isLoading" class="text-center py-12">
-        <div
-          class="inline-block w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"
-        ></div>
-        <p class="text-gray-600 mt-4">در حال بارگذاری...</p>
-      </div>
-
-      <!-- Error State -->
+  <AdminPage title="جزئیات کاربر">
+    <!-- Loading State -->
+    <div v-if="isLoading" class="text-center py-12">
       <div
-        v-else-if="error"
-        class="bg-red-50 border border-red-200 rounded-xl p-6 text-center"
-      >
-        <svg
-          class="w-12 h-12 text-red-500 mx-auto mb-3"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-          />
-        </svg>
-        <p class="text-red-600 font-medium">{{ error }}</p>
-        <button
-          @click="fetchUserDetails"
-          class="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200"
-        >
-          تلاش مجدد
-        </button>
-      </div>
+        class="inline-block w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"
+      ></div>
+      <p class="text-gray-600 mt-4">در حال بارگذاری...</p>
+    </div>
 
-      <!-- User Details -->
-      <div v-else-if="user" class="space-y-6">
-        <!-- User Info Card -->
-        <div
-          class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6"
-        >
-          <!-- Header -->
-          <div class="flex flex-col gap-4 pb-6 border-b border-gray-200 mb-6">
-            <!-- User Name & Payment Deadline -->
-            <div
-              class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3"
-            >
-              <button
-                type="button"
-                @click="openPaymentDeadlinesModal"
-                :disabled="isLoadingPaymentDeadline"
-                class="order-1 sm:order-2 px-4 py-2.5 rounded-lg transition-colors duration-200 font-medium text-sm border w-full sm:w-auto"
-                :class="
-                  currentPaymentDeadline
-                    ? 'bg-red-50 text-red-600 hover:bg-red-100 border-red-100'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200'
-                "
-              >
-                {{ paymentDeadlineLabel }}
-              </button>
-
-              <div class="order-2 sm:order-1">
-                <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-3">
-                  {{ getUserDisplayName(user) }}
-                </h2>
-                <div class="flex flex-wrap items-center gap-2">
-                  <span
-                    class="px-3 py-1 text-sm font-medium rounded-full"
-                    :class="
-                      user.isActive
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
-                    "
-                  >
-                    {{ user.isActive ? "فعال" : "غیرفعال" }}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Action Buttons - Responsive Grid -->
-            <div
-              class="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap gap-2"
-            >
-              <NuxtLink
-                v-if="user.role !== 'ADMIN'"
-                :to="`/admin/users/edit/${user.id}`"
-                class="px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-accent transition-colors duration-200 font-medium text-center text-sm"
-              >
-                ویرایش اطلاعات
-              </NuxtLink>
-              <NuxtLink
-                :to="`/admin/users/phones/${user.id}`"
-                class="px-4 py-2.5 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors duration-200 font-medium flex items-center justify-center gap-2 text-sm"
-              >
-                <svg
-                  class="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                  />
-                </svg>
-                مدیریت شماره‌ها
-              </NuxtLink>
-              <button
-                v-if="user.role !== 'ADMIN'"
-                @click="openDebtModal('add')"
-                class="px-4 py-2.5 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors duration-200 font-medium flex items-center justify-center gap-2 text-sm"
-              >
-                <svg
-                  class="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                  />
-                </svg>
-                افزودن بدهی
-              </button>
-              <button
-                v-if="user.role !== 'ADMIN' && parseInt(user.totalDebt) > 0"
-                @click="openDebtModal('reduce')"
-                class="px-4 py-2.5 bg-orange-50 text-orange-600 rounded-lg hover:bg-orange-100 transition-colors duration-200 font-medium flex items-center justify-center gap-2 text-sm"
-              >
-                <svg
-                  class="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M20 12H4"
-                  />
-                </svg>
-                کاهش بدهی
-              </button>
-              <button
-                @click="openContactHistoriesModal"
-                class="px-4 py-2.5 bg-slate-50 text-slate-700 rounded-lg hover:bg-slate-100 transition-colors duration-200 font-medium flex items-center justify-center gap-2 text-sm"
-              >
-                <svg
-                  class="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M8 10h8M8 14h5m2 6H7a2 2 0 01-2-2V6a2 2 0 012-2h6l5 5v9a2 2 0 01-2 2z"
-                  />
-                </svg>
-                تاریخچه تماس‌ها
-              </button>
-              <button
-                v-if="user.role !== 'ADMIN'"
-                @click="handleToggleStatus"
-                class="px-4 py-2.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors duration-200 font-medium text-sm"
-              >
-                {{ user.isActive ? "غیرفعال کردن" : "فعال کردن" }}
-              </button>
-            </div>
-          </div>
-
-          <!-- User Details Grid -->
-          <div class="grid md:grid-cols-2 gap-6 mb-6">
-            <div class="space-y-4">
-              <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
-                <div
-                  class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0"
-                >
-                  <svg
-                    class="w-5 h-5 text-primary"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <p class="text-xs text-gray-600 mb-1">شناسه کاربر</p>
-                  <p class="text-lg font-bold text-gray-900">{{ user.id }}</p>
-                </div>
-              </div>
-
-              <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
-                <div
-                  class="w-10 h-10 bg-green-500/10 rounded-lg flex items-center justify-center flex-shrink-0"
-                >
-                  <svg
-                    class="w-5 h-5 text-green-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <p class="text-xs text-gray-600 mb-1">شماره موبایل</p>
-                  <p class="text-lg font-bold text-gray-900" dir="ltr">
-                    {{ user.phoneNumber }}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div class="space-y-4">
-              <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
-                <div
-                  class="w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center flex-shrink-0"
-                >
-                  <svg
-                    class="w-5 h-5 text-blue-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <p class="text-xs text-gray-600 mb-1">کد ملی</p>
-                  <p class="text-lg font-bold text-gray-900">
-                    {{ user.nationalCode }}
-                  </p>
-                </div>
-              </div>
-
-              <div
-                class="flex items-center gap-3 p-4 bg-red-50 rounded-lg border border-red-100"
-              >
-                <div
-                  class="w-10 h-10 bg-red-500/10 rounded-lg flex items-center justify-center flex-shrink-0"
-                >
-                  <svg
-                    class="w-5 h-5 text-red-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                </div>
-                <div class="flex-1">
-                  <p class="text-xs text-gray-600 mb-1">مبلغ بدهی</p>
-                  <p class="text-xl font-bold text-red-600" dir="ltr">
-                    {{ formatCurrency(user.totalDebt, true) }}
-                  </p>
-                </div>
-                <NuxtLink
-                  v-if="user.role !== 'ADMIN'"
-                  :to="`/admin/users/debt-history/${user.id}`"
-                  class="px-3 py-2 bg-white border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-colors duration-200 text-sm font-medium whitespace-nowrap"
-                >
-                  تاریخچه
-                </NuxtLink>
-              </div>
-            </div>
-          </div>
-
-          <!-- Dates -->
-          <div class="pt-6 border-t border-gray-200 grid md:grid-cols-2 gap-4">
-            <div class="flex items-center gap-2 text-sm">
-              <svg
-                class="w-5 h-5 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                />
-              </svg>
-              <span class="text-gray-600">تاریخ ثبت‌نام:</span>
-              <span class="font-medium text-gray-900">
-                {{ new Date(user.createdAt).toLocaleDateString("fa-IR") }}
-              </span>
-            </div>
-            <div class="flex items-center gap-2 text-sm">
-              <svg
-                class="w-5 h-5 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                />
-              </svg>
-              <span class="text-gray-600">آخرین به‌روزرسانی:</span>
-              <span class="font-medium text-gray-900">
-                {{ new Date(user.updatedAt).toLocaleDateString("fa-IR") }}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <LoanDebtBreakdownSection
-          title="جزئیات بدهی به تفکیک تسهیلات"
-          :breakdown="loanDebtBreakdown"
-          :loading="isLoadingLoanDebtBreakdown"
-          :error="loanDebtBreakdownError"
-          :show-discrepancy-warning="true"
-          empty-message="در حال حاضر تسهیلات بدهکاری برای این کاربر ثبت نشده است."
-          @retry="fetchUserLoanDebtBreakdown"
-        />
-
-        <!-- Transactions -->
-        <BaseCard :padding="false">
-          <div class="flex items-center justify-between gap-3 border-b border-gray-200 px-6 py-4">
-            <div>
-              <h3 class="text-lg font-bold text-gray-900">
-                تاریخچه تراکنش‌های کاربر
-              </h3>
-            
-            </div>
-         
-          </div>
-
-          <StateLoader
-            v-if="isLoadingTransactions"
-            message="در حال بارگذاری تاریخچه تراکنش‌ها..."
-          />
-
-          <StateError
-            v-else-if="transactionsError"
-            :message="transactionsError"
-            @retry="fetchUserTransactions"
-          />
-
-          <template v-else>
-            <BaseTable
-              v-if="userTransactions.length > 0"
-              :columns="transactionColumns"
-              :data="userTransactions"
-              :expanded-row-key="expandedTransactionId"
-            >
-              <template #cell-amount="{ row }">
-                <span class="font-medium" dir="ltr">{{ formatCurrency(row.amount) }}</span>
-              </template>
-
-              <template #cell-type="{ row }">
-                <BaseBadge :variant="getTransactionTypeBadge(row.type).variant as any">
-                  {{ getTransactionTypeBadge(row.type).text }}
-                </BaseBadge>
-              </template>
-
-              <template #cell-allocationSummary="{ row }">
-                <div class="flex justify-center">
-                  <TransactionAllocationsSummary
-                    :transaction="row"
-                    trigger-only
-                    :expanded="expandedTransactionId === row.id"
-                    @toggle="toggleTransactionDetails(row.id)"
-                  />
-                </div>
-              </template>
-
-              <template #expanded-row="{ row }">
-                <TransactionAllocationsSummary
-                  v-if="canExpandTransaction(row)"
-                  :transaction="row"
-                  default-expanded
-                />
-              </template>
-
-              <template #cell-status="{ row }">
-                <BaseBadge :variant="getTransactionStatusBadge(row.status).variant as any">
-                  {{ getTransactionStatusBadge(row.status).text }}
-                </BaseBadge>
-              </template>
-
-              <template #cell-transactionDate="{ row }">
-                {{ formatDate(row.transactionDate) }}
-              </template>
-
-              <template #cell-description="{ row }">
-                <div class="max-w-[230px] mx-auto whitespace-normal break-words text-center leading-6">
-                  {{ row.description || "-" }}
-                </div>
-              </template>
-            </BaseTable>
-
-            <StateEmpty
-              v-else
-              icon="document"
-              message="تراکنشی برای این کاربر یافت نشد"
-            />
-
-            <BasePagination
-              v-if="transactionsTotal > 0"
-              :page="transactionsPage"
-              :total="transactionsTotal"
-              :limit="transactionsLimit"
-              @update:page="handleTransactionsPageChange"
-            />
-          </template>
-        </BaseCard>
-
-        <!-- Installments -->
-        <!-- <div class="bg-white rounded-xl shadow-sm border border-gray-200">
-          <div class="px-6 py-4 border-b border-gray-200">
-            <h3 class="text-lg font-bold text-gray-900">اقساط</h3>
-            <p class="text-sm text-gray-600">10 قسط اخیر کاربر</p>
-          </div>
-          
-          <div v-if="user.installments && user.installments.length > 0" class="overflow-x-auto">
-            <table class="w-full">
-              <thead class="bg-gray-50">
-                <tr>
-                  <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">شناسه</th>
-                  <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">مبلغ</th>
-                  <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">شماره تسهیلات</th>
-                  <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">تاریخ سررسید</th>
-                  <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">وضعیت</th>
-                  <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">توضیحات</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-200">
-                <tr v-for="installment in user.installments" :key="installment.id" class="hover:bg-gray-50">
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">{{ installment.id }}</td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center" dir="ltr">
-                    {{ formatCurrency(installment.amount) }}
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center" dir="ltr">
-                    {{ installment.loan?.loanNumber || 'ندارد' }}
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
-                    {{ formatDate(installment.dueDate) }}
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-center">
-                    <span
-                      class="px-2 py-1 text-xs font-medium rounded-full inline-block"
-                      :class="{
-                        'bg-green-100 text-green-800': installment.status === 'PAID',
-                        'bg-red-100 text-red-800': installment.status === 'OVERDUE',
-                        'bg-yellow-100 text-yellow-800': installment.status === 'PENDING'
-                      }"
-                    >
-                      {{
-                        installment.status === 'PAID' ? 'پرداخت شده' :
-                        installment.status === 'OVERDUE' ? 'عقب افتاده' :
-                        'در انتظار'
-                      }}
-                    </span>
-                  </td>
-                  <td class="px-6 py-4 text-sm text-gray-900 text-center">
-                    {{ installment.description || '-' }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div v-else class="text-center py-12">
-            <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-            </svg>
-            <p class="text-gray-600">قسطی یافت نشد</p>
-          </div>
-        </div> -->
-      </div>
-    </main>
-
-    <ContactHistoriesModal
-      v-if="showContactHistoriesModal"
-      :items="contactHistories"
-      :meta="contactHistoriesMeta"
-      :limit="contactHistoriesLimit"
-      :is-loading="isLoadingContactHistories"
-      :is-loading-more="isLoadingMoreContactHistories"
-      :error="contactHistoriesError"
-      @close="closeContactHistoriesModal"
-      @create="openCreateContactHistoryModal"
-      @refresh="fetchContactHistories"
-      @loadMore="handleLoadMoreContactHistories"
-    />
-
-    <ContactHistoryCreateModal
-      v-if="showCreateContactHistoryModal"
-      v-model:description="createContactHistoryForm.description"
-      :error="createContactHistoryErrors.description"
-      :is-submitting="isSubmittingContactHistory"
-      @close="closeCreateContactHistoryModal"
-      @submit="handleCreateContactHistory"
-    />
-
-    <PaymentDeadlinesModal
-      v-if="showPaymentDeadlinesModal"
-      :items="paymentDeadlines"
-      :meta="paymentDeadlinesMeta"
-      :page="paymentDeadlinesPage"
-      :limit="paymentDeadlinesLimit"
-      :current-id="currentPaymentDeadline?.id ?? null"
-      :is-loading="isLoadingPaymentDeadlines"
-      :error="paymentDeadlinesError"
-      :disable-create="Boolean(currentPaymentDeadline)"
-      @close="closePaymentDeadlinesModal"
-      @create="openCreatePaymentDeadlineModal"
-      @edit="openEditPaymentDeadlineModal"
-      @update:page="handlePaymentDeadlinesPageChange"
-    />
-
-    <PaymentDeadlineCreateModal
-      v-if="showCreatePaymentDeadlineModal"
-      v-model:deadline-at="createPaymentDeadlineForm.deadlineAt"
-      :error="createPaymentDeadlineErrors.deadlineAt"
-      :is-submitting="isSubmittingPaymentDeadline"
-      @close="closeCreatePaymentDeadlineModal"
-      @submit="handleCreatePaymentDeadline"
-    />
-
-    <PaymentDeadlineEditModal
-      v-if="showEditPaymentDeadlineModal"
-      :deadline-at="editPaymentDeadlineForm.deadlineAt"
-      :deadline-display="editPaymentDeadlineDateDisplay"
-      v-model:edit-reason="editPaymentDeadlineForm.editReason"
-      :deadline-error="editPaymentDeadlineErrors.deadlineAt"
-      :reason-error="editPaymentDeadlineErrors.editReason"
-      :is-submitting="isSubmittingEditPaymentDeadline"
-      @close="closeEditPaymentDeadlineModal"
-      @update:deadline-at="handleEditPaymentDeadlineDateChange"
-      @submit="handleEditPaymentDeadline"
-    />
-
-    <!-- Debt Management Modal -->
+    <!-- Error State -->
     <div
-      v-if="showDebtModal"
-      class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+      v-else-if="error"
+      class="bg-red-50 border border-red-200 rounded-xl p-6 text-center"
     >
-      <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
-        <div class="flex items-center justify-between mb-6">
-          <h3 class="text-xl font-bold text-gray-900">
-            {{ debtModalType === "add" ? "افزودن بدهی" : "کاهش بدهی" }}
-          </h3>
-          <button
-            @click="closeDebtModal"
-            class="text-gray-400 hover:text-gray-600"
-          >
-            <svg
-              class="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-        </div>
+      <IconsOutline name="exclamation-circle" class="w-12 h-12 text-red-500 mx-auto mb-3" />
+      <p class="text-red-600 font-medium">{{ error }}</p>
+      <button
+        @click="fetchUserDetails"
+        class="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200"
+      >
+        تلاش مجدد
+      </button>
+    </div>
 
-        <div class="space-y-4">
-          <!-- Loan Selection -->
-          <div v-if="isLoadingLoans" class="text-center py-4">
-            <div
-              class="inline-block w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"
-            ></div>
-            <p class="text-gray-600 text-sm mt-2">در حال بارگذاری تسهیلات...</p>
+    <!-- User Details -->
+    <div v-else-if="user" class="space-y-6">
+      <!-- User Info Card -->
+      <div
+        class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6"
+      >
+        <!-- Header -->
+        <div class="flex flex-col gap-4 pb-6 border-b border-gray-200 mb-6">
+          <!-- User Name & Payment Deadline -->
+          <div
+            class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3"
+          >
+            <button
+              type="button"
+              @click="openPaymentDeadlinesModal"
+              :disabled="isLoadingPaymentDeadline"
+              class="order-1 sm:order-2 px-4 py-2.5 rounded-lg transition-colors duration-200 font-medium text-sm border w-full sm:w-auto"
+              :class="
+                currentPaymentDeadline
+                  ? 'bg-red-50 text-red-600 hover:bg-red-100 border-red-100'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200'
+              "
+            >
+              {{ paymentDeadlineLabel }}
+            </button>
+
+            <div class="order-2 sm:order-1">
+              <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-3">
+                {{ getUserDisplayName(user) }}
+              </h2>
+              <div class="flex flex-wrap items-center gap-2">
+                <span
+                  class="px-3 py-1 text-sm font-medium rounded-full"
+                  :class="
+                    user.isActive
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-red-100 text-red-800'
+                  "
+                >
+                  {{ user.isActive ? "فعال" : "غیرفعال" }}
+                </span>
+              </div>
+            </div>
           </div>
 
-          <div v-else>
-            <!-- Warning for no loans -->
-            <div v-if="showLoanWarning && showNewLoanInput" class="mb-4">
-              <div class="bg-yellow-50 rounded-lg p-3 mb-3 text-center">
-                <p class="text-sm text-yellow-800">
-                  این کاربر تسهیلاتی ندارد. لطفاً شماره تسهیلات جدید وارد کنید.
-                </p>
-              </div>
-
-              <!-- Manual loan number input -->
-              <div>
-                <label class="block text-sm font-medium text-gray-900 mb-2">
-                  شماره تسهیلات جدید <span class="text-red-500">*</span>
-                </label>
-                <input
-                  v-model="debtForm.newLoanNumber"
-                  type="text"
-                  placeholder="LN_0000000001"
-                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                  dir="ltr"
-                />
-              </div>
-            </div>
-
-            <!-- Info for creating new loan when loans exist -->
-            <div v-else-if="showNewLoanInput && loans.length > 0" class="mb-2">
-              <div class="flex items-start gap-3">
-                <div class="flex-1">
-                  <!-- Manual loan number input -->
-                  <div>
-                    <label class="block text-sm font-medium text-gray-900 mb-2">
-                      شماره تسهیلات جدید <span class="text-red-500">*</span>
-                    </label>
-                    <input
-                      v-model="debtForm.newLoanNumber"
-                      type="text"
-                      placeholder="LN_0000000002"
-                      class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                      :class="
-                        debtFieldErrors.newLoanNumber
-                          ? 'border-red-500'
-                          : 'border-gray-300'
-                      "
-                      dir="ltr"
-                    />
-                    <p
-                      v-if="debtFieldErrors.newLoanNumber"
-                      class="mt-1 text-xs text-red-600"
-                    >
-                      {{ debtFieldErrors.newLoanNumber }}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Select existing loan -->
-            <div v-else-if="loans.length > 0">
-              <label class="block text-sm font-medium text-gray-900 mb-2">
-                انتخاب تسهیلات <span class="text-red-500">*</span>
-              </label>
-              <select
-                v-model="debtForm.loanId"
-                class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                :class="
-                  debtFieldErrors.loanId ? 'border-red-500' : 'border-gray-300'
-                "
-                dir="ltr"
-              >
-                <option disabled :value="undefined">
-                  تسهیلات کاربر را انتخاب کنید
-                </option>
-                <option v-for="loan in loans" :key="loan.id" :value="loan.id">
-                  {{ formatLoanOption(loan) }}
-                </option>
-              </select>
-              <p
-                v-if="debtFieldErrors.loanId"
-                class="mt-1 text-xs text-red-600"
-              >
-                {{ debtFieldErrors.loanId }}
-              </p>
-            </div>
-
-            <!-- Toggle button for creating new loan -->
+          <!-- Action Buttons - Responsive Grid -->
+          <div
+            class="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap gap-2"
+          >
+            <NuxtLink
+              v-if="user.role !== 'ADMIN'"
+              :to="`/admin/users/edit/${user.id}`"
+              class="px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-accent transition-colors duration-200 font-medium text-center text-sm"
+            >
+              ویرایش اطلاعات
+            </NuxtLink>
+            <NuxtLink
+              :to="`/admin/users/phones/${user.id}`"
+              class="px-4 py-2.5 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors duration-200 font-medium flex items-center justify-center gap-2 text-sm"
+            >
+              <IconsOutline name="phone" class="w-4 h-4" />
+              مدیریت شماره‌ها
+            </NuxtLink>
             <button
-              v-if="loans.length > 0"
-              type="button"
-              @click="toggleNewLoanInput"
-              class="w-full py-2 text-sm font-medium text-primary hover:text-accent transition-colors duration-200 flex items-center justify-start gap-2"
+              v-if="user.role !== 'ADMIN'"
+              @click="openDebtModal('add')"
+              class="px-4 py-2.5 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors duration-200 font-medium flex items-center justify-center gap-2 text-sm"
+            >
+              <IconsOutline name="plus" class="w-4 h-4" />
+              افزودن بدهی
+            </button>
+            <button
+              v-if="user.role !== 'ADMIN' && parseInt(user.totalDebt) > 0"
+              @click="openDebtModal('reduce')"
+              class="px-4 py-2.5 bg-orange-50 text-orange-600 rounded-lg hover:bg-orange-100 transition-colors duration-200 font-medium flex items-center justify-center gap-2 text-sm"
             >
               <svg
                 class="w-4 h-4"
@@ -1640,170 +1012,657 @@ onMounted(() => {
                   stroke-linecap="round"
                   stroke-linejoin="round"
                   stroke-width="2"
-                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                  d="M20 12H4"
                 />
               </svg>
-              {{
-                showNewLoanInput
-                  ? "انتخاب از تسهیلات موجود"
-                  : "ایجاد تسهیلات جدید"
-              }}
-            </button>
-          </div>
-
-          <!-- Amount -->
-          <div>
-            <label class="block text-sm font-medium text-gray-900 mb-2">
-              مبلغ (ریال) <span class="text-red-500">*</span>
-            </label>
-            <input
-              :value="debtAmountInput.displayValue.value"
-              @input="debtAmountInput.handleInput"
-              type="text"
-              inputmode="numeric"
-              placeholder="1,000,000"
-              class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-left"
-              :class="
-                debtFieldErrors.amount ? 'border-red-500' : 'border-gray-300'
-              "
-              dir="ltr"
-            />
-            <p v-if="debtFieldErrors.amount" class="mt-1 text-xs text-red-600">
-              {{ debtFieldErrors.amount }}
-            </p>
-            <p
-              v-if="debtModalType === 'reduce'"
-              class="mt-1 text-xs text-gray-600"
-            >
-              حداکثر: {{ formatCurrency(user?.totalDebt || "0") }} ریال
-            </p>
-          </div>
-
-          <!-- Transaction Date -->
-          <div>
-            <label class="block text-sm font-medium text-gray-900 mb-2"
-              >تاریخ تراکنش (اختیاری)</label
-            >
-            <input
-              v-model="debtForm.transactionDate"
-              type="text"
-              placeholder="1405/02/08"
-              class="user-debt-transaction-date w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              :class="
-                debtFieldErrors.transactionDate
-                  ? 'border-red-500'
-                  : 'border-gray-300'
-              "
-              dir="ltr"
-            />
-            <date-picker
-              v-model="debtForm.transactionDate"
-              custom-input=".user-debt-transaction-date"
-            />
-            <p
-              v-if="debtFieldErrors.transactionDate"
-              class="mt-1 text-xs text-red-600"
-            >
-              {{ debtFieldErrors.transactionDate }}
-            </p>
-          </div>
-
-          <!-- Description -->
-          <div>
-            <label class="block text-sm font-medium text-gray-900 mb-2">
-              توضیحات (اختیاری)
-            </label>
-            <textarea
-              v-model="debtForm.description"
-              rows="3"
-              placeholder="توضیحات مربوط به این تراکنش..."
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
-            ></textarea>
-          </div>
-
-          <!-- Transaction Type -->
-          <div>
-            <label class="block text-sm font-medium text-gray-900 mb-2">
-              نوع تراکنش
-            </label>
-            <select
-              v-model="debtForm.transactionType"
-              :disabled="debtModalType === 'reduce'"
-              class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 disabled:text-gray-600 disabled:cursor-not-allowed"
-              :class="
-                debtFieldErrors.transactionType
-                  ? 'border-red-500'
-                  : 'border-gray-300'
-              "
-            >
-              <option
-                v-if="debtModalType === 'reduce'"
-                value="ADMIN_DEBT_REDUCE"
-              >
-                کاهش بدهی
-              </option>
-              <option v-else disabled value="">
-                نوع تراکنش را مشخص کنید.
-              </option>
-              <option
-                v-for="option in ADD_DEBT_TRANSACTION_TYPES"
-                v-if="debtModalType === 'add'"
-                :key="option.value"
-                :value="option.value"
-              >
-                {{ option.label }}
-              </option>
-            </select>
-            <p
-              v-if="debtFieldErrors.transactionType"
-              class="mt-1 text-xs text-red-600"
-            >
-              {{ debtFieldErrors.transactionType }}
-            </p>
-          </div>
-
-          <!-- SMS Notification -->
-          <div
-            class="flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3"
-          >
-            <input
-              id="send-sms-notification"
-              v-model="debtForm.sendSms"
-              type="checkbox"
-              class="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-            />
-            <label for="send-sms-notification" class="text-sm text-gray-800">
-              ارسال پیامک اطلاع رسانی
-            </label>
-          </div>
-
-          <!-- Actions -->
-          <div class="flex items-center gap-3 pt-4">
-            <button
-              @click="handleDebtSubmit"
-              :disabled="isSubmittingDebt"
-              class="flex-1 py-3 rounded-lg font-bold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-              :class="
-                debtModalType === 'add'
-                  ? 'bg-gradient-to-r from-green-600 to-green-500 text-white hover:shadow-lg'
-                  : 'bg-gradient-to-r from-orange-600 to-orange-500 text-white hover:shadow-lg'
-              "
-            >
-              <span v-if="isSubmittingDebt">در حال ثبت...</span>
-              <span v-else>{{
-                debtModalType === "add" ? "افزودن بدهی" : "کاهش بدهی"
-              }}</span>
+              کاهش بدهی
             </button>
             <button
-              @click="closeDebtModal"
-              :disabled="isSubmittingDebt"
-              class="flex-1 py-3 bg-gray-100 text-gray-700 rounded-lg font-bold hover:bg-gray-200 transition-colors duration-200 disabled:opacity-50"
+              @click="openContactHistoriesModal"
+              class="px-4 py-2.5 bg-slate-50 text-slate-700 rounded-lg hover:bg-slate-100 transition-colors duration-200 font-medium flex items-center justify-center gap-2 text-sm"
             >
-              انصراف
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M8 10h8M8 14h5m2 6H7a2 2 0 01-2-2V6a2 2 0 012-2h6l5 5v9a2 2 0 01-2 2z"
+                />
+              </svg>
+              تاریخچه تماس‌ها
+            </button>
+            <button
+              v-if="user.role !== 'ADMIN'"
+              @click="handleToggleStatus"
+              class="px-4 py-2.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors duration-200 font-medium text-sm"
+            >
+              {{ user.isActive ? "غیرفعال کردن" : "فعال کردن" }}
             </button>
           </div>
         </div>
+
+        <!-- User Details Grid -->
+        <div class="grid md:grid-cols-2 gap-6 mb-6">
+          <div class="space-y-4">
+            <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+              <div
+                class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0"
+              >
+                <svg
+                  class="w-5 h-5 text-primary"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"
+                  />
+                </svg>
+              </div>
+              <div>
+                <p class="text-xs text-gray-600 mb-1">شناسه کاربر</p>
+                <p class="text-lg font-bold text-gray-900">{{ user.id }}</p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+              <div
+                class="w-10 h-10 bg-green-500/10 rounded-lg flex items-center justify-center flex-shrink-0"
+              >
+                <IconsOutline name="phone" class="w-5 h-5 text-green-600" />
+              </div>
+              <div>
+                <p class="text-xs text-gray-600 mb-1">شماره موبایل</p>
+                <p class="text-lg font-bold text-gray-900" dir="ltr">
+                  {{ user.phoneNumber }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+              <div
+                class="w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center flex-shrink-0"
+              >
+                <IconsOutline name="identification" class="w-5 h-5 text-blue-600" />
+              </div>
+              <div>
+                <p class="text-xs text-gray-600 mb-1">کد ملی</p>
+                <p class="text-lg font-bold text-gray-900">
+                  {{ user.nationalCode }}
+                </p>
+              </div>
+            </div>
+
+            <div
+              class="flex items-center gap-3 p-4 bg-red-50 rounded-lg border border-red-100"
+            >
+              <div
+                class="w-10 h-10 bg-red-500/10 rounded-lg flex items-center justify-center flex-shrink-0"
+              >
+                <IconsOutline name="money" class="w-5 h-5 text-red-600" />
+              </div>
+              <div class="flex-1">
+                <p class="text-xs text-gray-600 mb-1">مبلغ بدهی</p>
+                <p class="text-xl font-bold text-red-600" dir="ltr">
+                  {{ formatCurrency(user.totalDebt, true) }}
+                </p>
+              </div>
+              <NuxtLink
+                v-if="user.role !== 'ADMIN'"
+                :to="`/admin/users/debt-history/${user.id}`"
+                class="px-3 py-2 bg-white border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-colors duration-200 text-sm font-medium whitespace-nowrap"
+              >
+                تاریخچه
+              </NuxtLink>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dates -->
+        <div class="pt-6 border-t border-gray-200 grid md:grid-cols-2 gap-4">
+          <div class="flex items-center gap-2 text-sm">
+            <IconsOutline name="calendar" class="w-5 h-5 text-gray-400" />
+            <span class="text-gray-600">تاریخ ثبت‌نام:</span>
+            <span class="font-medium text-gray-900">
+              {{ new Date(user.createdAt).toLocaleDateString("fa-IR") }}
+            </span>
+          </div>
+          <div class="flex items-center gap-2 text-sm">
+            <svg
+              class="w-5 h-5 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+              />
+            </svg>
+            <span class="text-gray-600">آخرین به‌روزرسانی:</span>
+            <span class="font-medium text-gray-900">
+              {{ new Date(user.updatedAt).toLocaleDateString("fa-IR") }}
+            </span>
+          </div>
+        </div>
       </div>
+
+      <LoanDebtBreakdownSection
+        title="جزئیات بدهی به تفکیک تسهیلات"
+        :breakdown="loanDebtBreakdown"
+        :loading="isLoadingLoanDebtBreakdown"
+        :error="loanDebtBreakdownError"
+        :show-discrepancy-warning="true"
+        empty-message="در حال حاضر تسهیلات بدهکاری برای این کاربر ثبت نشده است."
+        @retry="fetchUserLoanDebtBreakdown"
+      />
+
+      <!-- Transactions -->
+      <BaseCard :padding="false">
+        <div class="flex items-center justify-between gap-3 border-b border-gray-200 px-6 py-4">
+          <div>
+            <h3 class="text-lg font-bold text-gray-900">
+              تاریخچه تراکنش‌های کاربر
+            </h3>
+          
+          </div>
+       
+        </div>
+
+        <StateLoader
+          v-if="isLoadingTransactions"
+          message="در حال بارگذاری تاریخچه تراکنش‌ها..."
+        />
+
+        <StateError
+          v-else-if="transactionsError"
+          :message="transactionsError"
+          @retry="fetchUserTransactions"
+        />
+
+        <template v-else>
+          <BaseTable
+            v-if="userTransactions.length > 0"
+            :columns="transactionColumns"
+            :data="userTransactions"
+            :expanded-row-key="expandedTransactionId"
+          >
+            <template #cell-amount="{ row }">
+              <span class="font-medium" dir="ltr">{{ formatCurrency(row.amount) }}</span>
+            </template>
+
+            <template #cell-type="{ row }">
+              <BaseStatusBadge :map="ADMIN_TRANSACTION_TYPE_BADGES" :value="row.type" />
+            </template>
+
+            <template #cell-allocationSummary="{ row }">
+              <div class="flex justify-center">
+                <TransactionAllocationsSummary
+                  :transaction="row"
+                  trigger-only
+                  :expanded="expandedTransactionId === row.id"
+                  @toggle="toggleTransactionDetails(row.id)"
+                />
+              </div>
+            </template>
+
+            <template #expanded-row="{ row }">
+              <TransactionAllocationsSummary
+                v-if="canExpandTransaction(row)"
+                :transaction="row"
+                default-expanded
+              />
+            </template>
+
+            <template #cell-status="{ row }">
+              <BaseStatusBadge :map="ADMIN_TRANSACTION_STATUS_BADGES" :value="row.status" />
+            </template>
+
+            <template #cell-transactionDate="{ row }">
+              {{ formatDate(row.transactionDate) }}
+            </template>
+
+            <template #cell-description="{ row }">
+              <div class="max-w-[230px] mx-auto whitespace-normal break-words text-center leading-6">
+                {{ row.description || "-" }}
+              </div>
+            </template>
+          </BaseTable>
+
+          <StateEmpty
+            v-else
+            icon="document"
+            message="تراکنشی برای این کاربر یافت نشد"
+          />
+
+          <BasePagination
+            v-if="transactionsTotal > 0"
+            :page="transactionsPage"
+            :total="transactionsTotal"
+            :limit="transactionsLimit"
+            @update:page="handleTransactionsPageChange"
+          />
+        </template>
+      </BaseCard>
+
+      <!-- Installments -->
+      <!-- <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h3 class="text-lg font-bold text-gray-900">اقساط</h3>
+          <p class="text-sm text-gray-600">10 قسط اخیر کاربر</p>
+        </div>
+        
+        <div v-if="user.installments && user.installments.length > 0" class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">شناسه</th>
+                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">مبلغ</th>
+                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">شماره تسهیلات</th>
+                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">تاریخ سررسید</th>
+                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">وضعیت</th>
+                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">توضیحات</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr v-for="installment in user.installments" :key="installment.id" class="hover:bg-gray-50">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">{{ installment.id }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center" dir="ltr">
+                  {{ formatCurrency(installment.amount) }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center" dir="ltr">
+                  {{ installment.loan?.loanNumber || 'ندارد' }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
+                  {{ formatDate(installment.dueDate) }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-center">
+                  <span
+                    class="px-2 py-1 text-xs font-medium rounded-full inline-block"
+                    :class="{
+                      'bg-green-100 text-green-800': installment.status === 'PAID',
+                      'bg-red-100 text-red-800': installment.status === 'OVERDUE',
+                      'bg-yellow-100 text-yellow-800': installment.status === 'PENDING'
+                    }"
+                  >
+                    {{
+                      installment.status === 'PAID' ? 'پرداخت شده' :
+                      installment.status === 'OVERDUE' ? 'عقب افتاده' :
+                      'در انتظار'
+                    }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-900 text-center">
+                  {{ installment.description || '-' }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div v-else class="text-center py-12">
+          <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+          <p class="text-gray-600">قسطی یافت نشد</p>
+        </div>
+      </div> -->
     </div>
-  </div>
+
+    <template #overlays>
+      <ContactHistoriesModal
+        v-if="showContactHistoriesModal"
+        :items="contactHistories"
+        :meta="contactHistoriesMeta"
+        :limit="contactHistoriesLimit"
+        :is-loading="isLoadingContactHistories"
+        :is-loading-more="isLoadingMoreContactHistories"
+        :error="contactHistoriesError"
+        @close="closeContactHistoriesModal"
+        @create="openCreateContactHistoryModal"
+        @refresh="fetchContactHistories"
+        @loadMore="handleLoadMoreContactHistories"
+      />
+
+      <ContactHistoryCreateModal
+        v-if="showCreateContactHistoryModal"
+        v-model:description="createContactHistoryForm.description"
+        :error="createContactHistoryErrors.description"
+        :is-submitting="isSubmittingContactHistory"
+        @close="closeCreateContactHistoryModal"
+        @submit="handleCreateContactHistory"
+      />
+
+      <PaymentDeadlinesModal
+        v-if="showPaymentDeadlinesModal"
+        :items="paymentDeadlines"
+        :meta="paymentDeadlinesMeta"
+        :page="paymentDeadlinesPage"
+        :limit="paymentDeadlinesLimit"
+        :current-id="currentPaymentDeadline?.id ?? null"
+        :is-loading="isLoadingPaymentDeadlines"
+        :error="paymentDeadlinesError"
+        :disable-create="Boolean(currentPaymentDeadline)"
+        @close="closePaymentDeadlinesModal"
+        @create="openCreatePaymentDeadlineModal"
+        @edit="openEditPaymentDeadlineModal"
+        @update:page="handlePaymentDeadlinesPageChange"
+      />
+
+      <PaymentDeadlineCreateModal
+        v-if="showCreatePaymentDeadlineModal"
+        v-model:deadline-at="createPaymentDeadlineForm.deadlineAt"
+        :error="createPaymentDeadlineErrors.deadlineAt"
+        :is-submitting="isSubmittingPaymentDeadline"
+        @close="closeCreatePaymentDeadlineModal"
+        @submit="handleCreatePaymentDeadline"
+      />
+
+      <PaymentDeadlineEditModal
+        v-if="showEditPaymentDeadlineModal"
+        :deadline-at="editPaymentDeadlineForm.deadlineAt"
+        :deadline-display="editPaymentDeadlineDateDisplay"
+        v-model:edit-reason="editPaymentDeadlineForm.editReason"
+        :deadline-error="editPaymentDeadlineErrors.deadlineAt"
+        :reason-error="editPaymentDeadlineErrors.editReason"
+        :is-submitting="isSubmittingEditPaymentDeadline"
+        @close="closeEditPaymentDeadlineModal"
+        @update:deadline-at="handleEditPaymentDeadlineDateChange"
+        @submit="handleEditPaymentDeadline"
+      />
+
+      <!-- Debt Management Modal -->
+      <div
+        v-if="showDebtModal"
+        class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+      >
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-xl font-bold text-gray-900">
+              {{ debtModalType === "add" ? "افزودن بدهی" : "کاهش بدهی" }}
+            </h3>
+            <button
+              @click="closeDebtModal"
+              class="text-gray-400 hover:text-gray-600"
+            >
+              <IconsOutline name="x" class="w-6 h-6" />
+            </button>
+          </div>
+
+          <div class="space-y-4">
+            <!-- Loan Selection -->
+            <div v-if="isLoadingLoans" class="text-center py-4">
+              <div
+                class="inline-block w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"
+              ></div>
+              <p class="text-gray-600 text-sm mt-2">در حال بارگذاری تسهیلات...</p>
+            </div>
+
+            <div v-else>
+              <!-- Warning for no loans -->
+              <div v-if="showLoanWarning && showNewLoanInput" class="mb-4">
+                <div class="bg-yellow-50 rounded-lg p-3 mb-3 text-center">
+                  <p class="text-sm text-yellow-800">
+                    این کاربر تسهیلاتی ندارد. لطفاً شماره تسهیلات جدید وارد کنید.
+                  </p>
+                </div>
+
+                <!-- Manual loan number input -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-900 mb-2">
+                    شماره تسهیلات جدید <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    v-model="debtForm.newLoanNumber"
+                    type="text"
+                    placeholder="LN_0000000001"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    dir="ltr"
+                  />
+                </div>
+              </div>
+
+              <!-- Info for creating new loan when loans exist -->
+              <div v-else-if="showNewLoanInput && loans.length > 0" class="mb-2">
+                <div class="flex items-start gap-3">
+                  <div class="flex-1">
+                    <!-- Manual loan number input -->
+                    <div>
+                      <label class="block text-sm font-medium text-gray-900 mb-2">
+                        شماره تسهیلات جدید <span class="text-red-500">*</span>
+                      </label>
+                      <input
+                        v-model="debtForm.newLoanNumber"
+                        type="text"
+                        placeholder="LN_0000000002"
+                        class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                        :class="
+                          debtFieldErrors.newLoanNumber
+                            ? 'border-red-500'
+                            : 'border-gray-300'
+                        "
+                        dir="ltr"
+                      />
+                      <p
+                        v-if="debtFieldErrors.newLoanNumber"
+                        class="mt-1 text-xs text-red-600"
+                      >
+                        {{ debtFieldErrors.newLoanNumber }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Select existing loan -->
+              <div v-else-if="loans.length > 0">
+                <label class="block text-sm font-medium text-gray-900 mb-2">
+                  انتخاب تسهیلات <span class="text-red-500">*</span>
+                </label>
+                <select
+                  v-model="debtForm.loanId"
+                  class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  :class="
+                    debtFieldErrors.loanId ? 'border-red-500' : 'border-gray-300'
+                  "
+                  dir="ltr"
+                >
+                  <option disabled :value="undefined">
+                    تسهیلات کاربر را انتخاب کنید
+                  </option>
+                  <option v-for="loan in loans" :key="loan.id" :value="loan.id">
+                    {{ formatLoanOption(loan) }}
+                  </option>
+                </select>
+                <p
+                  v-if="debtFieldErrors.loanId"
+                  class="mt-1 text-xs text-red-600"
+                >
+                  {{ debtFieldErrors.loanId }}
+                </p>
+              </div>
+
+              <!-- Toggle button for creating new loan -->
+              <button
+                v-if="loans.length > 0"
+                type="button"
+                @click="toggleNewLoanInput"
+                class="w-full py-2 text-sm font-medium text-primary hover:text-accent transition-colors duration-200 flex items-center justify-start gap-2"
+              >
+                <IconsOutline name="plus" class="w-4 h-4" />
+                {{
+                  showNewLoanInput
+                    ? "انتخاب از تسهیلات موجود"
+                    : "ایجاد تسهیلات جدید"
+                }}
+              </button>
+            </div>
+
+            <!-- Amount -->
+            <div>
+              <label class="block text-sm font-medium text-gray-900 mb-2">
+                مبلغ (ریال) <span class="text-red-500">*</span>
+              </label>
+              <input
+                :value="debtAmountInput.displayValue.value"
+                @input="debtAmountInput.handleInput"
+                type="text"
+                inputmode="numeric"
+                placeholder="1,000,000"
+                class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-left"
+                :class="
+                  debtFieldErrors.amount ? 'border-red-500' : 'border-gray-300'
+                "
+                dir="ltr"
+              />
+              <p v-if="debtFieldErrors.amount" class="mt-1 text-xs text-red-600">
+                {{ debtFieldErrors.amount }}
+              </p>
+              <p
+                v-if="debtModalType === 'reduce'"
+                class="mt-1 text-xs text-gray-600"
+              >
+                حداکثر: {{ formatCurrency(user?.totalDebt || "0") }} ریال
+              </p>
+            </div>
+
+            <!-- Transaction Date -->
+            <div>
+              <label class="block text-sm font-medium text-gray-900 mb-2"
+                >تاریخ تراکنش (اختیاری)</label
+              >
+              <input
+                v-model="debtForm.transactionDate"
+                type="text"
+                placeholder="1405/02/08"
+                class="user-debt-transaction-date w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                :class="
+                  debtFieldErrors.transactionDate
+                    ? 'border-red-500'
+                    : 'border-gray-300'
+                "
+                dir="ltr"
+              />
+              <date-picker
+                v-model="debtForm.transactionDate"
+                custom-input=".user-debt-transaction-date"
+              />
+              <p
+                v-if="debtFieldErrors.transactionDate"
+                class="mt-1 text-xs text-red-600"
+              >
+                {{ debtFieldErrors.transactionDate }}
+              </p>
+            </div>
+
+            <!-- Description -->
+            <div>
+              <label class="block text-sm font-medium text-gray-900 mb-2">
+                توضیحات (اختیاری)
+              </label>
+              <textarea
+                v-model="debtForm.description"
+                rows="3"
+                placeholder="توضیحات مربوط به این تراکنش..."
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+              ></textarea>
+            </div>
+
+            <!-- Transaction Type -->
+            <div>
+              <label class="block text-sm font-medium text-gray-900 mb-2">
+                نوع تراکنش
+              </label>
+              <select
+                v-model="debtForm.transactionType"
+                :disabled="debtModalType === 'reduce'"
+                class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 disabled:text-gray-600 disabled:cursor-not-allowed"
+                :class="
+                  debtFieldErrors.transactionType
+                    ? 'border-red-500'
+                    : 'border-gray-300'
+                "
+              >
+                <option
+                  v-if="debtModalType === 'reduce'"
+                  value="ADMIN_DEBT_REDUCE"
+                >
+                  کاهش بدهی
+                </option>
+                <option v-else disabled value="">
+                  نوع تراکنش را مشخص کنید.
+                </option>
+                <option
+                  v-for="option in ADD_DEBT_TRANSACTION_TYPES"
+                  v-if="debtModalType === 'add'"
+                  :key="option.value"
+                  :value="option.value"
+                >
+                  {{ option.label }}
+                </option>
+              </select>
+              <p
+                v-if="debtFieldErrors.transactionType"
+                class="mt-1 text-xs text-red-600"
+              >
+                {{ debtFieldErrors.transactionType }}
+              </p>
+            </div>
+
+            <!-- SMS Notification -->
+            <div
+              class="flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3"
+            >
+              <input
+                id="send-sms-notification"
+                v-model="debtForm.sendSms"
+                type="checkbox"
+                class="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+              />
+              <label for="send-sms-notification" class="text-sm text-gray-800">
+                ارسال پیامک اطلاع رسانی
+              </label>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex items-center gap-3 pt-4">
+              <button
+                @click="handleDebtSubmit"
+                :disabled="isSubmittingDebt"
+                class="flex-1 py-3 rounded-lg font-bold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                :class="
+                  debtModalType === 'add'
+                    ? 'bg-gradient-to-r from-green-600 to-green-500 text-white hover:shadow-lg'
+                    : 'bg-gradient-to-r from-orange-600 to-orange-500 text-white hover:shadow-lg'
+                "
+              >
+                <span v-if="isSubmittingDebt">در حال ثبت...</span>
+                <span v-else>{{
+                  debtModalType === "add" ? "افزودن بدهی" : "کاهش بدهی"
+                }}</span>
+              </button>
+              <button
+                @click="closeDebtModal"
+                :disabled="isSubmittingDebt"
+                class="flex-1 py-3 bg-gray-100 text-gray-700 rounded-lg font-bold hover:bg-gray-200 transition-colors duration-200 disabled:opacity-50"
+              >
+                انصراف
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+  </AdminPage>
 </template>

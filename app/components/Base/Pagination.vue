@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { formatNumber } from '~/utils/formatters'
+
 const props = withDefaults(
   defineProps<{
     page: number
@@ -39,11 +41,11 @@ const goToNext = () => {
     <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
       <div class="text-sm text-gray-600 text-center md:text-right">
         نمایش ردیف
-        <span class="font-bold text-gray-900">{{ from.toLocaleString('fa-IR') }}</span>
+        <span class="font-bold text-gray-900">{{ formatNumber(from) }}</span>
         تا
-        <span class="font-bold text-gray-900">{{ to.toLocaleString('fa-IR') }}</span>
+        <span class="font-bold text-gray-900">{{ formatNumber(to) }}</span>
         از
-        <span class="font-bold text-gray-900">{{ total.toLocaleString('fa-IR') }}</span>
+        <span class="font-bold text-gray-900">{{ formatNumber(total) }}</span>
         مورد
       </div>
 
@@ -58,9 +60,9 @@ const goToNext = () => {
         </BaseButton>
         <div class="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm text-gray-700 shadow-sm">
           صفحه
-          <span class="font-bold text-gray-900">{{ page.toLocaleString('fa-IR') }}</span>
+          <span class="font-bold text-gray-900">{{ formatNumber(page) }}</span>
           از
-          <span class="font-bold text-gray-900">{{ totalPages.toLocaleString('fa-IR') }}</span>
+          <span class="font-bold text-gray-900">{{ formatNumber(totalPages) }}</span>
         </div>
         <BaseButton
           size="sm"

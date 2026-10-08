@@ -22,13 +22,10 @@ watch(section, value => {
 </script>
 
 <template>
-  <div class="min-h-screen w-full bg-gray-50">
-    <AdminHeader title="مدیریت پیامک‌ها" />
-    <main class="mx-auto max-w-[1400px] px-4 py-8">
-      <AdminSmsNavigation v-model="section" />
-      <AdminSmsDispatchesPanel v-if="section === 'dispatches'" />
-      <AdminSmsTemplatesPanel v-else-if="section === 'templates'" />
-      <AdminSmsEventsPanel v-else />
-    </main>
-  </div>
+  <AdminPage title="مدیریت پیامک‌ها" main-class="mx-auto max-w-[1400px] px-4 py-8">
+    <AdminSmsNavigation v-model="section" />
+    <AdminSmsDispatchesPanel v-if="section === 'dispatches'" />
+    <AdminSmsTemplatesPanel v-else-if="section === 'templates'" />
+    <AdminSmsEventsPanel v-else />
+  </AdminPage>
 </template>
