@@ -6,8 +6,10 @@ import AuthPhoneStep from '~/components/auth/AuthPhoneStep.vue'
 import AuthOtpStep from '~/components/auth/AuthOtpStep.vue'
 import AuthPasswordStep from '~/components/auth/AuthPasswordStep.vue'
 
+const { t } = useI18n()
+
 useHead({
-  title: 'ورود - عماد ایران'
+  title: t('seo.auth')
 })
 
 // Define page meta for layout
@@ -55,7 +57,7 @@ const redirectAfterLogin = async () => {
 // Request OTP (allow-listed admins are sent to the password step instead)
 const handleRequestOtp = async () => {
   if (!isPhoneValid.value) {
-    toast.error('شماره موبایل معتبر نیست')
+    toast.error(t('auth.validation.invalidPhone'))
     return
   }
 
@@ -66,7 +68,7 @@ const handleRequestOtp = async () => {
   if (method === 'password') {
     step.value = 'password'
   } else if (method === 'otp') {
-    toast.success('کد تایید ارسال شد')
+    toast.success(t('auth.messages.otpSent'))
     step.value = 'otp'
     startCountdown()
   }
@@ -75,7 +77,7 @@ const handleRequestOtp = async () => {
 // Verify OTP
 const handleVerifyOtp = async () => {
   if (!isOtpValid.value) {
-    toast.error('کد تایید باید 6 رقم باشد')
+    toast.error(t('auth.validation.otpLength'))
     return
   }
 
@@ -91,7 +93,7 @@ const handleVerifyOtp = async () => {
 // Login with password
 const handlePasswordLogin = async () => {
   if (!isPasswordValid.value) {
-    toast.error('رمز عبور را وارد کنید')
+    toast.error(t('auth.password.title'))
     return
   }
 
@@ -115,7 +117,7 @@ const handleResendOtp = async () => {
   isSubmitting.value = false
 
   if (method === 'otp') {
-    toast.success('کد تایید مجدد ارسال شد')
+    toast.success(t('auth.messages.otpResent'))
     otpCode.value = ''
     startCountdown()
   }
@@ -136,9 +138,9 @@ const handleBackToPhone = () => {
     <div class="w-full max-w-md">
       <!-- Logo and Title -->
       <div class="text-center mb-4">
-        <img src="/emad-logo-p.png" alt="عماد" class="h-16 mx-auto mb-4" />
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">ورود به پنل</h1>
-        <p class="text-gray-600">عماد، نماد اعتماد</p>
+        <img src="/emad-logo-p.png" :alt="$t('common.brand.short')" class="h-16 mx-auto mb-4" />
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ $t('common.labels.loginToPanel') }}</h1>
+        <p class="text-gray-600">{{ $t('app.title') }}</p>
       </div>
 
       <!-- Auth Card -->

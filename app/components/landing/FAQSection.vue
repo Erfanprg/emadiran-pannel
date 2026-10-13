@@ -4,16 +4,16 @@
       <!-- Section Header -->
       <div class="text-center mb-12">
         <span class="inline-block px-4 py-2 bg-gradient-to-r from-primary/10 to-secondary/10 text-primary rounded-full text-sm font-medium mb-4">
-          سوالات متداول
+          {{ $t('landing.faq.title') }}
         </span>
         <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-          پاسخ به 
+          {{ $t('landing.faq.headingStart') }} 
           <span class="bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
-            سوالات شما
+            {{ $t('landing.faq.headingHighlight') }}
           </span>
         </h2>
         <p class="text-gray-600 max-w-2xl mx-auto">
-          پاسخ سوالات رایج درباره خدمات عماد و نحوه استفاده از پنل کاربری
+          {{ $t('landing.faq.subtitle') }}
         </p>
       </div>
 
@@ -62,10 +62,10 @@
       <!-- CTA Section -->
       <div class="mt-12 text-center bg-white rounded-2xl border border-gray-200 p-8">
         <h3 class="text-2xl font-bold text-gray-900 mb-3">
-          سوال دیگری دارید؟
+          {{ $t('landing.faq.moreQuestions') }}
         </h3>
         <p class="text-gray-600 mb-6">
-          تیم پشتیبانی ما آماده پاسخگویی به سوالات شماست
+          {{ $t('landing.faq.supportReady') }}
         </p>
         <div class="flex flex-wrap gap-4 justify-center">
           <a
@@ -75,13 +75,13 @@
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
             </svg>
-            تماس با ما
+            {{ $t('global.navigation.contact') }}
           </a>
           <NuxtLink
             to="/auth"
             class="inline-flex items-center gap-2 bg-white text-primary border-2 border-primary px-6 py-3 rounded-xl font-bold hover:bg-primary hover:text-white transition-all duration-300"
           >
-            ورود به پنل
+            {{ $t('common.labels.loginToPanel') }}
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg>
@@ -95,34 +95,36 @@
 <script setup lang="ts">
 import { ref, onMounted, nextTick } from 'vue'
 
+const { t } = useI18n()
+
 const activeIndex = ref<number | null>(null)
 const maxHeights = ref<number[]>([])
 const contentRefs = ref<(HTMLElement | null)[]>([])
 
 const faqs = [
   {
-    question: '۱. عمادایران چه خدمتی ارائه می‌دهد؟',
-    answer: 'عمادایران سرویس «ضمانت هوشمند اقساط» است. ما با بانک‌ها و لندتک‌هایی مانند نسیبا و تارا قرارداد همکاری داریم و برای کاربرانی که شرایط دریافت وام را دارند، ضمانت‌نامه صادر می‌کنیم. در صورت تأخیر کاربر در پرداخت قسط، ما مبلغ را به نهاد مالی پرداخت می‌کنیم و در ادامه، پیگیری و وصول آن را از طریق فرایندهای حقوقی انجام می‌دهیم.'
+    question: t('landing.faq.q1'),
+    answer: t('landing.faq.a1')
   },
   {
-    question: '۲. چرا باید از عمادایران استفاده کنم؟',
-    answer: 'با این خدمت، حتی اگر به هر دلیل نتوانید در سررسید قسط خود را پرداخت کنید، ضمانت عماد باعث می‌شود چرخه پرداخت‌های شما به بانک یا لندتک قطع نشود و سابقه اعتباری‌تان آسیب نبیند. همچنین فرصت می‌یابید در مهلت تعیین‌شده توسط عماد، بدهی خود را با آرامش بیشتر تسویه کنید.'
+    question: t('landing.faq.q2'),
+    answer: t('landing.faq.a2')
   },
   {
-    question: '۳. اگر قسط خود را به موقع به عمادایران نپردازم چه اتفاقی می‌افتد؟',
-    answer: 'در این حالت، عماد با استفاده از سازوکارهای حقوقی و وصول مطالبات، پیگیری قانونی را آغاز می‌کند. پیشنهاد می‌کنیم حتماً در مهلت مقرر نسبت به پرداخت اقدام کنید تا وارد فرایند حقوقی نشوید.'
+    question: t('landing.faq.q3'),
+    answer: t('landing.faq.a3')
   },
   {
-    question: '۴. چگونه می‌توانم وضعیت ضمانت‌نامه و تراکنش‌های خود را ببینم؟',
-    answer: 'پس از ثبت درخواست و فعال‌سازی حساب کاربری در emadiran.ir، می‌توانید همه تراکنش‌ها، مبالغ و تاریخ‌های پرداخت را در پنل خود مشاهده کنید.'
+    question: t('landing.faq.q4'),
+    answer: t('landing.faq.a4')
   },
   {
-    question: '۵. آیا عمادایران مستقیم وام ارائه می‌دهد؟',
-    answer: 'خیر، عمادایران خودش وام‌دهنده نیست؛ بلکه به عنوان ضامن بین شما (کاربر) و نهاد مالی (بانک یا لندتک) عمل می‌کند تا فرایند بازپرداخت با انعطاف و امنیت بیشتری انجام شود.'
+    question: t('landing.faq.q5'),
+    answer: t('landing.faq.a5')
   },
   {
-    question: '۶. آیا کاربر می‌تواند مستقیماً و بدون واسطه لندتک یا بانک، از خدمات ضمانت عمادایران استفاده کند؟',
-    answer: 'خیر، خدمات ضمانت عمادایران تنها از طریق شرکای مالی همکار (مانند لندتک‌ها و بانک‌ها) در دسترس است. به عبارت دیگر، کاربران نمی‌توانند به صورت مستقیم و با مراجعه به عمادایران درخواست ضمانت دهند.'
+    question: t('landing.faq.q6'),
+    answer: t('landing.faq.a6')
   }
 ]
 

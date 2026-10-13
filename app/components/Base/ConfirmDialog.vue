@@ -117,14 +117,14 @@ const confirmButtonClass = computed(() => {
                 @click="handleCancel"
                 class="flex-1 py-3 bg-gray-100 text-gray-700 rounded-lg font-bold hover:bg-gray-200 transition-colors duration-200"
               >
-                {{ state.options?.cancelText || 'انصراف' }}
+                {{ state.options?.cancelText || $t('common.actions.cancel') }}
               </button>
               <button
                 @click="handleConfirm"
                 class="flex-1 py-3 text-white rounded-lg font-bold transition-colors duration-200"
                 :class="confirmButtonClass"
               >
-                {{ state.options?.confirmText || 'تایید' }}
+                {{ state.options?.confirmText || $t('global.button.confirm') }}
               </button>
             </div>
           </div>

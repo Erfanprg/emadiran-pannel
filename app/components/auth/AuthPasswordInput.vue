@@ -21,8 +21,8 @@ const showPassword = defineModel<boolean>('show', { required: true })
     <button
       type="button"
       @click="showPassword = !showPassword"
-      :aria-label="showPassword ? 'پنهان کردن رمز عبور' : 'نمایش رمز عبور'"
-      :title="showPassword ? 'پنهان کردن رمز عبور' : 'نمایش رمز عبور'"
+      :aria-label="showPassword ? $t('auth.password.hide') : $t('auth.password.show')"
+      :title="showPassword ? $t('auth.password.hide') : $t('auth.password.show')"
       class="absolute inset-y-0 left-0 flex items-center px-3 text-gray-500 hover:text-gray-900 transition-colors duration-200"
     >
       <!-- Eye-slash: password visible, click to hide -->

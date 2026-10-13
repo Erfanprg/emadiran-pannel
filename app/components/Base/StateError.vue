@@ -1,11 +1,12 @@
-<script setup lang="ts">
+<script setup lang="ts">import { translate } from '~/i18n/translate'
+
 const props = withDefaults(
   defineProps<{
     message?: string
     retry?: boolean
   }>(),
   {
-    message: 'خطایی رخ داده است',
+    message: () => translate('common.errors.generic'),
     retry: true
   }
 )
@@ -26,7 +27,7 @@ const emit = defineEmits<{
       size="md"
       @click="emit('retry')"
     >
-      تلاش مجدد
+      {{ $t('common.actions.retry') }}
     </BaseButton>
   </div>
 </template>

@@ -4,6 +4,7 @@ import { authApi } from '~/services/api/auth'
 import { userApi } from '~/services/api/user'
 import { useToast } from '~/composables/useToast'
 import { getUserDisplayName } from '~/func/getUserDisplayName'
+import { translate } from '~/i18n/translate'
 
 interface AuthState {
   user: User | null
@@ -22,7 +23,7 @@ export const useAuthStore = defineStore('auth', {
 
   getters: {
     isAdmin: (state) => state.user?.role === 'ADMIN',
-    userFullName: (state) => state.user ? getUserDisplayName(state.user) : 'کاربر',
+    userFullName: (state) => state.user ? getUserDisplayName(state.user) : translate('common.labels.user'),
     totalDebt: (state) => state.user?.totalDebt || '0'
   },
 
@@ -39,7 +40,7 @@ export const useAuthStore = defineStore('auth', {
         return response.method ?? 'otp'
       } catch (error: any) {
         const toast = useToast()
-        toast.error(error.data?.message || 'خطا در ارسال کد تایید')
+        toast.error(error.data?.message || translate('auth.errors.sendOtp'))
         return null
       } finally {
         this.isLoading = false
@@ -57,7 +58,7 @@ export const useAuthStore = defineStore('auth', {
         return true
       } catch (error: any) {
         const toast = useToast()
-        toast.error(error.data?.message || 'کد تایید نامعتبر است')
+        toast.error(error.data?.message || translate('auth.errors.invalidOtp'))
         return false
       } finally {
         this.isLoading = false
@@ -75,7 +76,7 @@ export const useAuthStore = defineStore('auth', {
         return true
       } catch (error: any) {
         const toast = useToast()
-        toast.error(error.data?.message || 'شماره موبایل یا رمز عبور اشتباه است')
+        toast.error(error.data?.message || translate('auth.errors.invalidCredentials'))
         return false
       } finally {
         this.isLoading = false
@@ -106,7 +107,7 @@ export const useAuthStore = defineStore('auth', {
       this.user = userProfile as any
 
       const toast = useToast()
-      toast.success('ورود موفقیت‌آمیز بود')
+      toast.success(translate('auth.messages.loginSuccess'))
     },
 
     /**

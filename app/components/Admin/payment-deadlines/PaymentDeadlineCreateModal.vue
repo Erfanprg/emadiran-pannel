@@ -24,11 +24,11 @@ const localDeadlineAt = computed({
 </script>
 
 <template>
-  <BaseModal title="ثبت مهلت پرداخت" max-width="md" @close="emit('close')">
+  <BaseModal :title="$t('admin.paymentDeadlines.create.title')" max-width="md" @close="emit('close')">
     <div class="space-y-4">
       <div>
         <label class="block text-sm font-medium text-gray-900 mb-2">
-          تاریخ مهلت <span class="text-red-500">*</span>
+          {{ $t('admin.paymentDeadlines.fields.deadlineDate') }} <span class="text-red-500">*</span>
         </label>
         <input
           v-model="localDeadlineAt"
@@ -55,8 +55,8 @@ const localDeadlineAt = computed({
         :disabled="isSubmitting"
         @click="emit('submit')"
       >
-        <span v-if="isSubmitting">در حال ثبت...</span>
-        <span v-else>ثبت مهلت</span>
+        <span v-if="isSubmitting">{{ $t('common.states.submitting') }}</span>
+        <span v-else>{{ $t('admin.paymentDeadlines.create.submit') }}</span>
       </button>
       <button
         type="button"
@@ -64,7 +64,7 @@ const localDeadlineAt = computed({
         :disabled="isSubmitting"
         @click="emit('close')"
       >
-        انصراف
+        {{ $t('common.actions.cancel') }}
       </button>
     </template>
   </BaseModal>

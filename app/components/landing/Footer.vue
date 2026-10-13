@@ -8,12 +8,12 @@
         <!-- Company Info -->
         <div class="space-y-6">
           <div>
-            <h3 class="text-xl font-bold mb-2">عمادایران</h3>
+            <h3 class="text-xl font-bold mb-2">{{ $t('common.brand.emadiran') }}</h3>
             <p class="text-gray-300 text-sm leading-relaxed">
-              پلتفرم بازپرداخت هوشمند اقساط
+              {{ $t('landing.footer.tagline') }}
             </p>
             <p class="text-gray-400 text-xs mt-2">
-              محصولی از شرکت عماد، نماد اعتماد
+              {{ $t('landing.footer.productOf') }}
             </p>
           </div>
 
@@ -28,7 +28,7 @@
                 ><img
                   referrerpolicy="origin"
                   src="https://trustseal.enamad.ir/logo.aspx?id=703444&Code=sGHllu7NvM7VlTphGEG1f2thbTNvDfUX"
-                  alt="اینماد"
+                  :alt="$t('landing.footer.enamad')"
                   style="cursor: pointer"
                   code="sGHllu7NvM7VlTphGEG1f2thbTNvDfUX"
                   class="w-24 h-auto"
@@ -41,12 +41,12 @@
                 onclick="window.open('https://panel.aqayepardakht.ir/trustGateway/80153',null,'width=400, height=600, scrollbars=no, resizable=no')"
                 href="javascript:void(0)"
                 referrerpolicy="strict-origin-when-cross-origin"
-                title="پرداخت امن آقای پرداخت"
+                :title="$t('landing.footer.securePayment')"
               >
                 <img
                   style="border-radius: 0px; margin-right: 10px"
                   src="https://cdn.aqayepardakht.ir/trustlogo/2.svg"
-                  alt="پرداخت امن آقای پرداخت"
+                  :alt="$t('landing.footer.securePayment')"
               /></a>
             </div>
           </div>
@@ -72,7 +72,7 @@
 
         <!-- Quick Links -->
         <div>
-          <h4 class="text-lg font-bold mb-6">دسترسی سریع</h4>
+          <h4 class="text-lg font-bold mb-6">{{ $t('landing.footer.quickAccess') }}</h4>
           <ul class="space-y-3">
             <li>
               <a
@@ -92,7 +92,7 @@
                     d="M15 19l-7-7 7-7"
                   />
                 </svg>
-                درباره ما
+                {{ $t('global.navigation.about') }}
               </a>
             </li>
             <li>
@@ -113,7 +113,7 @@
                     d="M15 19l-7-7 7-7"
                   />
                 </svg>
-                خدمات
+                {{ $t('global.navigation.services') }}
               </a>
             </li>
             <li>
@@ -134,7 +134,7 @@
                     d="M15 19l-7-7 7-7"
                   />
                 </svg>
-                مزایا
+                {{ $t('landing.nav.benefits') }}
               </a>
             </li>
             <li>
@@ -155,7 +155,7 @@
                     d="M15 19l-7-7 7-7"
                   />
                 </svg>
-                سوالات متداول
+                {{ $t('landing.faq.title') }}
               </a>
             </li>
             <li>
@@ -176,7 +176,7 @@
                     d="M15 19l-7-7 7-7"
                   />
                 </svg>
-                ورود به پنل
+                {{ $t('common.labels.loginToPanel') }}
               </NuxtLink>
             </li>
           </ul>
@@ -184,7 +184,7 @@
 
         <!-- Services -->
         <div>
-          <h4 class="text-lg font-bold mb-6">خدمات ما</h4>
+          <h4 class="text-lg font-bold mb-6">{{ $t('landing.services.title') }}</h4>
           <ul class="space-y-3">
             <li>
               <a
@@ -194,7 +194,7 @@
                 <div
                   class="w-1.5 h-1.5 bg-secondary rounded-full group-hover:w-2 group-hover:h-2 transition-all duration-200"
                 ></div>
-                خدمات حقوقی تخصصی لندتک‌ها
+                {{ $t('landing.services.legal.title') }}
               </a>
             </li>
             <li>
@@ -205,7 +205,7 @@
                 <div
                   class="w-1.5 h-1.5 bg-secondary rounded-full group-hover:w-2 group-hover:h-2 transition-all duration-200"
                 ></div>
-                وصول مطالبات حقوقی و مذاکره‌ای
+                {{ $t('landing.services.recovery.title') }}
               </a>
             </li>
             <li>
@@ -216,7 +216,7 @@
                 <div
                   class="w-1.5 h-1.5 bg-secondary rounded-full group-hover:w-2 group-hover:h-2 transition-all duration-200"
                 ></div>
-                مشاوره و پشتیبانی حقوقی مستمر
+                {{ $t('landing.services.consulting.title') }}
               </a>
             </li>
             <li>
@@ -227,7 +227,7 @@
                 <div
                   class="w-1.5 h-1.5 bg-secondary rounded-full group-hover:w-2 group-hover:h-2 transition-all duration-200"
                 ></div>
-                سامانه‌ها و ابزارهای فناورانه
+                {{ $t('landing.services.tech.title') }}
               </a>
             </li>
           </ul>
@@ -235,7 +235,7 @@
 
         <!-- Contact Info -->
         <div>
-          <h4 class="text-lg font-bold mb-6">تماس با ما</h4>
+          <h4 class="text-lg font-bold mb-6">{{ $t('global.navigation.contact') }}</h4>
           <ul class="space-y-4">
             <li>
               <a
@@ -260,7 +260,7 @@
                   </svg>
                 </div>
                 <div class="flex-1">
-                  <div class="text-xs text-gray-400 mb-1">تلفن تماس</div>
+                  <div class="text-xs text-gray-400 mb-1">{{ $t('landing.footer.phone') }}</div>
                   <div class="font-medium" dir="ltr">021-92002343</div>
                 </div>
               </a>
@@ -285,7 +285,7 @@
                   </svg>
                 </div>
                 <div class="flex-1">
-                  <div class="text-xs text-gray-400 mb-1">سامانه پیام</div>
+                  <div class="text-xs text-gray-400 mb-1">{{ $t('landing.footer.sms') }}</div>
                   <div class="font-medium" dir="ltr">+989 0008616</div>
                 </div>
               </div>
@@ -310,7 +310,7 @@
                   </svg>
                 </div>
                 <div class="flex-1">
-                  <div class="text-xs text-gray-400 mb-1">وب‌سایت</div>
+                  <div class="text-xs text-gray-400 mb-1">{{ $t('landing.footer.website') }}</div>
                   <div class="space-y-1">
                     <div class="font-medium">
                       <a
@@ -358,13 +358,12 @@
                   </svg>
                 </div>
                 <div class="flex-1">
-                  <div class="text-xs text-gray-400 mb-1">آدرس</div>
+                  <div class="text-xs text-gray-400 mb-1">{{ $t('landing.footer.address') }}</div>
                   <div class="font-medium text-sm leading-relaxed">
-                    تهران، بلوار آیت الله کاشانی، بین وفاآذر و رامین، پلاک 314،
-                    واحد 2
+                    {{ $t('landing.footer.addressValue') }}
                   </div>
                   <div class="text-xs text-gray-400 mt-1" dir="ltr">
-                    کدپستی: 1481856864
+                    {{ $t('landing.footer.postalCode') }}
                   </div>
                 </div>
               </div>
@@ -382,8 +381,8 @@
         >
           <div class="text-gray-400 text-sm text-center md:text-right">
             <p>
-              © ۱۴۰۴ شرکت عماد نماد اعتماد | شماره ثبت:
-              <span class="text-white font-medium">۶۴۷۴۵</span>
+              {{ $t('landing.footer.copyright') }}
+              <span class="text-white font-medium">{{ $t('landing.footer.registrationNumber') }}</span>
             </p>
           </div>
           <div class="flex flex-wrap gap-6 text-sm">
@@ -391,19 +390,19 @@
               href="#"
               class="text-gray-400 hover:text-white transition-colors duration-200"
             >
-              قوانین و مقررات
+              {{ $t('landing.footer.terms') }}
             </a>
             <a
               href="#"
               class="text-gray-400 hover:text-white transition-colors duration-200"
             >
-              حریم خصوصی
+              {{ $t('landing.footer.privacy') }}
             </a>
             <a
               href="#"
               class="text-gray-400 hover:text-white transition-colors duration-200"
             >
-              شرایط استفاده
+              {{ $t('landing.footer.termsOfUse') }}
             </a>
           </div>
         </div>

@@ -7,8 +7,10 @@ import { getUserDisplayName } from '~/func/getUserDisplayName'
 import { getTransactionAllocations } from '~/utils/transactionAllocations'
 import { ADMIN_TRANSACTION_STATUS_BADGES, DEBT_HISTORY_TYPE_BADGES } from '~/constants/badges'
 
+const { t } = useI18n()
+
 useHead({
-  title: 'تاریخچه بدهی - عماد ایران'
+  title: t('seo.admin.debtHistory')
 })
 
 definePageMeta({
@@ -54,7 +56,7 @@ const fetchDebtHistory = async () => {
     history.value = response.data.transactions || []
     total.value = response.data.meta?.total || 0
   } catch (err: any) {
-    error.value = err.data?.message || err.message || 'خطا در دریافت تاریخچه بدهی'
+    error.value = err.data?.message || err.message || t('admin.users.debtHistory.errors.fetch')
     console.error('Error fetching debt history:', err)
   } finally {
     isLoading.value = false
@@ -80,7 +82,7 @@ watch(page, () => {
 </script>
 
 <template>
-  <AdminPage title="تاریخچه بدهی">
+  <AdminPage :title="$t('admin.users.debtHistory.title')">
     <!-- User Info Card -->
     <div v-if="user" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
       <div class="flex items-center justify-between">
@@ -94,7 +96,7 @@ watch(page, () => {
           </div>
         </div>
         <div class="text-left">
-          <p class="text-sm text-gray-600 mb-1">بدهی فعلی</p>
+          <p class="text-sm text-gray-600 mb-1">{{ $t('common.fields.currentDebt') }}</p>
           <p class="text-2xl font-bold" :class="parseInt(user.totalDebt) > 0 ? 'text-red-600' : 'text-green-600'" dir="ltr">
             {{ formatCurrency(user.totalDebt, true) }}
           </p>
@@ -105,12 +107,12 @@ watch(page, () => {
     <!-- History Table -->
     <BaseCard :padding="false">
       <div class="px-6 py-4 border-b border-gray-200">
-        <h3 class="text-lg font-bold text-gray-900">تاریخچه تغییرات بدهی</h3>
-        <p class="text-sm text-gray-600">تمام عملیات افزایش و کاهش بدهی</p>
+        <h3 class="text-lg font-bold text-gray-900">{{ $t('admin.users.debtHistory.changes.title') }}</h3>
+        <p class="text-sm text-gray-600">{{ $t('admin.users.debtHistory.changes.subtitle') }}</p>
       </div>
 
       <!-- Loading State -->
-      <StateLoader v-if="isLoading" message="در حال بارگذاری..." />
+      <StateLoader v-if="isLoading" :message="$t('common.states.loading')" />
 
       <!-- Error State -->
       <StateError v-else-if="error" :message="error" @retry="fetchDebtHistory" />
@@ -119,13 +121,13 @@ watch(page, () => {
       <BaseTable
         v-else-if="history.length > 0"
         :columns="[
-          { key: 'id', label: 'شناسه', align: 'center' },
-          { key: 'type', label: 'نوع عملیات', align: 'center' },
-          { key: 'amount', label: 'مبلغ', align: 'center' },
-          { key: 'allocationSummary', label: 'جزئیات تسهیلات', align: 'center' },
-          { key: 'status', label: 'وضعیت', align: 'center' },
-          { key: 'description', label: 'توضیحات', align: 'center', format: (val) => val || '-' },
-          { key: 'transactionDate', label: 'تاریخ', align: 'center', format: (val) => formatDate(val) }
+          { key: 'id', label: $t('common.fields.id'), align: 'center' },
+          { key: 'type', label: $t('admin.users.debtHistory.table.operationType'), align: 'center' },
+          { key: 'amount', label: $t('common.fields.amount'), align: 'center' },
+          { key: 'allocationSummary', label: $t('common.fields.loanDetails'), align: 'center' },
+          { key: 'status', label: $t('common.fields.status'), align: 'center' },
+          { key: 'description', label: $t('common.fields.description'), align: 'center', format: (val) => val || '-' },
+          { key: 'transactionDate', label: $t('common.fields.date'), align: 'center', format: (val) => formatDate(val) }
         ]"
         :data="history"
         :expanded-row-key="expandedTransactionId"
@@ -172,7 +174,7 @@ watch(page, () => {
       <StateEmpty
         v-else
         icon="document"
-        message="تاریخچه‌ای یافت نشد"
+        :message="$t('admin.users.debtHistory.empty')"
       />
 
       <!-- Pagination -->

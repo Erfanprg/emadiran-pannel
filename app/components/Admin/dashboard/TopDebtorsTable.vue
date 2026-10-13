@@ -13,11 +13,11 @@ defineProps<{
       <table class="w-full">
         <thead class="bg-gray-50">
           <tr>
-            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">رتبه</th>
-            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">نام</th>
-            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">شماره تماس</th>
-            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">میزان بدهی</th>
-            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">عملیات</th>
+            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">{{ $t('admin.dashboard.topDebtors.rank') }}</th>
+            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">{{ $t('common.fields.name') }}</th>
+            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">{{ $t('admin.dashboard.topDebtors.phone') }}</th>
+            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">{{ $t('admin.dashboard.topDebtors.debt') }}</th>
+            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">{{ $t('common.table.actions') }}</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200">
@@ -44,14 +44,14 @@ defineProps<{
               <span class="text-sm font-bold text-red-600" dir="ltr">
                 {{ formatCurrency(debtor.totalDebt) }}
               </span>
-              <span class="text-xs text-gray-500 mr-1">ریال</span>
+              <span class="text-xs text-gray-500 mr-1">{{ $t('global.currency.rial') }}</span>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-center">
               <NuxtLink
                 :to="`/admin/users/${debtor.id}`"
                 class="text-primary hover:underline text-sm font-medium"
               >
-                مشاهده جزئیات
+                {{ $t('common.actions.viewDetails') }}
               </NuxtLink>
             </td>
           </tr>

@@ -2,6 +2,8 @@
 import { formatDate } from '~/utils/formatters'
 import type { ContactHistoryItem, ContactHistoriesMeta } from '~/types/admin'
 
+const { t } = useI18n()
+
 const props = withDefaults(
   defineProps<{
     items: ContactHistoryItem[]
@@ -26,17 +28,17 @@ const emit = defineEmits<{
 }>()
 
 const columns = [
-  { key: 'index', label: 'ردیف', align: 'center', width: '80px' },
-  { key: 'description', label: 'توضیحات', align: 'center', class: '!whitespace-normal max-w-[320px]' },
-  { key: 'admin', label: 'اپراتور', align: 'center', format: (val: ContactHistoryItem['admin']) => val?.fullName || '-' },
-  { key: 'createdAt', label: 'تاریخ و ساعت', align: 'center', format: (val: string) => formatDate(val, true) }
+  { key: 'index', label: t('common.table.row'), align: 'center', width: '80px' },
+  { key: 'description', label: t('common.fields.description'), align: 'center', class: '!whitespace-normal max-w-[320px]' },
+  { key: 'admin', label: t('admin.contactHistories.table.operator'), align: 'center', format: (val: ContactHistoryItem['admin']) => val?.fullName || '-' },
+  { key: 'createdAt', label: t('admin.contactHistories.table.dateTime'), align: 'center', format: (val: string) => formatDate(val, true) }
 ]
 </script>
 
 <template>
-  <BaseModal title="تاریخچه تماس‌ها" max-width="2xl" @close="emit('close')">
+  <BaseModal :title="$t('admin.contactHistories.title')" max-width="2xl" @close="emit('close')">
     <div class="space-y-4">
-      <StateLoader v-if="isLoading" message="در حال بارگذاری..." />
+      <StateLoader v-if="isLoading" :message="$t('common.states.loading')" />
 
       <StateError
         v-else-if="error"
@@ -55,7 +57,7 @@ const columns = [
 
         <template #empty>
           <div class="py-12 text-center text-gray-600 font-medium">
-            تاریخچه تماسی ثبت نشده.
+            {{ $t('admin.contactHistories.empty') }}
           </div>
         </template>
       </BaseTable>
@@ -70,8 +72,8 @@ const columns = [
           :disabled="isLoadingMore"
           @click="emit('loadMore')"
         >
-          <span v-if="isLoadingMore">در حال بارگذاری...</span>
-          <span v-else>نمایش بیشتر</span>
+          <span v-if="isLoadingMore">{{ $t('common.states.loading') }}</span>
+          <span v-else>{{ $t('admin.contactHistories.loadMore') }}</span>
         </button>
       </div>
     </div>
@@ -83,7 +85,7 @@ const columns = [
           class="px-6 py-2.5 rounded-lg font-medium text-sm bg-primary text-white hover:bg-accent transition-colors duration-200"
           @click="emit('create')"
         >
-         <span class="pt-[4px] ml-1 "> + </span> افزودن 
+         <span class="pt-[4px] ml-1 "> + </span> {{ $t('global.button.add') }} 
         </button>
       </div>
     </template>

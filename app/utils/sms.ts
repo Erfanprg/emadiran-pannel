@@ -1,4 +1,5 @@
 import type { SmsDispatch } from '~/types/sms'
+import { translate } from '../i18n/translate'
 
 export const getSmsApiError = (error: unknown, fallback: string): string => {
   if (!error || typeof error !== 'object') return fallback
@@ -10,8 +11,8 @@ export const getSmsApiError = (error: unknown, fallback: string): string => {
 
 export const getSmsUserName = (dispatch: SmsDispatch): string => {
   const user = dispatch.user
-  if (!user) return 'کاربر نامشخص'
-  return user.fullName || [user.firstName, user.lastName].filter(Boolean).join(' ') || 'بدون نام'
+  if (!user) return translate('admin.sms.recipient.unknown')
+  return user.fullName || [user.firstName, user.lastName].filter(Boolean).join(' ') || translate('admin.sms.recipient.noName')
 }
 
 export const canRetrySms = (dispatch: SmsDispatch): boolean =>

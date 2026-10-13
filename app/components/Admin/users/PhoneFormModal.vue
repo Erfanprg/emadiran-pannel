@@ -22,7 +22,7 @@ const emit = defineEmits<{
       <BaseInput
         :model-value="phoneNumber"
         @update:model-value="emit('update:phoneNumber', $event)"
-        label="شماره تلفن"
+        :label="$t('common.fields.phone')"
         required
         :placeholder="phonePlaceholder"
         dir="ltr"
@@ -32,8 +32,8 @@ const emit = defineEmits<{
       <BaseInput
         :model-value="label"
         @update:model-value="emit('update:label', $event)"
-        label="برچسب (اختیاری)"
-        placeholder="مثلاً: تلفن منزل، شماره پدر، شماره دوم"
+        :label="$t('admin.users.phones.fields.labelOptional')"
+        :placeholder="$t('admin.users.phones.fields.labelPlaceholder')"
         :error="errors.label"
       />
 
@@ -53,7 +53,7 @@ const emit = defineEmits<{
           full-width
           @click="emit('close')"
         >
-          انصراف
+          {{ $t('common.actions.cancel') }}
         </BaseButton>
       </div>
     </form>

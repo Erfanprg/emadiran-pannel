@@ -6,22 +6,22 @@
         <div class="space-y-6">
           <div>
             <span class="inline-block px-4 py-2 bg-gradient-to-r from-primary/10 to-secondary/10 text-primary rounded-full text-sm font-medium mb-4">
-              درباره ما
+              {{ $t('global.navigation.about') }}
             </span>
             <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-              عماد، نماد 
+              {{ $t('landing.about.titleStart') }} 
               <span class="bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
-                اعتماد
+                {{ $t('landing.about.titleHighlight') }}
               </span>
             </h2>
           </div>
 
           <p class="text-lg text-gray-700 leading-relaxed">
-            شرکت عماد نماد اعتماد (شماره ثبت ۶۴۷۴۵) فعالیت خود را از تاریخ ۱۰ فروردین ۱۴۰۴ با هدف ارائه خدمات حقوقی و وصول مطالبات به لندتک‌ها، بانک‌ها و سایر فعالان حوزه فین‌تک آغاز کرد.
+            {{ $t('landing.about.paragraph1') }}
           </p>
 
           <p class="text-gray-600 leading-relaxed">
-            این شرکت در عمادایران، با تکیه بر تیمی جوان، متخصص و آشنا با فضای حقوقی و فناوری مالی، تلاش دارد پلی میان دانش حقوقی و فناوری‌های نوین در صنعت اعتباردهی آنلاین ایجاد کند.
+            {{ $t('landing.about.paragraph2') }}
           </p>
 
           <div class="flex flex-wrap gap-4 pt-4">
@@ -29,19 +29,19 @@
               <svg class="w-6 h-6 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
-              <span class="text-gray-900 font-medium">امن و محرمانه</span>
+              <span class="text-gray-900 font-medium">{{ $t('landing.about.features.secure') }}</span>
             </div>
             <div class="flex items-center gap-3 bg-gray-50 px-6 py-3 rounded-lg">
               <svg class="w-6 h-6 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
-              <span class="text-gray-900 font-medium">سریع و چابک</span>
+              <span class="text-gray-900 font-medium">{{ $t('landing.about.features.fast') }}</span>
             </div>
             <div class="flex items-center gap-3 bg-gray-50 px-6 py-3 rounded-lg">
               <svg class="w-6 h-6 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span class="text-gray-900 font-medium">دقیق و شفاف</span>
+              <span class="text-gray-900 font-medium">{{ $t('landing.about.features.accurate') }}</span>
             </div>
           </div>
 
@@ -50,7 +50,7 @@
               to="/auth"
               class="inline-flex items-center gap-2 bg-gradient-to-r from-primary via-accent to-secondary text-white px-8 py-4 rounded-xl font-bold hover:shadow-lg hover:scale-105 transition-all duration-300"
             >
-              ورود به پنل کاربری
+              {{ $t('landing.loginToUserPanel') }}
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
               </svg>
@@ -68,7 +68,7 @@
             <div class="relative flex items-center justify-center">
               <img 
                 src="~/assets/images/why-emadiran.webp" 
-                alt="عماد، نماد اعتماد" 
+                :alt="$t('app.title')" 
                 class="w-full h-auto object-contain drop-shadow-2xl rounded-xl"
               />
             </div>
@@ -83,8 +83,8 @@
                 </svg>
               </div>
               <div>
-                <div class="text-sm font-bold text-gray-900">مورد اعتماد</div>
-                <div class="text-xs text-gray-600">فین‌تک‌های برتر</div>
+                <div class="text-sm font-bold text-gray-900">{{ $t('landing.hero.trustedBy') }}</div>
+                <div class="text-xs text-gray-600">{{ $t('landing.hero.topFintechs') }}</div>
               </div>
             </div>
           </div>

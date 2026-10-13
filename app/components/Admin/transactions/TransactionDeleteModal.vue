@@ -8,6 +8,8 @@ import {
 } from "~/utils/adminTransactionPayload";
 import type { DebtTransactionType, Transaction } from "~/types/transaction";
 
+const { t } = useI18n()
+
 const props = defineProps<{
   transaction: Transaction;
 }>();
@@ -33,16 +35,16 @@ const selectedTransactionTypeLabel = computed(() => {
 
 const selectedTransactionDeleteSummary = computed(
   () =>
-    `شناسه تراکنش ${props.transaction.id} به مبلغ ${formatCurrency(
+    t('admin.transactions.delete.summary', { id: props.transaction.id, amount: formatCurrency(
       props.transaction.amount
-    )} ریال`
+    ) })
 );
 
 const handleDeleteSubmit = async () => {
   deleteError.value = "";
   const reason = (deleteReason.value || "").trim();
   if (reason.length < 5) {
-    deleteError.value = "دلیل باید حداقل ۵ کاراکتر باشد";
+    deleteError.value = t('admin.common.validation.reasonMin');
     return;
   }
 
@@ -53,10 +55,10 @@ const handleDeleteSubmit = async () => {
         reason,
       }),
     {
-      successMessage: "تراکنش با موفقیت حذف شد",
+      successMessage: t('admin.transactions.messages.deleted'),
       onError: (err) => {
         deleteError.value =
-          err?.data?.message || err?.message || "خطا در حذف تراکنش";
+          err?.data?.message || err?.message || t('admin.transactions.errors.delete');
       },
       onSuccess: () => {
         emit("deleted");
@@ -72,9 +74,9 @@ const handleDeleteSubmit = async () => {
     class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
   >
     <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
-      <h3 class="text-lg font-bold text-gray-900 mb-2">حذف تراکنش</h3>
+      <h3 class="text-lg font-bold text-gray-900 mb-2">{{ $t('admin.transactions.delete.title') }}</h3>
       <p class="text-sm text-gray-600 mb-4">
-        آیا از حذف تراکنش {{ selectedTransactionTypeLabel }} اطمینان دارید؟
+        {{ $t('admin.transactions.delete.confirm', { selectedTransactionTypeLabel: selectedTransactionTypeLabel }) }}
       </p>
 
       <div class="mb-4 rounded-lg bg-gray-50 border border-gray-200 p-3">
@@ -85,7 +87,7 @@ const handleDeleteSubmit = async () => {
 
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-2"
-          >دلیل حذف <span class="text-red-500">*</span></label
+          >{{ $t('admin.transactions.delete.reason') }} <span class="text-red-500">*</span></label
         >
         <textarea
           v-model="deleteReason"
@@ -104,15 +106,15 @@ const handleDeleteSubmit = async () => {
           :disabled="isDeleting || deleteReason.trim().length < 5"
           class="py-2.5 rounded-lg bg-gradient-to-r from-red-600 to-red-500 text-white font-medium disabled:opacity-60"
         >
-          <span v-if="isDeleting">در حال حذف...</span>
-          <span v-else>تایید حذف</span>
+          <span v-if="isDeleting">{{ $t('admin.transactions.delete.deleting') }}</span>
+          <span v-else>{{ $t('admin.transactions.delete.submit') }}</span>
         </button>
         <button
           @click="emit('close')"
           :disabled="isDeleting"
           class="py-2.5 rounded-lg bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 disabled:opacity-60"
         >
-          انصراف
+          {{ $t('common.actions.cancel') }}
         </button>
       </div>
     </div>

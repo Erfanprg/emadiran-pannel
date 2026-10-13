@@ -16,7 +16,7 @@ const visibleErrors = computed(() => (props.limit ? props.errors.slice(0, props.
   <div class="bg-red-50 border border-red-200 rounded-lg p-4">
     <h4 class="font-bold text-red-900 mb-3 flex items-center gap-2">
       <IconsOutline name="exclamation-circle" class="w-5 h-5" />
-      خطاها ({{ formatNumber(errors.length) }})
+      {{ $t('admin.import.errorsList.title', { count: formatNumber(errors.length) }) }}
     </h4>
     <div class="overflow-y-auto space-y-2" :class="listClass">
       <div
@@ -27,7 +27,7 @@ const visibleErrors = computed(() => (props.limit ? props.errors.slice(0, props.
         {{ error }}
       </div>
       <p v-if="limit && errors.length > limit" class="text-gray-600 text-xs p-2">
-        و {{ errors.length - limit }} خطای دیگر...
+        {{ $t('admin.import.errorsList.more', { value: errors.length - limit }) }}
       </p>
     </div>
   </div>

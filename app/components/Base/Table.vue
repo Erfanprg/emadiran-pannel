@@ -64,7 +64,7 @@ const isRowExpanded = (row: T) => {
             v-if="$slots.actions"
             class="px-2 md:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase"
           >
-            عملیات
+            {{ $t('common.table.actions') }}
           </th>
         </tr>
       </thead>
@@ -125,7 +125,7 @@ const isRowExpanded = (row: T) => {
         <tr v-if="data.length === 0">
           <td :colspan="columns.length + ($slots.actions ? 1 : 0)" class="px-6 py-12">
             <slot name="empty">
-              <StateEmpty icon="default" message="موردی یافت نشد" />
+              <StateEmpty icon="default" :message="$t('common.states.noResults')" />
             </slot>
           </td>
         </tr>

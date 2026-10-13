@@ -18,7 +18,7 @@ const description = defineModel<string>("description", { required: true });
     <div class="space-y-4">
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-2">
-          مبلغ پرداخت (ریال):
+          {{ $t('user.payment.amount.label') }}
         </label>
         <div class="flex flex-col sm:flex-row gap-3">
           <div class="flex-1 relative">
@@ -28,7 +28,7 @@ const description = defineModel<string>("description", { required: true });
               @blur="emit('blur')"
               type="text"
               inputmode="numeric"
-              placeholder="مبلغ را به ریال وارد کنید"
+              :placeholder="$t('user.payment.amount.placeholder')"
               class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-left"
               :class="error ? 'border-red-500' : 'border-gray-300'"
               dir="ltr"
@@ -38,7 +38,7 @@ const description = defineModel<string>("description", { required: true });
             @click="emit('fill-total')"
             class="px-6 py-3 bg-primary text-white rounded-lg font-bold hover:bg-primary/90 transition-colors duration-200 whitespace-nowrap"
           >
-            کل بدهی
+            {{ $t('user.payment.amount.fillTotal') }}
           </button>
         </div>
         <p v-if="error" class="mt-2 text-sm text-red-600">
@@ -48,12 +48,12 @@ const description = defineModel<string>("description", { required: true });
 
       <div class="pt-4 border-t border-gray-100">
         <label class="block text-sm font-medium text-gray-700 mb-2">
-          توضیحات (اختیاری)
+          {{ $t('common.fields.descriptionOptional') }}
         </label>
         <textarea
           v-model="description"
           rows="3"
-          placeholder="توضیحات پرداخت"
+          :placeholder="$t('user.payment.amount.descriptionPlaceholder')"
           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
         ></textarea>
       </div>

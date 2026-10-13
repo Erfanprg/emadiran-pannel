@@ -12,6 +12,7 @@ import type {
   LoanDebtItem,
   PaymentAllocationPreview,
 } from "~/types/debt";
+import { translate } from '~/i18n/translate'
 
 /**
  * State and flow of the user's "pay debt" page: loan and amount selection,
@@ -120,22 +121,22 @@ export const usePaymentForm = () => {
 
   const previewHint = computed(() => {
     if (previewLoading.value) {
-      return "در حال بررسی پیش‌نمایش...";
+      return translate('user.payment.preview.hints.loading');
     }
 
     if (!amountInput.rawValue.value) {
-      return "ابتدا مبلغ پرداختی را وارد کنید.";
+      return translate('user.payment.preview.hints.enterAmount');
     }
 
     if (!selectedLoanId.value) {
-      return "ابتدا تسهیلات را انتخاب کنید.";
+      return translate('user.payment.preview.hints.selectLoan');
     }
 
     if (!canRequestPreview.value) {
-      return "مبلغ پرداختی را بررسی کنید.";
+      return translate('user.payment.preview.hints.checkAmount');
     }
 
-    return "پیش‌نمایش به صورت خودکار نمایش داده می‌شود.";
+    return translate('user.payment.preview.hints.auto');
   });
 
   const syncSelectedLoan = () => {
@@ -190,18 +191,18 @@ export const usePaymentForm = () => {
     const maxPayableDebt = parseAmount(positiveDebtTotal.value);
 
     if (!amount || amount <= 0) {
-      fieldErrors.value.amount = "لطفاً مبلغ معتبری وارد کنید";
+      fieldErrors.value.amount = translate('common.validation.invalidAmount');
     } else if (amount < 10000) {
-      fieldErrors.value.amount = "حداقل مبلغ پرداخت باید ۱۰,۰۰۰ ریال باشد";
+      fieldErrors.value.amount = translate('user.payment.validation.minAmount');
     } else if (amount > maxPayableDebt) {
-      fieldErrors.value.amount = `مبلغ پرداخت نمی‌تواند بیشتر از مبلغ کل (${formatCurrency(
+      fieldErrors.value.amount = translate('user.payment.validation.maxAmount', { maxPayableDebt: formatCurrency(
         maxPayableDebt,
         true
-      )}) باشد`;
+      ) });
     }
 
     if (!selectedLoanId.value) {
-      fieldErrors.value.selectedLoanId = "لطفاً تسهیلات موردنظر را انتخاب کنید";
+      fieldErrors.value.selectedLoanId = translate('user.payment.validation.selectLoan');
     }
 
     return Object.keys(fieldErrors.value).length === 0;
@@ -234,7 +235,7 @@ export const usePaymentForm = () => {
     } catch (error: any) {
       console.error("Error fetching payment page data:", error);
       loanDebtError.value =
-        error.data?.message || error.message || "خطا در دریافت اطلاعات پرداخت";
+        error.data?.message || error.message || translate('user.payment.errors.fetch');
     } finally {
       loading.value = false;
     }
@@ -272,7 +273,7 @@ export const usePaymentForm = () => {
       allocationPreviewError.value =
         error.data?.message ||
         error.message ||
-        "خطا در دریافت پیش‌نمایش تخصیص پرداخت";
+        translate('user.payment.errors.preview');
     } finally {
       if (requestId === latestPreviewRequestId) {
         previewLoading.value = false;
@@ -299,30 +300,28 @@ export const usePaymentForm = () => {
     paymentError.value = null;
 
     if (!validatePreviewInputs()) {
-      toast.error("لطفاً اطلاعات پرداخت را کامل و صحیح وارد کنید");
+      toast.error(translate('user.payment.validation.incomplete'));
       return;
     }
 
     if (!selectedGateway.value) {
-      paymentError.value = "لطفاً یک درگاه پرداخت انتخاب کنید";
+      paymentError.value = translate('user.payment.validation.selectGateway');
       toast.error(paymentError.value);
       return;
     }
 
     if (!isPreviewCurrent.value) {
       paymentError.value =
-        "پیش از تایید پرداخت، پیش‌نمایش تخصیص مبلغ را مشاهده و بررسی کنید";
+        translate('user.payment.validation.previewRequired');
       toast.error(paymentError.value);
       return;
     }
 
     const confirmed = await confirm({
-      title: "تایید پرداخت",
-      message: `آیا از پرداخت ${formatCurrency(
+      title: translate('user.payment.confirm.title'),
+      message: translate('user.payment.confirm.message', { amount: formatCurrency(
         amountInput.rawValue.value
-      )} ریال برای تسهیلات ${selectedLoan.value?.loanNumber || "-"} از طریق ${
-        selectedGatewayDisplayName.value
-      } اطمینان دارید؟`,
+      ), loanNumber: selectedLoan.value?.loanNumber || "-", gateway: selectedGatewayDisplayName.value }),
       type: "warning",
     });
 
@@ -337,7 +336,7 @@ export const usePaymentForm = () => {
         loanId: selectedLoanId.value!,
       });
 
-      toast.success("در حال انتقال به درگاه پرداخت...");
+      toast.success(translate('user.payment.messages.redirecting'));
 
       setTimeout(() => {
         window.location.href = response.data.paymentUrl;
@@ -345,7 +344,7 @@ export const usePaymentForm = () => {
     } catch (error: any) {
       console.error("Payment initiation error:", error);
       paymentError.value =
-        error.data?.message || error.message || "خطا در ایجاد پرداخت";
+        error.data?.message || error.message || translate('user.payment.errors.initiate');
       toast.error(paymentError.value);
       submitting.value = false;
     }

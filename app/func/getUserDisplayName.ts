@@ -1,3 +1,4 @@
+import { translate } from '../i18n/translate'
 /**
  * Get display name for user
  * Returns firstName + lastName if available, otherwise fallback to fullName
@@ -34,5 +35,5 @@ export function getUserDisplayName(user: {
   }
   
   // Ultimate fallback
-  return 'کاربر'
+  return translate('common.labels.user')
 }

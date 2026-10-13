@@ -4,8 +4,10 @@ import { useMyInstallments } from '~/composables/useMyInstallments'
 import UserInstallmentsTable from '~/components/User/installments/UserInstallmentsTable.vue'
 import FilterSelect from '~/components/User/FilterSelect.vue'
 
+const { t } = useI18n()
+
 useHead({
-  title: 'اقساط من - عماد ایران'
+  title: t('seo.user.installments')
 })
 
 definePageMeta({
@@ -24,42 +26,42 @@ const {
 
 // Status options
 const statusOptions = [
-  { value: 'ALL', label: 'همه' },
-  { value: 'PENDING', label: 'در انتظار' },
-  { value: 'PAID', label: 'پرداخت شده' },
-  { value: 'OVERDUE', label: 'عقب افتاده' }
+  { value: 'ALL', label: t('common.filters.all') },
+  { value: 'PENDING', label: t('status.pending') },
+  { value: 'PAID', label: t('status.paid') },
+  { value: 'OVERDUE', label: t('status.overdue') }
 ]
 </script>
 
 <template>
-  <UserPage title="اقساط من">
+  <UserPage :title="$t('user.installments.title')">
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
       <BaseStatsCard
-        title="اقساط عقب افتاده"
+        :title="$t('user.installments.stats.overdue')"
         :value="stats.overdue.toString()"
-        unit="قسط"
+        :unit="$t('user.installments.stats.unit')"
         icon="mdi:alert-circle"
         color="red"
       />
       <BaseStatsCard
-        title="مبلغ اقساط عقب افتاده"
+        :title="$t('user.installments.stats.overdueAmount')"
         :value="formatCurrency(stats.overdueAmount)"
-        unit="ریال"
+        :unit="$t('global.currency.rial')"
         icon="mdi:cash-remove"
         color="orange"
       />
       <BaseStatsCard
-        title="اقساط باقی‌مانده"
+        :title="$t('user.installments.stats.remaining')"
         :value="stats.remaining.toString()"
-        unit="قسط"
+        :unit="$t('user.installments.stats.unit')"
         icon="mdi:calendar-clock"
         color="blue"
       />
       <BaseStatsCard
-        title="اقساط پرداخت شده"
+        :title="$t('user.installments.stats.paid')"
         :value="stats.paid.toString()"
-        unit="قسط"
+        :unit="$t('user.installments.stats.unit')"
         icon="mdi:check-circle"
         color="green"
       />
@@ -69,10 +71,10 @@ const statusOptions = [
     <BaseCard>
       <template #header>
         <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <h2 class="text-xl font-bold text-gray-900">لیست اقساط</h2>
+          <h2 class="text-xl font-bold text-gray-900">{{ $t('common.labels.installmentsList') }}</h2>
 
           <!-- Status Filter -->
-          <FilterSelect v-model="selectedStatus" label="وضعیت:" :options="statusOptions" />
+          <FilterSelect v-model="selectedStatus" :label="$t('common.fields.statusLabel')" :options="statusOptions" />
         </div>
       </template>
 
@@ -86,8 +88,8 @@ const statusOptions = [
         <div class="w-16 h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
           <Icon name="mdi:calendar-blank" size="32" class="text-gray-400" />
         </div>
-        <p class="text-gray-500 text-lg font-medium mb-2">هیچ قسطی یافت نشد</p>
-        <p class="text-gray-400 text-sm">در حال حاضر قسطی برای نمایش وجود ندارد</p>
+        <p class="text-gray-500 text-lg font-medium mb-2">{{ $t('user.installments.empty.title') }}</p>
+        <p class="text-gray-400 text-sm">{{ $t('user.installments.empty.subtitle') }}</p>
       </div>
 
       <!-- Table -->

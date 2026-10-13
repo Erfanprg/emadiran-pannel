@@ -1,0 +1,140 @@
+{
+  "common": {
+    "actions": {
+      "backToHome": "بازگشت به صفحه اصلی",
+      "cancel": "انصراف",
+      "confirmDelete": "بله، حذف شود",
+      "retry": "تلاش مجدد",
+      "saveChanges": "ذخیره تغییرات",
+      "viewDetails": "مشاهده جزئیات"
+    },
+    "allocations": {
+      "allocatedAmount": "مبلغ تخصیص",
+      "summaryCount": "{count} تسهیلات",
+      "types": {
+        "autoDistributed": "تخصیص خودکار",
+        "recorded": "تخصیص ثبت‌شده",
+        "selectedLoan": "تسهیلات انتخاب‌شده"
+      },
+      "viewDetails": "مشاهده جزئیات تسهیلات"
+    },
+    "brand": {
+      "emadiran": "عمادایران",
+      "short": "عماد"
+    },
+    "currency": {
+      "withUnit": " {formatted} ریال"
+    },
+    "errors": {
+      "fetchTransactions": "خطا در دریافت تاریخچه تراکنش‌ها",
+      "forbidden": "شما دسترسی به این بخش را ندارید",
+      "generic": "خطایی رخ داده است",
+      "notFound": "اطلاعات مورد نظر یافت نشد",
+      "operationFailed": "خطا در انجام عملیات",
+      "server": "خطای سرور. لطفاً بعداً تلاش کنید",
+      "tooManyRequests": "تعداد درخواست‌های شما بیش از حد مجاز است. لطفاً کمی صبر کنید",
+      "unauthorized": "لطفاً وارد حساب کاربری خود شوید"
+    },
+    "fields": {
+      "amount": "مبلغ",
+      "amountRial": "مبلغ (ریال)",
+      "currentDebt": "بدهی فعلی",
+      "date": "تاریخ",
+      "description": "توضیحات",
+      "descriptionOptional": "توضیحات (اختیاری)",
+      "dueDate": "تاریخ سررسید",
+      "fullName": "نام و نام خانوادگی",
+      "id": "شناسه",
+      "lastName": "نام خانوادگی",
+      "loanDetails": "جزئیات تسهیلات",
+      "loanNumber": "شماره تسهیلات",
+      "name": "نام",
+      "nationalCode": "کد ملی",
+      "phone": "شماره تلفن",
+      "selectLoan": "انتخاب تسهیلات",
+      "status": "وضعیت",
+      "statusLabel": "وضعیت:",
+      "transactionDateOptional": "تاریخ تراکنش (اختیاری)",
+      "transactionType": "نوع تراکنش",
+      "type": "نوع"
+    },
+    "filters": {
+      "all": "همه",
+      "allStatuses": "همه وضعیت‌ها",
+      "apply": "اعمال فیلتر",
+      "searchPlaceholder": "جستجو...",
+      "title": "فیلترها"
+    },
+    "labels": {
+      "admin": "مدیر",
+      "importantNotes": "نکات مهم:",
+      "installmentsList": "لیست اقساط",
+      "loginToPanel": "ورود به پنل",
+      "none": "ندارد",
+      "user": "کاربر"
+    },
+    "loanDebts": {
+      "breakdownTitle": "جزئیات بدهی به تفکیک تسهیلات",
+      "loading": "در حال بارگذاری بدهی تسهیلات...",
+      "mismatch": {
+        "computed": "مبلغ محاسبه‌شده",
+        "difference": "اختلاف",
+        "stored": "مبلغ ثبت‌شده",
+        "title": "اختلاف در جمع مبالغ"
+      },
+      "status": {
+        "debtor": "بدهکار",
+        "needsReview": "نیازمند بررسی",
+        "settled": "تسویه"
+      },
+      "table": {
+        "debtAmount": "مبلغی بدهی",
+        "lastTransaction": "آخرین تراکنش",
+        "notRecorded": "ثبت نشده",
+        "transactionCount": "تعداد تراکنش"
+      },
+      "title": "بدهی به تفکیک تسهیلات"
+    },
+    "messages": {
+      "success": "عملیات با موفقیت انجام شد"
+    },
+    "pagination": {
+      "of": "از",
+      "page": "صفحه",
+      "showingRows": "نمایش ردیف",
+      "to": "تا"
+    },
+    "relativeTime": {
+      "days": "{durationdayDate} روز پیش",
+      "hours": "{durationHourDate} ساعت پیش",
+      "justNow": "لحظاتی پیش",
+      "minutes": "{durationMinDate} دقیقه پیش",
+      "months": "{durationMounthDate} ماه پیش",
+      "oneWeek": "یک هفته پیش",
+      "threeWeeks": "سه هفته پیش",
+      "twoWeeks": "دو هفته پیش",
+      "years": "{durationYearDate} سال پیش"
+    },
+    "select": {
+      "placeholder": "انتخاب کنید..."
+    },
+    "states": {
+      "loading": "در حال بارگذاری...",
+      "noResults": "موردی یافت نشد",
+      "nothingToShow": "موردی برای نمایش وجود ندارد",
+      "saving": "در حال ذخیره...",
+      "submitting": "در حال ثبت..."
+    },
+    "table": {
+      "actions": "عملیات",
+      "row": "ردیف"
+    },
+    "units": {
+      "item": "مورد"
+    },
+    "validation": {
+      "fixErrors": "لطفاً خطاهای فرم را برطرف کنید",
+      "invalidAmount": "لطفاً مبلغ معتبری وارد کنید"
+    }
+  }
+}

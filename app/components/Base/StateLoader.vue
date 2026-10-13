@@ -1,11 +1,12 @@
-<script setup lang="ts">
+<script setup lang="ts">import { translate } from '~/i18n/translate'
+
 withDefaults(
   defineProps<{
     message?: string
     size?: 'sm' | 'md' | 'lg'
   }>(),
   {
-    message: 'در حال بارگذاری...',
+    message: () => translate('common.states.loading'),
     size: 'md'
   }
 )

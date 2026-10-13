@@ -5,8 +5,10 @@ import { useToast } from '~/composables/useToast'
 import { useApiCall } from '~/composables/useApiCall'
 import type { AdminUser } from '~/types/admin'
 
+const { t } = useI18n()
+
 useHead({
-  title: 'ویرایش کاربر - عماد ایران'
+  title: t('seo.admin.editUser')
 })
 
 definePageMeta({
@@ -52,7 +54,7 @@ const fetchUserDetails = async () => {
       isActive: user.value.isActive
     }
   } catch (err: any) {
-    error.value = err.data?.message || 'خطا در دریافت اطلاعات کاربر'
+    error.value = err.data?.message || t('admin.common.errors.fetchUser')
     console.error('Error fetching user:', err)
   } finally {
     isLoading.value = false
@@ -64,11 +66,11 @@ const validateForm = () => {
   errors.value = {}
   
   if (!formData.value.firstName.trim()) {
-    errors.value.firstName = 'نام الزامی است'
+    errors.value.firstName = t('admin.users.form.validation.firstNameRequired')
   }
   
   if (!formData.value.lastName.trim()) {
-    errors.value.lastName = 'نام خانوادگی الزامی است'
+    errors.value.lastName = t('admin.users.form.validation.lastNameRequired')
   }
   
   return Object.keys(errors.value).length === 0
@@ -77,7 +79,7 @@ const validateForm = () => {
 // Handle submit
 const handleSubmit = async () => {
   if (!validateForm()) {
-    toast.error('لطفاً خطاهای فرم را برطرف کنید')
+    toast.error(t('common.validation.fixErrors'))
     return
   }
   
@@ -86,7 +88,7 @@ const handleSubmit = async () => {
   const { success } = await execute(
     () => adminApi.updateUser(userId, formData.value),
     {
-      successMessage: 'اطلاعات کاربر با موفقیت ویرایش شد',
+      successMessage: t('admin.users.form.messages.updated'),
       onSuccess: () => router.push(`/admin/users/${userId}`)
     }
   )
@@ -101,12 +103,12 @@ onMounted(() => {
 </script>
 
 <template>
-  <AdminPage title="ویرایش کاربر">
+  <AdminPage :title="$t('admin.users.form.edit.title')">
     <div class="max-w-2xl mx-auto">
       <!-- Loading State -->
       <div v-if="isLoading" class="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
         <div class="inline-block w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-        <p class="text-gray-600 mt-4">در حال بارگذاری...</p>
+        <p class="text-gray-600 mt-4">{{ $t('common.states.loading') }}</p>
       </div>
 
       <!-- Error State -->
@@ -117,7 +119,7 @@ onMounted(() => {
           @click="fetchUserDetails"
           class="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200"
         >
-          تلاش مجدد
+          {{ $t('common.actions.retry') }}
         </button>
       </div>
 
@@ -132,7 +134,7 @@ onMounted(() => {
                   <IconsOutline name="user" class="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <p class="text-sm text-gray-600">شماره موبایل (غیرقابل تغییر)</p>
+                  <p class="text-sm text-gray-600">{{ $t('admin.users.form.fields.mobileReadonly') }}</p>
                   <p class="text-lg font-bold text-gray-900" dir="ltr">{{ user.phoneNumber }}</p>
                 </div>
               </div>
@@ -141,7 +143,7 @@ onMounted(() => {
                   <IconsOutline name="identification" class="w-6 h-6 text-secondary" />
                 </div>
                 <div>
-                  <p class="text-sm text-gray-600">کد ملی (غیرقابل تغییر)</p>
+                  <p class="text-sm text-gray-600">{{ $t('admin.users.form.fields.nationalCodeReadonly') }}</p>
                   <p class="text-lg font-bold text-gray-900" dir="ltr">{{ user.nationalCode }}</p>
                 </div>
               </div>
@@ -151,18 +153,18 @@ onMounted(() => {
           <!-- First Name -->
           <BaseInput
             v-model="formData.firstName"
-            label="نام"
+            :label="$t('common.fields.name')"
             required
-            placeholder="علی"
+            :placeholder="$t('admin.users.form.fields.firstNamePlaceholder')"
             :error="errors.firstName"
           />
 
           <!-- Last Name -->
           <BaseInput
             v-model="formData.lastName"
-            label="نام خانوادگی"
+            :label="$t('common.fields.lastName')"
             required
-            placeholder="احمدی"
+            :placeholder="$t('admin.users.form.fields.lastNamePlaceholder')"
             :error="errors.lastName"
           />
 
@@ -174,9 +176,9 @@ onMounted(() => {
                 type="checkbox"
                 class="w-5 h-5 text-primary border-gray-300 rounded focus:ring-2 focus:ring-primary"
               />
-              <span class="text-sm font-medium text-gray-900">کاربر فعال است</span>
+              <span class="text-sm font-medium text-gray-900">{{ $t('admin.users.form.fields.isActive') }}</span>
             </label>
-            <p class="text-xs text-gray-600 mt-1 mr-8">در صورت غیرفعال بودن، کاربر نمی‌تواند وارد سیستم شود</p>
+            <p class="text-xs text-gray-600 mt-1 mr-8">{{ $t('admin.users.form.fields.isActiveHint') }}</p>
           </div>
 
           <!-- Actions -->
@@ -189,7 +191,7 @@ onMounted(() => {
               :loading="isSubmitting"
               :disabled="isSubmitting"
             >
-              ذخیره تغییرات
+              {{ $t('common.actions.saveChanges') }}
             </BaseButton>
             <NuxtLink
               :to="`/admin/users/${userId}`"
@@ -200,7 +202,7 @@ onMounted(() => {
                 size="lg"
                 full-width
               >
-                انصراف
+                {{ $t('common.actions.cancel') }}
               </BaseButton>
             </NuxtLink>
           </div>

@@ -15,7 +15,7 @@ defineProps<{
     <div class="mb-4">
       <div>
         <h3 class="text-lg font-bold text-gray-900">
-          پیش‌نمایش تخصیص مبلغ پرداخت
+          {{ $t('user.payment.preview.title') }}
         </h3>
       </div>
     </div>
@@ -45,7 +45,7 @@ defineProps<{
                 v-if="allocation.allocationType === 'SELECTED_LOAN'"
                 variant="primary"
               >
-                انتخاب‌شده
+                {{ $t('user.payment.preview.selected') }}
               </BaseBadge>
             </div>
           </div>
@@ -59,14 +59,14 @@ defineProps<{
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div class="rounded-lg bg-gray-50 border border-gray-200 px-3 py-3">
-            <p class="text-xs text-gray-500 mb-1">مبلغ بدهی فعلی</p>
+            <p class="text-xs text-gray-500 mb-1">{{ $t('user.payment.preview.debtBefore') }}</p>
             <p class="font-bold text-gray-900">
               {{ formatCurrency(allocation.currentDebtBeforeAllocation, true) }}
             </p>
           </div>
           <div class="rounded-lg bg-gray-50 border border-gray-200 px-3 py-3">
             <p class="text-xs text-gray-500 mb-1">
-              باقی‌مانده بعد از پرداخت
+              {{ $t('user.payment.preview.debtAfter') }}
             </p>
             <p class="font-bold text-gray-900">
               {{ formatCurrency(allocation.currentDebtAfterAllocation, true) }}

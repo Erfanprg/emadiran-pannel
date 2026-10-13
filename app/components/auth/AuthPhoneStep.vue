@@ -16,13 +16,13 @@ const phoneNumber = defineModel<string>({ required: true })
 <template>
   <div class="space-y-6">
     <div>
-      <h2 class="text-xl font-bold text-gray-900 mb-2">شماره موبایل خود را وارد کنید</h2>
-      <p class="text-sm text-gray-600">کد تایید به شماره شما ارسال خواهد شد</p>
+      <h2 class="text-xl font-bold text-gray-900 mb-2">{{ $t('auth.phone.title') }}</h2>
+      <p class="text-sm text-gray-600">{{ $t('auth.phone.subtitle') }}</p>
     </div>
 
     <div class="space-y-4">
       <div>
-        <label class="block text-sm font-medium text-gray-900 mb-2">شماره موبایل</label>
+        <label class="block text-sm font-medium text-gray-900 mb-2">{{ $t('global.form.mobile_number') }}</label>
         <input
           v-model="phoneNumber"
           type="tel"
@@ -37,14 +37,14 @@ const phoneNumber = defineModel<string>({ required: true })
       <AuthSubmitButton
         :disabled="!isPhoneValid || isSubmitting"
         :loading="isSubmitting"
-        loading-text="در حال ارسال..."
+        :loading-text="$t('auth.phone.sending')"
         @click="emit('submit')"
-      >دریافت کد تایید</AuthSubmitButton>
+      >{{ $t('auth.phone.submit') }}</AuthSubmitButton>
     </div>
 
     <div class="text-center">
       <NuxtLink to="/" class="text-sm text-primary hover:text-accent transition-colors duration-200">
-        بازگشت به صفحه اصلی
+        {{ $t('common.actions.backToHome') }}
       </NuxtLink>
     </div>
   </div>

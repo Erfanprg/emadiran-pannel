@@ -23,17 +23,17 @@ const otpCode = defineModel<string>({ required: true })
   <div class="space-y-6">
     <div>
       <AuthBackButton @click="emit('back')" />
-      <h2 class="text-xl font-bold text-gray-900 mb-2">کد تایید را وارد کنید</h2>
+      <h2 class="text-xl font-bold text-gray-900 mb-2">{{ $t('auth.loginWithOTP_title') }}</h2>
       <p class="text-sm text-gray-600">
-        کد 6 رقمی به شماره
+        {{ $t('auth.otp.sentTo') }}
         <span class="font-bold text-gray-900" dir="ltr">{{ phoneNumber }}</span>
-        ارسال شد
+        {{ $t('auth.otp.sent') }}
       </p>
     </div>
 
     <div class="space-y-4">
       <div>
-        <label class="block text-sm font-medium text-gray-900 mb-2">کد تایید</label>
+        <label class="block text-sm font-medium text-gray-900 mb-2">{{ $t('auth.otp.label') }}</label>
         <input
           v-model="otpCode"
           type="text"
@@ -48,9 +48,9 @@ const otpCode = defineModel<string>({ required: true })
       <AuthSubmitButton
         :disabled="!isOtpValid || isSubmitting"
         :loading="isSubmitting"
-        loading-text="در حال بررسی..."
+        :loading-text="$t('auth.checking')"
         @click="emit('submit')"
-      >تایید و ورود</AuthSubmitButton>
+      >{{ $t('auth.otp.submit') }}</AuthSubmitButton>
 
       <!-- Resend OTP -->
       <div class="text-center">
@@ -59,7 +59,7 @@ const otpCode = defineModel<string>({ required: true })
           disabled
           class="text-sm text-gray-500 cursor-not-allowed"
         >
-          ارسال مجدد کد ({{ formatCountdown }})
+          {{ $t('auth.otp.resendIn', { formatCountdown: formatCountdown }) }}
         </button>
         <button
           v-else
@@ -67,7 +67,7 @@ const otpCode = defineModel<string>({ required: true })
           :disabled="isSubmitting"
           class="text-sm text-primary hover:text-accent font-medium transition-colors duration-200"
         >
-          ارسال مجدد کد تایید
+          {{ $t('auth.otp.resend') }}
         </button>
       </div>
     </div>

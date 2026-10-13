@@ -1,5 +1,6 @@
 import { transactionsApi } from "~/services/api/transactions";
 import type { Transaction } from "~/types/transaction";
+import { translate } from '~/i18n/translate'
 
 /**
  * Paginated transaction history of a single user (admin panel).
@@ -38,7 +39,7 @@ export const useUserTransactions = (userId: number) => {
       userTransactions.value = [];
       transactionsTotal.value = 0;
       transactionsError.value =
-        err.data?.message || err.message || "خطا در دریافت تاریخچه تراکنش‌ها";
+        err.data?.message || err.message || translate('common.errors.fetchTransactions');
     } finally {
       isLoadingTransactions.value = false;
     }

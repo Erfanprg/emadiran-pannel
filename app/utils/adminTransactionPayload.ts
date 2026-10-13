@@ -1,13 +1,14 @@
 import type { DebtTransactionType, Transaction, UpdateTransactionRequest } from '../types/transaction'
 import { convertJalaliDateToIso, isValidJalaliDate } from '../func/GenerateDate'
+import { translate } from '../i18n/translate'
 
 export const ADD_DEBT_TRANSACTION_TYPES: Array<{ value: Extract<DebtTransactionType, 'ADMIN_DEBT_ADD' | 'LEGAL_DEBT_ADD'>; label: string }> = [
-  { value: 'ADMIN_DEBT_ADD', label: 'افزایش بدهی' },
-  { value: 'LEGAL_DEBT_ADD', label: 'افزایش بدهی حقوقی' }
+  { value: 'ADMIN_DEBT_ADD', get label() { return translate('status.transactionType.debtAdd') } },
+  { value: 'LEGAL_DEBT_ADD', get label() { return translate('status.transactionType.legalDebtAdd') } }
 ]
 
 export const REDUCE_DEBT_TRANSACTION_TYPES: Array<{ value: Extract<DebtTransactionType, 'ADMIN_DEBT_REDUCE'>; label: string }> = [
-  { value: 'ADMIN_DEBT_REDUCE', label: 'پرداخت بدهی' }
+  { value: 'ADMIN_DEBT_REDUCE', get label() { return translate('status.transactionType.debtPayment') } }
 ]
 
 export const EDITABLE_TRANSACTION_TYPES: DebtTransactionType[] = [
@@ -56,32 +57,32 @@ export interface EditValidationResult {
 }
 
 export const getTransactionTypeLabel = (type: DebtTransactionType): string => {
-  if (type === 'ADMIN_DEBT_ADD') return 'افزایش بدهی'
-  if (type === 'LEGAL_DEBT_ADD') return 'افزایش بدهی حقوقی'
-  return 'پرداخت بدهی'
+  if (type === 'ADMIN_DEBT_ADD') return translate('status.transactionType.debtAdd')
+  if (type === 'LEGAL_DEBT_ADD') return translate('status.transactionType.legalDebtAdd')
+  return translate('status.transactionType.debtPayment')
 }
 
 export const validateDebtForm = (input: DebtFormInput): DebtFormValidationResult => {
   const errors: DebtFormValidationResult['errors'] = {}
 
   if (!Number.isFinite(input.amount) || input.amount <= 0) {
-    errors.amount = 'مبلغ باید بیشتر از صفر باشد'
+    errors.amount = translate('admin.transactions.validation.amountPositive')
   }
 
   if (!input.type) {
-    errors.transactionType = 'لطفاً نوع تراکنش را مشخص کنید'
+    errors.transactionType = translate('admin.transactions.validation.typeRequired')
   } else if (!EDITABLE_TRANSACTION_TYPES.includes(input.type)) {
-    errors.transactionType = 'نوع تراکنش معتبر نیست'
+    errors.transactionType = translate('admin.transactions.validation.typeInvalid')
   }
 
   let transactionDateIso: string | undefined
   if (input.jalaliDate && input.jalaliDate.trim()) {
     if (!isValidJalaliDate(input.jalaliDate)) {
-      errors.transactionDate = 'تاریخ تراکنش معتبر نیست'
+      errors.transactionDate = translate('admin.transactions.validation.dateInvalid')
     } else {
       const iso = convertJalaliDateToIso(input.jalaliDate)
       if (!iso) {
-        errors.transactionDate = 'تاریخ تراکنش معتبر نیست'
+        errors.transactionDate = translate('admin.transactions.validation.dateInvalid')
       } else {
         transactionDateIso = iso
       }
@@ -107,13 +108,13 @@ export const buildEditTransactionPayload = (
   const nextAmount = Number((form.amount || '').replace(/,/g, ''))
   const originalAmount = Number(original.amount)
   if (!Number.isFinite(nextAmount) || nextAmount < 1000) {
-    errors.amount = 'حداقل مبلغ باید ۱,۰۰۰ ریال باشد'
+    errors.amount = translate('admin.transactions.validation.minAmount')
   } else if (nextAmount !== originalAmount) {
     payload.amount = String(nextAmount)
   }
 
   if (!EDITABLE_TRANSACTION_TYPES.includes(form.type)) {
-    errors.type = 'نوع تراکنش معتبر نیست'
+    errors.type = translate('admin.transactions.validation.typeInvalid')
   } else if (form.type !== original.type) {
     payload.type = form.type
   }
@@ -127,11 +128,11 @@ export const buildEditTransactionPayload = (
   const dateHasValue = Boolean(form.jalaliDate && form.jalaliDate.trim())
   if (dateHasValue) {
     if (!isValidJalaliDate(form.jalaliDate)) {
-      errors.transactionDate = 'تاریخ تراکنش معتبر نیست'
+      errors.transactionDate = translate('admin.transactions.validation.dateInvalid')
     } else {
       const iso = convertJalaliDateToIso(form.jalaliDate)
       if (!iso) {
-        errors.transactionDate = 'تاریخ تراکنش معتبر نیست'
+        errors.transactionDate = translate('admin.transactions.validation.dateInvalid')
       } else {
         const originalIso = original.transactionDate ? new Date(original.transactionDate).toISOString() : ''
         if (!originalIso || originalIso !== iso) {
@@ -142,12 +143,12 @@ export const buildEditTransactionPayload = (
   }
 
   if (payload.reason.length < 5) {
-    errors.reason = 'دلیل باید حداقل ۵ کاراکتر باشد'
+    errors.reason = translate('admin.common.validation.reasonMin')
   }
 
   const changedFieldsCount = Object.keys(payload).filter((key) => key !== 'reason').length
   if (changedFieldsCount === 0 && Object.keys(errors).length === 0) {
-    errors.reason = 'حداقل یک فیلد را تغییر دهید'
+    errors.reason = translate('admin.transactions.validation.noChanges')
   }
 
   if (Object.keys(errors).length > 0) {

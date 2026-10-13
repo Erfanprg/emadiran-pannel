@@ -16,7 +16,7 @@ const selectedLoanId = defineModel<string | number>({ required: true });
     <div class="space-y-4">
       <div>
         <h3 class="text-lg font-bold text-gray-900">
-          انتخاب تسهیلات
+          {{ $t('common.fields.selectLoan') }}
         </h3>
       </div>
 
@@ -29,14 +29,14 @@ const selectedLoanId = defineModel<string | number>({ required: true });
         >
           <div>
             <p class="text-sm text-gray-500 mb-1">
-              تسهیلات دارای بدهی
+              {{ $t('user.payment.total.loansWithDebt') }}
             </p>
             <p class="text-lg font-bold text-gray-900" dir="ltr">
               {{ selectedLoan.loanNumber }}
             </p>
           </div>
           <div class="text-left">
-            <p class="text-sm text-gray-500 mb-1">بدهی فعلی</p>
+            <p class="text-sm text-gray-500 mb-1">{{ $t('common.fields.currentDebt') }}</p>
             <p class="text-lg font-bold text-gray-900">
               {{ formatCurrency(selectedLoan.currentDebt, true) }}
             </p>
@@ -47,9 +47,9 @@ const selectedLoanId = defineModel<string | number>({ required: true });
       <BaseSelect
         v-else
         v-model="selectedLoanId"
-        label="تسهیلات موردنظر"
+        :label="$t('user.payment.loan.label')"
         required
-        placeholder="تسهیلات دارای بدهی را انتخاب کنید"
+        :placeholder="$t('user.payment.loan.placeholder')"
         :error="error"
         :options="
           loans.map((loan) => ({

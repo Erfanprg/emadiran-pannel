@@ -40,13 +40,13 @@ const goToNext = () => {
   >
     <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
       <div class="text-sm text-gray-600 text-center md:text-right">
-        نمایش ردیف
+        {{ $t('common.pagination.showingRows') }}
         <span class="font-bold text-gray-900">{{ formatNumber(from) }}</span>
-        تا
+        {{ $t('common.pagination.to') }}
         <span class="font-bold text-gray-900">{{ formatNumber(to) }}</span>
-        از
+        {{ $t('common.pagination.of') }}
         <span class="font-bold text-gray-900">{{ formatNumber(total) }}</span>
-        مورد
+        {{ $t('common.units.item') }}
       </div>
 
       <div class="flex items-center justify-center gap-2 self-center md:self-auto">
@@ -56,12 +56,12 @@ const goToNext = () => {
           :disabled="page === 1"
           @click="goToPrevious"
         >
-          قبلی
+          {{ $t('global.button.previous') }}
         </BaseButton>
         <div class="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm text-gray-700 shadow-sm">
-          صفحه
+          {{ $t('common.pagination.page') }}
           <span class="font-bold text-gray-900">{{ formatNumber(page) }}</span>
-          از
+          {{ $t('common.pagination.of') }}
           <span class="font-bold text-gray-900">{{ formatNumber(totalPages) }}</span>
         </div>
         <BaseButton
@@ -70,7 +70,7 @@ const goToNext = () => {
           :disabled="page >= totalPages"
           @click="goToNext"
         >
-          بعدی
+          {{ $t('global.button.next') }}
         </BaseButton>
       </div>
     </div>

@@ -2,6 +2,8 @@
 import { useAuthStore } from "~/stores/auth";
 import { formatCurrency } from "~/utils/formatters";
 
+const { t } = useI18n()
+
 const props = defineProps<{
   title: string;
 }>();
@@ -11,19 +13,19 @@ const route = useRoute();
 
 // Navigation items
 const navItems = [
-  { title: "داشبورد", path: "/dashboard", icon: "mdi:view-dashboard" },
+  { title: t('global.navigation.dashboard'), path: "/dashboard", icon: "mdi:view-dashboard" },
   // {
   //   title: "اقساط من",
   //   path: "/dashboard/installments",
   //   icon: "mdi:calendar-clock",
   // },
   {
-    title: "تاریخچه بدهی‌ها",
+    title: t('user.common.debtHistory'),
     path: "/dashboard/transactions",
     icon: "mdi:receipt-text",
   },
   {
-    title: "پرداخت بدهی",
+    title: t('user.common.payDebt'),
     path: "/dashboard/payment/new",
     icon: "mdi:credit-card-plus",
   },
@@ -53,7 +55,7 @@ const handleLogout = async () => {
         <!-- Logo & Title -->
         <div class="flex items-center">
           <div class="flex items-center gap-3">
-            <img src="/emad-logo-p.png" alt="عماد" class="h-10" />
+            <img src="/emad-logo-p.png" :alt="$t('common.brand.short')" class="h-10" />
           
           </div>
         </div>
@@ -81,10 +83,10 @@ const handleLogout = async () => {
           <!-- Debt Display -->
           <div v-if="authStore.user" class="hidden md:block">
             <div class="text-left bg-red-50 px-4 py-2 rounded-lg">
-              <p class="text-xs text-red-600 font-medium">بدهی شما</p>
+              <p class="text-xs text-red-600 font-medium">{{ $t('user.layout.yourDebt') }}</p>
               <p class="text-lg font-bold text-red-700">
                 {{ formatCurrency(authStore.user.totalDebt || "0") }}
-                <span class="text-xs">ریال</span>
+                <span class="text-xs">{{ $t('global.currency.rial') }}</span>
               </p>
             </div>
           </div>
@@ -93,7 +95,7 @@ const handleLogout = async () => {
           <NuxtLink
             to="/dashboard/profile"
             class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 group"
-            title="پروفایل کاربری"
+            :title="$t('user.common.profile')"
           >
         
             <div class="text-right sm:block">
@@ -102,7 +104,7 @@ const handleLogout = async () => {
               >
                 {{ authStore.userFullName }}
               </p>
-              <p class="text-xs text-gray-500">مشاهده پروفایل</p>
+              <p class="text-xs text-gray-500">{{ $t('user.layout.viewProfile') }}</p>
             </div>
           </NuxtLink>
 
@@ -110,10 +112,10 @@ const handleLogout = async () => {
           <button
             @click="handleLogout"
             class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
-            title="خروج"
+            :title="$t('global.button.logout')"
           >
             <Icon name="mdi:logout" size="20" />
-            <span class=" sm:inline">خروج</span>
+            <span class=" sm:inline">{{ $t('global.button.logout') }}</span>
           </button>
         </div>
       </div>
@@ -141,9 +143,9 @@ const handleLogout = async () => {
         <div
           class="bg-red-50 px-4 py-2 rounded-lg flex items-center justify-between"
         >
-          <span class="text-xs text-red-600 font-medium">بدهی شما:</span>
+          <span class="text-xs text-red-600 font-medium">{{ $t('user.layout.yourDebtLabel') }}</span>
           <span class="text-sm font-bold text-red-700" dir="ltr">
-            ریال {{ formatCurrency(authStore.user.totalDebt || "0") }}
+            {{ $t('user.layout.debtAmountRial', { value: formatCurrency(authStore.user.totalDebt || "0") }) }}
           </span>
         </div>
       </div>

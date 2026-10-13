@@ -33,7 +33,7 @@ const colors = computed(() => colorClasses[props.color])
       </div>
       <p class="text-sm text-gray-600 mb-2">{{ label }}</p>
       <p class="font-bold" :class="[large ? 'text-3xl' : 'text-2xl', colors.text]" dir="ltr">{{ value }}</p>
-      <p class="text-xs text-gray-500 mt-1">ریال</p>
+      <p class="text-xs text-gray-500 mt-1">{{ $t('global.currency.rial') }}</p>
     </div>
   </BaseCard>
 </template>

@@ -55,7 +55,7 @@ const emit = defineEmits<{
                   : 'bg-red-100 text-red-800'
               "
             >
-              {{ user.isActive ? "فعال" : "غیرفعال" }}
+              {{ user.isActive ? $t('status.active') : $t('status.inactive') }}
             </span>
           </div>
         </div>
@@ -70,14 +70,14 @@ const emit = defineEmits<{
           :to="`/admin/users/edit/${user.id}`"
           class="px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-accent transition-colors duration-200 font-medium text-center text-sm"
         >
-          ویرایش اطلاعات
+          {{ $t('admin.users.detail.actions.edit') }}
         </NuxtLink>
         <NuxtLink
           :to="`/admin/users/phones/${user.id}`"
           class="px-4 py-2.5 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors duration-200 font-medium flex items-center justify-center gap-2 text-sm"
         >
           <IconsOutline name="phone" class="w-4 h-4" />
-          مدیریت شماره‌ها
+          {{ $t('admin.users.detail.actions.phones') }}
         </NuxtLink>
         <button
           v-if="user.role !== 'ADMIN'"
@@ -85,7 +85,7 @@ const emit = defineEmits<{
           class="px-4 py-2.5 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors duration-200 font-medium flex items-center justify-center gap-2 text-sm"
         >
           <IconsOutline name="plus" class="w-4 h-4" />
-          افزودن بدهی
+          {{ $t('admin.common.addDebt') }}
         </button>
         <button
           v-if="user.role !== 'ADMIN' && parseInt(user.totalDebt) > 0"
@@ -93,21 +93,21 @@ const emit = defineEmits<{
           class="px-4 py-2.5 bg-orange-50 text-orange-600 rounded-lg hover:bg-orange-100 transition-colors duration-200 font-medium flex items-center justify-center gap-2 text-sm"
         >
           <IconsOutline name="minus" class="w-4 h-4" />
-          کاهش بدهی
+          {{ $t('status.transactionType.debtReduce') }}
         </button>
         <button
           @click="emit('open-contact-histories')"
           class="px-4 py-2.5 bg-slate-50 text-slate-700 rounded-lg hover:bg-slate-100 transition-colors duration-200 font-medium flex items-center justify-center gap-2 text-sm"
         >
           <IconsOutline name="note" class="w-4 h-4" />
-          تاریخچه تماس‌ها
+          {{ $t('admin.contactHistories.title') }}
         </button>
         <button
           v-if="user.role !== 'ADMIN'"
           @click="emit('toggle-status')"
           class="px-4 py-2.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors duration-200 font-medium text-sm"
         >
-          {{ user.isActive ? "غیرفعال کردن" : "فعال کردن" }}
+          {{ user.isActive ? $t('admin.common.deactivate') : $t('admin.common.activate') }}
         </button>
       </div>
     </div>
@@ -122,7 +122,7 @@ const emit = defineEmits<{
             <IconsOutline name="hashtag" class="w-5 h-5 text-primary" />
           </div>
           <div>
-            <p class="text-xs text-gray-600 mb-1">شناسه کاربر</p>
+            <p class="text-xs text-gray-600 mb-1">{{ $t('admin.users.detail.fields.userId') }}</p>
             <p class="text-lg font-bold text-gray-900">{{ user.id }}</p>
           </div>
         </div>
@@ -134,7 +134,7 @@ const emit = defineEmits<{
             <IconsOutline name="phone" class="w-5 h-5 text-green-600" />
           </div>
           <div>
-            <p class="text-xs text-gray-600 mb-1">شماره موبایل</p>
+            <p class="text-xs text-gray-600 mb-1">{{ $t('global.form.mobile_number') }}</p>
             <p class="text-lg font-bold text-gray-900" dir="ltr">
               {{ user.phoneNumber }}
             </p>
@@ -150,7 +150,7 @@ const emit = defineEmits<{
             <IconsOutline name="identification" class="w-5 h-5 text-blue-600" />
           </div>
           <div>
-            <p class="text-xs text-gray-600 mb-1">کد ملی</p>
+            <p class="text-xs text-gray-600 mb-1">{{ $t('common.fields.nationalCode') }}</p>
             <p class="text-lg font-bold text-gray-900">
               {{ user.nationalCode }}
             </p>
@@ -166,7 +166,7 @@ const emit = defineEmits<{
             <IconsOutline name="money" class="w-5 h-5 text-red-600" />
           </div>
           <div class="flex-1">
-            <p class="text-xs text-gray-600 mb-1">مبلغ بدهی</p>
+            <p class="text-xs text-gray-600 mb-1">{{ $t('admin.users.detail.fields.debtAmount') }}</p>
             <p class="text-xl font-bold text-red-600" dir="ltr">
               {{ formatCurrency(user.totalDebt, true) }}
             </p>
@@ -176,7 +176,7 @@ const emit = defineEmits<{
             :to="`/admin/users/debt-history/${user.id}`"
             class="px-3 py-2 bg-white border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-colors duration-200 text-sm font-medium whitespace-nowrap"
           >
-            تاریخچه
+            {{ $t('admin.users.detail.actions.history') }}
           </NuxtLink>
         </div>
       </div>
@@ -186,14 +186,14 @@ const emit = defineEmits<{
     <div class="pt-6 border-t border-gray-200 grid md:grid-cols-2 gap-4">
       <div class="flex items-center gap-2 text-sm">
         <IconsOutline name="calendar" class="w-5 h-5 text-gray-400" />
-        <span class="text-gray-600">تاریخ ثبت‌نام:</span>
+        <span class="text-gray-600">{{ $t('admin.users.detail.dates.registeredAt') }}</span>
         <span class="font-medium text-gray-900">
           {{ new Date(user.createdAt).toLocaleDateString("fa-IR") }}
         </span>
       </div>
       <div class="flex items-center gap-2 text-sm">
         <IconsOutline name="refresh" class="w-5 h-5 text-gray-400" />
-        <span class="text-gray-600">آخرین به‌روزرسانی:</span>
+        <span class="text-gray-600">{{ $t('admin.users.detail.dates.updatedAt') }}</span>
         <span class="font-medium text-gray-900">
           {{ new Date(user.updatedAt).toLocaleDateString("fa-IR") }}
         </span>

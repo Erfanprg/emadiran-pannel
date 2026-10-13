@@ -1,6 +1,7 @@
 import { userApi } from '~/services/api/user'
 import { formatDate } from '~/utils/formatters'
 import type { Transaction } from '~/types/transaction'
+import { translate } from '~/i18n/translate'
 
 /**
  * Filtered, paginated transaction history of the logged-in user, plus payment stats.
@@ -60,7 +61,7 @@ export const useMyTransactions = () => {
     } catch (err) {
       console.error('Error fetching transactions:', err)
       const apiError = err as { data?: { message?: string }; message?: string }
-      error.value = apiError.data?.message || apiError.message || 'خطا در دریافت تاریخچه تراکنش‌ها'
+      error.value = apiError.data?.message || apiError.message || translate('common.errors.fetchTransactions')
       transactions.value = []
     } finally {
       loading.value = false

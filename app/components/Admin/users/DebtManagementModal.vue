@@ -14,6 +14,8 @@ import {
 import type { LoanListItem } from "~/types/loan";
 import type { DebtTransactionType } from "~/types/transaction";
 
+const { t } = useI18n()
+
 const props = defineProps<{
   userId: number;
   user: any;
@@ -74,7 +76,7 @@ const fetchUserLoans = async () => {
     }
   } catch (err: any) {
     console.error("Error fetching loans:", err);
-    toast.error("خطا در دریافت لیست تسهیلات");
+    toast.error(t('admin.common.errors.fetchLoans'));
   } finally {
     isLoadingLoans.value = false;
   }
@@ -88,7 +90,7 @@ const formatLoanOption = (loan: LoanListItem) => {
 // Create loan for user
 const createLoanForUser = async () => {
   if (!debtForm.value.newLoanNumber.trim()) {
-    toast.error("لطفاً شماره تسهیلات را وارد کنید");
+    toast.error(t('admin.common.loans.numberRequired'));
     return false;
   }
 
@@ -98,12 +100,12 @@ const createLoanForUser = async () => {
       userId: props.userId,
       loanNumber: debtForm.value.newLoanNumber.trim(),
     });
-    toast.success("تسهیلات جدید با موفقیت ایجاد شد");
+    toast.success(t('admin.common.loans.created'));
     await fetchUserLoans();
     return true;
   } catch (err: any) {
     console.error("Error creating loan:", err);
-    toast.error(err.data?.message || err.message || "خطا در ایجاد تسهیلات");
+    toast.error(err.data?.message || err.message || t('admin.common.loans.createFailed'));
     return false;
   } finally {
     isLoadingLoans.value = false;
@@ -145,8 +147,8 @@ const handleDebtSubmit = async () => {
     !debtAmountInput.rawValue.value ||
     debtAmountInput.numericValue.value <= 0
   ) {
-    debtFieldErrors.value.amount = "لطفاً مبلغ معتبری وارد کنید";
-    toast.error("لطفاً مبلغ معتبری وارد کنید");
+    debtFieldErrors.value.amount = t('common.validation.invalidAmount');
+    toast.error(t('common.validation.invalidAmount'));
     return;
   }
 
@@ -158,14 +160,14 @@ const handleDebtSubmit = async () => {
 
   if (!validation.isValid) {
     debtFieldErrors.value = { ...debtFieldErrors.value, ...validation.errors };
-    toast.error("لطفاً خطاهای فرم را برطرف کنید");
+    toast.error(t('common.validation.fixErrors'));
     return;
   }
 
   // Validation for new loan mode
   if (showNewLoanInput.value && !debtForm.value.newLoanNumber.trim()) {
-    debtFieldErrors.value.newLoanNumber = "لطفاً شماره تسهیلات را وارد کنید";
-    toast.error("لطفاً شماره تسهیلات را وارد کنید");
+    debtFieldErrors.value.newLoanNumber = t('admin.common.loans.numberRequired');
+    toast.error(t('admin.common.loans.numberRequired'));
     return;
   }
 
@@ -175,8 +177,8 @@ const handleDebtSubmit = async () => {
     !debtForm.value.loanId &&
     loans.value.length > 0
   ) {
-    debtFieldErrors.value.loanId = "لطفاً یک تسهیلات انتخاب کنید";
-    toast.error("لطفاً یک تسهیلات انتخاب کنید");
+    debtFieldErrors.value.loanId = t('admin.users.debt.validation.selectLoan');
+    toast.error(t('admin.users.debt.validation.selectLoan'));
     return;
   }
 
@@ -184,9 +186,9 @@ const handleDebtSubmit = async () => {
     debtForm.value.transactionType = "ADMIN_DEBT_REDUCE";
     const maxDebt = parseInt(props.user?.totalDebt || "0");
     if (debtAmountInput.numericValue.value > maxDebt) {
-      const debtSafetyMessage = `مبلغ کاهش نمی‌تواند بیشتر از بدهی فعلی (${formatNumber(
+      const debtSafetyMessage = t('admin.users.debt.validation.reduceExceedsDebt', { maxDebt: formatNumber(
         maxDebt
-      )} ریال) باشد`;
+      ) });
       debtFieldErrors.value.amount = debtSafetyMessage;
       toast.error(debtSafetyMessage);
       return;
@@ -195,14 +197,14 @@ const handleDebtSubmit = async () => {
 
   const confirmMessage =
     props.type === "add"
-      ? `آیا از افزودن ${formatCurrency(
+      ? t('admin.users.debt.confirm.add', { debtAmountInput: formatCurrency(
           debtAmountInput.rawValue.value
-        )} ریال به بدهی کاربر (${getTransactionTypeLabel(
+        ), transactionType: getTransactionTypeLabel(
           debtForm.value.transactionType as DebtTransactionType
-        )}) اطمینان دارید؟`
-      : `آیا از کاهش ${formatCurrency(
+        ) })
+      : t('admin.users.debt.confirm.reduce', { debtAmountInput: formatCurrency(
           debtAmountInput.rawValue.value
-        )} ریال از بدهی کاربر اطمینان دارید؟`;
+        ) });
 
   const confirmed = await confirm({
     message: confirmMessage,
@@ -250,10 +252,10 @@ const handleDebtSubmit = async () => {
   await execute(apiCall, {
     successMessage:
       props.type === "add"
-        ? "بدهی با موفقیت افزوده شد"
-        : "بدهی با موفقیت کاهش یافت",
+        ? t('admin.users.debt.messages.added')
+        : t('admin.users.debt.messages.reduced'),
     onError: (err) => {
-      const message = err?.data?.message || err?.message || "خطا در ثبت تراکنش";
+      const message = err?.data?.message || err?.message || t('admin.users.debt.errors.submit');
       setDebtFieldErrorsFromBackend(message);
     },
     onSuccess: () => {
@@ -274,7 +276,7 @@ fetchUserLoans();
     <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
       <div class="flex items-center justify-between mb-6">
         <h3 class="text-xl font-bold text-gray-900">
-          {{ type === "add" ? "افزودن بدهی" : "کاهش بدهی" }}
+          {{ type === "add" ? $t('admin.common.addDebt') : $t('admin.users.debt.actions.reduce') }}
         </h3>
         <button
           @click="emit('close')"
@@ -290,7 +292,7 @@ fetchUserLoans();
           <div
             class="inline-block w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"
           ></div>
-          <p class="text-gray-600 text-sm mt-2">در حال بارگذاری تسهیلات...</p>
+          <p class="text-gray-600 text-sm mt-2">{{ $t('admin.users.debt.loadingLoans') }}</p>
         </div>
 
         <div v-else>
@@ -298,14 +300,14 @@ fetchUserLoans();
           <div v-if="showLoanWarning && showNewLoanInput" class="mb-4">
             <div class="bg-yellow-50 rounded-lg p-3 mb-3 text-center">
               <p class="text-sm text-yellow-800">
-                این کاربر تسهیلاتی ندارد. لطفاً شماره تسهیلات جدید وارد کنید.
+                {{ $t('admin.users.debt.noLoans') }}
               </p>
             </div>
 
             <!-- Manual loan number input -->
             <div>
               <label class="block text-sm font-medium text-gray-900 mb-2">
-                شماره تسهیلات جدید <span class="text-red-500">*</span>
+                {{ $t('admin.common.loans.newNumber') }} <span class="text-red-500">*</span>
               </label>
               <input
                 v-model="debtForm.newLoanNumber"
@@ -324,7 +326,7 @@ fetchUserLoans();
                 <!-- Manual loan number input -->
                 <div>
                   <label class="block text-sm font-medium text-gray-900 mb-2">
-                    شماره تسهیلات جدید <span class="text-red-500">*</span>
+                    {{ $t('admin.common.loans.newNumber') }} <span class="text-red-500">*</span>
                   </label>
                   <input
                     v-model="debtForm.newLoanNumber"
@@ -352,7 +354,7 @@ fetchUserLoans();
           <!-- Select existing loan -->
           <div v-else-if="loans.length > 0">
             <label class="block text-sm font-medium text-gray-900 mb-2">
-              انتخاب تسهیلات <span class="text-red-500">*</span>
+              {{ $t('common.fields.selectLoan') }} <span class="text-red-500">*</span>
             </label>
             <select
               v-model="debtForm.loanId"
@@ -363,7 +365,7 @@ fetchUserLoans();
               dir="ltr"
             >
               <option disabled :value="undefined">
-                تسهیلات کاربر را انتخاب کنید
+                {{ $t('admin.users.debt.selectLoanHint') }}
               </option>
               <option v-for="loan in loans" :key="loan.id" :value="loan.id">
                 {{ formatLoanOption(loan) }}
@@ -387,8 +389,8 @@ fetchUserLoans();
             <IconsOutline name="plus" class="w-4 h-4" />
             {{
               showNewLoanInput
-                ? "انتخاب از تسهیلات موجود"
-                : "ایجاد تسهیلات جدید"
+                ? $t('admin.users.debt.useExistingLoan')
+                : $t('admin.common.loans.createNew')
             }}
           </button>
         </div>
@@ -396,7 +398,7 @@ fetchUserLoans();
         <!-- Amount -->
         <div>
           <label class="block text-sm font-medium text-gray-900 mb-2">
-            مبلغ (ریال) <span class="text-red-500">*</span>
+            {{ $t('common.fields.amountRial') }} <span class="text-red-500">*</span>
           </label>
           <input
             :value="debtAmountInput.displayValue.value"
@@ -417,14 +419,14 @@ fetchUserLoans();
             v-if="type === 'reduce'"
             class="mt-1 text-xs text-gray-600"
           >
-            حداکثر: {{ formatCurrency(user?.totalDebt || "0") }} ریال
+            {{ $t('admin.users.debt.maxAmount', { value: formatCurrency(user?.totalDebt || "0") }) }}
           </p>
         </div>
 
         <!-- Transaction Date -->
         <div>
           <label class="block text-sm font-medium text-gray-900 mb-2"
-            >تاریخ تراکنش (اختیاری)</label
+            >{{ $t('common.fields.transactionDateOptional') }}</label
           >
           <input
             v-model="debtForm.transactionDate"
@@ -453,12 +455,12 @@ fetchUserLoans();
         <!-- Description -->
         <div>
           <label class="block text-sm font-medium text-gray-900 mb-2">
-            توضیحات (اختیاری)
+            {{ $t('common.fields.descriptionOptional') }}
           </label>
           <textarea
             v-model="debtForm.description"
             rows="3"
-            placeholder="توضیحات مربوط به این تراکنش..."
+            :placeholder="$t('admin.users.debt.descriptionPlaceholder')"
             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
           ></textarea>
         </div>
@@ -466,7 +468,7 @@ fetchUserLoans();
         <!-- Transaction Type -->
         <div>
           <label class="block text-sm font-medium text-gray-900 mb-2">
-            نوع تراکنش
+            {{ $t('common.fields.transactionType') }}
           </label>
           <select
             v-model="debtForm.transactionType"
@@ -482,10 +484,10 @@ fetchUserLoans();
               v-if="type === 'reduce'"
               value="ADMIN_DEBT_REDUCE"
             >
-              کاهش بدهی
+              {{ $t('admin.users.debt.actions.reduce') }}
             </option>
             <option v-else disabled value="">
-              نوع تراکنش را مشخص کنید.
+              {{ $t('admin.users.debt.typeHint') }}
             </option>
             <option
               v-for="option in ADD_DEBT_TRANSACTION_TYPES"
@@ -515,7 +517,7 @@ fetchUserLoans();
             class="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
           />
           <label for="send-sms-notification" class="text-sm text-gray-800">
-            ارسال پیامک اطلاع رسانی
+            {{ $t('admin.users.debt.sendSms') }}
           </label>
         </div>
 
@@ -531,9 +533,9 @@ fetchUserLoans();
                 : 'bg-gradient-to-r from-orange-600 to-orange-500 text-white hover:shadow-lg'
             "
           >
-            <span v-if="isSubmittingDebt">در حال ثبت...</span>
+            <span v-if="isSubmittingDebt">{{ $t('common.states.submitting') }}</span>
             <span v-else>{{
-              type === "add" ? "افزودن بدهی" : "کاهش بدهی"
+              type === "add" ? $t('admin.common.addDebt') : $t('admin.users.debt.actions.reduce')
             }}</span>
           </button>
           <button
@@ -541,7 +543,7 @@ fetchUserLoans();
             :disabled="isSubmittingDebt"
             class="flex-1 py-3 bg-gray-100 text-gray-700 rounded-lg font-bold hover:bg-gray-200 transition-colors duration-200 disabled:opacity-50"
           >
-            انصراف
+            {{ $t('common.actions.cancel') }}
           </button>
         </div>
       </div>

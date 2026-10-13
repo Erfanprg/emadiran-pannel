@@ -2,6 +2,7 @@ import { adminApi } from "~/services/api/admin";
 import { useToast } from "~/composables/useToast";
 import { useApiCall } from "~/composables/useApiCall";
 import type { ContactHistoryItem, ContactHistoriesMeta } from "~/types/admin";
+import { translate } from '~/i18n/translate'
 
 /**
  * Contact history list of a user and the flow between its list and create modals.
@@ -68,7 +69,7 @@ export const useContactHistories = (userId: number) => {
       contactHistoriesMeta.value = response.data.meta;
     } catch (err: any) {
       contactHistoriesError.value =
-        err?.data?.message || err?.message || "خطا در دریافت تاریخچه تماس";
+        err?.data?.message || err?.message || translate('admin.contactHistories.errors.fetch');
     } finally {
       isLoadingContactHistories.value = false;
       isLoadingMoreContactHistories.value = false;
@@ -113,10 +114,10 @@ export const useContactHistories = (userId: number) => {
   const validateContactHistoryDescription = (value: string) => {
     const trimmed = (value || "").trim();
     if (!trimmed) {
-      return { isValid: false, error: "توضیحات الزامی است" };
+      return { isValid: false, error: translate('admin.contactHistories.validation.descriptionRequired') };
     }
     if (trimmed.length > 2000) {
-      return { isValid: false, error: "حداکثر طول توضیحات 2000 کاراکتر است" };
+      return { isValid: false, error: translate('admin.contactHistories.validation.descriptionTooLong') };
     }
     return { isValid: true, value: trimmed };
   };
@@ -136,7 +137,7 @@ export const useContactHistories = (userId: number) => {
     );
     if (!validation.isValid) {
       createContactHistoryErrors.value.description = validation.error;
-      toast.error(validation.error || "لطفاً خطاهای فرم را برطرف کنید");
+      toast.error(validation.error || translate('common.validation.fixErrors'));
       return;
     }
 
@@ -148,9 +149,9 @@ export const useContactHistories = (userId: number) => {
           description: validation.value as string,
         }),
       {
-        successMessage: "تماس با موفقیت ثبت شد",
+        successMessage: translate('admin.contactHistories.create.success'),
         onError: (err) => {
-          const message = err?.data?.message || err?.message || "خطا در ثبت تماس";
+          const message = err?.data?.message || err?.message || translate('admin.contactHistories.errors.create');
           setCreateContactHistoryErrorsFromBackend(message);
         },
         onSuccess: () => {

@@ -25,9 +25,9 @@ defineProps<{
 
         <!-- Debt Display -->
         <div class="bg-white/10 backdrop-blur rounded-lg p-4 text-center md:text-right min-w-[200px]">
-          <p class="text-sm text-white/80 mb-1">بدهی کل</p>
+          <p class="text-sm text-white/80 mb-1">{{ $t('user.profile.header.totalDebt') }}</p>
           <p class="text-2xl font-bold" dir="ltr">
-            <span class="text-sm">ریال</span>
+            <span class="text-sm">{{ $t('global.currency.rial') }}</span>
             {{ formatCurrency(totalDebt) }}
           </p>
         </div>

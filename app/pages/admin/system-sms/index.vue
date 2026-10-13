@@ -2,7 +2,9 @@
 import { useAuthStore } from '~/stores/auth'
 import type { SmsSection } from '~/components/Admin/sms/SmsNavigation.vue'
 
-useHead({ title: 'مدیریت پیامک‌ها - عماد ایران' })
+const { t } = useI18n()
+
+useHead({ title: t('seo.admin.sms') })
 definePageMeta({ middleware: 'auth' })
 
 const authStore = useAuthStore()
@@ -22,7 +24,7 @@ watch(section, value => {
 </script>
 
 <template>
-  <AdminPage title="مدیریت پیامک‌ها" main-class="mx-auto max-w-[1400px] px-4 py-8">
+  <AdminPage :title="$t('admin.common.manageSms')" main-class="mx-auto max-w-[1400px] px-4 py-8">
     <AdminSmsNavigation v-model="section" />
     <AdminSmsDispatchesPanel v-if="section === 'dispatches'" />
     <AdminSmsTemplatesPanel v-else-if="section === 'templates'" />

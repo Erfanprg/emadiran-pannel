@@ -19,36 +19,36 @@ defineProps<{
       </div>
 
       <!-- Success Message -->
-      <h2 class="text-2xl font-bold text-gray-900 mb-2">پرداخت موفق!</h2>
-      <p class="text-gray-600 mb-6">پرداخت شما با موفقیت ثبت شد</p>
+      <h2 class="text-2xl font-bold text-gray-900 mb-2">{{ $t('user.paymentResult.success.title') }}</h2>
+      <p class="text-gray-600 mb-6">{{ $t('user.paymentResult.success.message') }}</p>
 
       <!-- Transaction Details -->
       <div class="bg-gray-50 rounded-lg p-6 mb-6 text-right">
         <div v-if="loading" class="text-center py-4">
           <Icon name="mdi:loading" size="32" class="animate-spin text-primary" />
-          <p class="text-gray-600 mt-2">در حال دریافت جزئیات...</p>
+          <p class="text-gray-600 mt-2">{{ $t('user.paymentResult.success.loadingDetails') }}</p>
         </div>
         <div v-else class="space-y-3">
           <div class="flex justify-between items-center">
-            <span class="text-gray-600">مبلغ پرداختی:</span>
+            <span class="text-gray-600">{{ $t('user.paymentResult.success.amount') }}</span>
             <span class="font-bold text-gray-900 text-lg">
               {{ transactionDetails?.amount ? formatCurrency(transactionDetails.amount) : '-' }}
             </span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-gray-600">شماره پیگیری:</span>
+            <span class="text-gray-600">{{ $t('user.paymentResult.success.trackingNumber') }}</span>
             <span class="font-bold text-gray-900">{{ transactionId || '-' }}</span>
           </div>
           <div v-if="transactionDetails?.refId || refId" class="flex justify-between items-center">
-            <span class="text-gray-600">شناسه تراکنش :</span>
+            <span class="text-gray-600">{{ $t('user.paymentResult.success.referenceId') }}</span>
             <span class="font-bold text-gray-900">{{ transactionDetails?.refId || refId || '-' }}</span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-gray-600">وضعیت:</span>
-            <BaseBadge variant="success">موفق</BaseBadge>
+            <span class="text-gray-600">{{ $t('common.fields.statusLabel') }}</span>
+            <BaseBadge variant="success">{{ $t('status.success') }}</BaseBadge>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-gray-600">تاریخ:</span>
+            <span class="text-gray-600">{{ $t('user.paymentResult.success.date') }}</span>
             <span class="font-bold text-gray-900">
               {{
                 transactionDetails?.transactionDate
@@ -63,7 +63,7 @@ defineProps<{
       </div>
 
       <div v-if="transactionDetails" class="bg-white border border-gray-200 rounded-lg p-4 mb-6 text-right">
-        <p class="text-sm text-gray-600 mb-2">جزئیات تسهیلات</p>
+        <p class="text-sm text-gray-600 mb-2">{{ $t('common.fields.loanDetails') }}</p>
         <TransactionAllocationsSummary
           :transaction="transactionDetails"
           :default-expanded="true"
@@ -77,14 +77,14 @@ defineProps<{
           class="px-6 py-3 bg-primary text-white rounded-lg font-bold hover:bg-primary/90 transition-colors duration-200 flex items-center justify-center gap-2"
         >
           <Icon name="mdi:view-dashboard" size="20" />
-          بازگشت به داشبورد
+          {{ $t('user.common.backToDashboard') }}
         </NuxtLink>
         <NuxtLink
           to="/dashboard/transactions"
           class="px-6 py-3 bg-white border-2 border-primary text-primary rounded-lg font-bold hover:bg-primary/5 transition-colors duration-200 flex items-center justify-center gap-2"
         >
           <Icon name="mdi:receipt-text" size="20" />
-          مشاهده تاریخچه
+          {{ $t('user.paymentResult.success.viewHistory') }}
         </NuxtLink>
       </div>
     </div>

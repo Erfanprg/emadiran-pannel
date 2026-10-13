@@ -1,4 +1,5 @@
 import { useToast } from "./useToast"
+import { translate } from '~/i18n/translate'
 
 interface ApiError {
   statusCode: number
@@ -59,7 +60,7 @@ export const useApi = () => {
   const handleError = (error: any): never => {
     const apiError: ApiError = {
       statusCode: error.statusCode || error.status || 500,
-      message: error.data?.message || error.message || 'خطایی رخ داده است',
+      message: error.data?.message || error.message || translate('common.errors.generic'),
       data: error.data
     }
 
@@ -68,17 +69,17 @@ export const useApi = () => {
     
     switch (apiError.statusCode) {
       case 401:
-        toast.error('لطفاً وارد حساب کاربری خود شوید')
+        toast.error(translate('common.errors.unauthorized'))
         // Clear auth and redirect to login
         const tokenCookie = useCookie('auth_token')
         tokenCookie.value = null
         navigateTo('/auth/login')
         break
       case 403:
-        toast.error('شما دسترسی به این بخش را ندارید')
+        toast.error(translate('common.errors.forbidden'))
         break
       case 404:
-        toast.error('اطلاعات مورد نظر یافت نشد')
+        toast.error(translate('common.errors.notFound'))
         break
       case 422:
         // Validation errors
@@ -94,12 +95,12 @@ export const useApi = () => {
         }
         break
       case 429:
-        toast.error('تعداد درخواست‌های شما بیش از حد مجاز است. لطفاً کمی صبر کنید')
+        toast.error(translate('common.errors.tooManyRequests'))
         break
       case 500:
       case 502:
       case 503:
-        toast.error('خطای سرور. لطفاً بعداً تلاش کنید')
+        toast.error(translate('common.errors.server'))
         break
       default:
         toast.error(apiError.message)

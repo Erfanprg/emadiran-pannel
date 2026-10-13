@@ -1,3 +1,4 @@
+import './i18n'
 import { describe, expect, it } from 'vitest'
 import {
   buildEditTransactionPayload,

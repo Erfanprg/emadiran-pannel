@@ -1,6 +1,7 @@
 import moment from 'jalali-moment';
 import type { Moment, MomentFormatSpecification } from 'jalali-moment';
 import { conv2EnNum } from './conv2EnNum';
+import { translate } from '../i18n/translate'
 
 export interface TypeDate {
     timestamp: number | string;
@@ -49,29 +50,29 @@ const ConvertTimestampToLastDate = (timestamp: any) => {
     const durationYearDate = convert2SecDate / (3600 * 24 * 30 * 12);
 
     if (convert2SecDate < 60) {
-        return 'لحظاتی پیش';
+        return translate('common.relativeTime.justNow');
     } else if (durationMinDate < 60) {
-        return `${Math.floor(durationMinDate)} دقیقه پیش`;
+        return translate('common.relativeTime.minutes', { durationMinDate: Math.floor(durationMinDate) });
     } else if (durationHourDate < 24) {
-        return `${Math.floor(durationHourDate)} ساعت پیش`;
+        return translate('common.relativeTime.hours', { durationHourDate: Math.floor(durationHourDate) });
     } else if (durationdayDate < 7) {
-        return `${Math.floor(durationdayDate)} روز پیش`;
+        return translate('common.relativeTime.days', { durationdayDate: Math.floor(durationdayDate) });
     } else if (Math.floor(durationdayDate) == 7) {
-        return 'یک هفته پیش';
+        return translate('common.relativeTime.oneWeek');
     } else if (Math.floor(durationdayDate) > 7 && Math.floor(durationdayDate) < 14) {
-        return `${Math.floor(durationdayDate)} روز پیش`;
+        return translate('common.relativeTime.days', { durationdayDate: Math.floor(durationdayDate) });
     } else if (Math.floor(durationdayDate) == 14) {
-        return 'دو هفته پیش';
+        return translate('common.relativeTime.twoWeeks');
     } else if (Math.floor(durationdayDate) > 14 && Math.floor(durationdayDate) < 21) {
-        return `${Math.floor(durationdayDate)} روز پیش`;
+        return translate('common.relativeTime.days', { durationdayDate: Math.floor(durationdayDate) });
     } else if (Math.floor(durationdayDate) == 21) {
-        return 'سه هفته پیش';
+        return translate('common.relativeTime.threeWeeks');
     } else if (Math.floor(durationdayDate) > 21 && Math.floor(durationdayDate) < 31) {
-        return `${Math.floor(durationdayDate)} روز پیش`;
+        return translate('common.relativeTime.days', { durationdayDate: Math.floor(durationdayDate) });
     } else if (Math.floor(durationdayDate) > 30 && Math.floor(durationdayDate) < 365) {
-        return `${Math.floor(durationMounthDate)} ماه پیش`;
+        return translate('common.relativeTime.months', { durationMounthDate: Math.floor(durationMounthDate) });
     } else if (Math.floor(durationdayDate) > 365) {
-        return `${Math.floor(durationYearDate)} سال پیش`;
+        return translate('common.relativeTime.years', { durationYearDate: Math.floor(durationYearDate) });
     }
 };
 

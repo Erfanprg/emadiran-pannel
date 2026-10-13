@@ -1,0 +1,44 @@
+{
+  "designShowcase": {
+    "cities": {
+      "isfahan": "اصفهان",
+      "mashhad": "مشهد",
+      "shiraz": "شیراز",
+      "tabriz": "تبریز",
+      "tehran": "تهران"
+    },
+    "controls": {
+      "city": "شهر",
+      "gender": "جنسیت",
+      "notifications": "دریافت اعلان‌ها",
+      "selectCity": "انتخاب شهر"
+    },
+    "gender": {
+      "female": "زن",
+      "male": "مرد"
+    },
+    "inputs": {
+      "descriptionPlaceholder": "توضیحات خود را بنویسید...",
+      "errorExample": "مثال خطا",
+      "errorField": "فیلد با خطا",
+      "namePlaceholder": "نام خود را وارد کنید",
+      "requiredError": "این فیلد الزامی است"
+    },
+    "sections": {
+      "buttons": "دکمه‌ها (Buttons)",
+      "controls": "کنترل‌ها (Controls)",
+      "inputs": "فیلدهای ورودی (Inputs)",
+      "toasts": "اعلان‌ها (Toast Notifications)"
+    },
+    "toasts": {
+      "clearAll": "پاک کردن همه",
+      "errorMessage": "خطایی رخ داده است. لطفاً دوباره تلاش کنید",
+      "infoMessage": "اطلاعات شما به‌روزرسانی شد",
+      "showError": "نمایش خطا",
+      "showInfo": "نمایش اطلاعات",
+      "showSuccess": "نمایش موفقیت",
+      "showWarning": "نمایش هشدار",
+      "warningMessage": "توجه: این عملیات قابل بازگشت نیست"
+    }
+  }
+}

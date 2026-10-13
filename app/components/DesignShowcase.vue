@@ -77,7 +77,7 @@
 
       <!-- Buttons Section -->
       <div class="card">
-        <h2 class="text-2xl font-semibold text-primary mb-6 w-full text-center">دکمه‌ها (Buttons)</h2>
+        <h2 class="text-2xl font-semibold text-primary mb-6 w-full text-center">{{ $t('designShowcase.sections.buttons') }}</h2>
         <div class="space-y-6">
           <!-- Primary Buttons -->
           <div>
@@ -110,45 +110,45 @@
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <!-- Text Inputs -->
         <div class="card">
-          <h2 class="text-2xl font-semibold text-primary mb-6 w-full text-center">فیلدهای ورودی (Inputs)</h2>
+          <h2 class="text-2xl font-semibold text-primary mb-6 w-full text-center">{{ $t('designShowcase.sections.inputs') }}</h2>
           <div class="space-y-4">
-            <FormBaseInput v-model:modelValue="formData.text" type="text" label="نام و نام خانوادگی"
-              placeholder="نام خود را وارد کنید" :mandatory="true" />
+            <FormBaseInput v-model:modelValue="formData.text" type="text" :label="$t('common.fields.fullName')"
+              :placeholder="$t('designShowcase.inputs.namePlaceholder')" :mandatory="true" />
 
-            <FormBaseInput v-model:modelValue="formData.email" type="mobile" label="شماره تلفن"
+            <FormBaseInput v-model:modelValue="formData.email" type="mobile" :label="$t('common.fields.phone')"
               placeholder="example@email.com" />
 
-            <FormBaseInput v-model:modelValue="formData.phone" type="number" label="شماره موبایل"
+            <FormBaseInput v-model:modelValue="formData.phone" type="number" :label="$t('global.form.mobile_number')"
               placeholder="09123456789" />
 
-            <FormBaseInput v-model:modelValue="formData.password" type="password" label="رمز عبور"
-              placeholder="رمز عبور خود را وارد کنید" />
+            <FormBaseInput v-model:modelValue="formData.password" type="password" :label="$t('auth.loginWithPassword_title')"
+              :placeholder="$t('auth.enter_password')" />
 
-            <FormBaseInput v-model:modelValue="formData.textarea" type="textarea" label="توضیحات"
-              placeholder="توضیحات خود را بنویسید..." :row="4" />
+            <FormBaseInput v-model:modelValue="formData.textarea" type="textarea" :label="$t('common.fields.description')"
+              :placeholder="$t('designShowcase.inputs.descriptionPlaceholder')" :row="4" />
 
-            <FormBaseInput v-model:modelValue="formData.error" type="text" label="فیلد با خطا" placeholder="مثال خطا"
-              error="این فیلد الزامی است" />
+            <FormBaseInput v-model:modelValue="formData.error" type="text" :label="$t('designShowcase.inputs.errorField')" :placeholder="$t('designShowcase.inputs.errorExample')"
+              :error="$t('designShowcase.inputs.requiredError')" />
           </div>
         </div>
 
         <!-- Select, Radio, Checkbox, Switch -->
         <div class="card">
-          <h2 class="text-2xl font-semibold text-primary mb-6 w-full text-center">کنترل‌ها (Controls)</h2>
+          <h2 class="text-2xl font-semibold text-primary mb-6 w-full text-center">{{ $t('designShowcase.sections.controls') }}</h2>
           <div class="space-y-6">
             <!-- Select Box -->
-            <FormBaseSelectBox v-model:model-value="formData.city" :items="cities" typeInput="text" label="شهر"
-              placeholder="انتخاب شهر" :mandatory="true" :disabled="false" />
+            <FormBaseSelectBox v-model:model-value="formData.city" :items="cities" typeInput="text" :label="$t('designShowcase.controls.city')"
+              :placeholder="$t('designShowcase.controls.selectCity')" :mandatory="true" :disabled="false" />
 
             <!-- Radio Buttons -->
             <FormBaseRadioBtn v-model:model-value="formData.gender" :options="genderOptions" name="gender"
-              label="جنسیت" />
+              :label="$t('designShowcase.controls.gender')" />
 
 
 
             <!-- Switch -->
             <div class="space-y-3">
-              <FormBaseSwitch v-model:model-value="formData.notifications" label="دریافت اعلان‌ها" />
+              <FormBaseSwitch v-model:model-value="formData.notifications" :label="$t('designShowcase.controls.notifications')" />
             </div>
           </div>
         </div>
@@ -156,31 +156,31 @@
 
       <!-- Toast Notifications -->
       <div class="card">
-        <h2 class="text-2xl font-semibold text-primary mb-6 w-full text-center">اعلان‌ها (Toast Notifications)</h2>
+        <h2 class="text-2xl font-semibold text-primary mb-6 w-full text-center">{{ $t('designShowcase.sections.toasts') }}</h2>
         <div class="space-y-4">
           <div class="grid grid-cols-2 gap-3">
             <BaseBtn 
               type="button" 
               typeDesign="primary" 
-              text="نمایش موفقیت"
+              :text="$t('designShowcase.toasts.showSuccess')"
               @click="showSuccessToast"
             />
             <BaseBtn 
               type="button" 
               typeDesign="primary" 
-              text="نمایش خطا"
+              :text="$t('designShowcase.toasts.showError')"
               @click="showErrorToast"
             />
             <BaseBtn 
               type="button" 
               typeDesign="outline" 
-              text="نمایش هشدار"
+              :text="$t('designShowcase.toasts.showWarning')"
               @click="showWarningToast"
             />
             <BaseBtn 
               type="button" 
               typeDesign="outline" 
-              text="نمایش اطلاعات"
+              :text="$t('designShowcase.toasts.showInfo')"
               @click="showInfoToast"
             />
           </div>
@@ -188,7 +188,7 @@
             <BaseBtn 
               type="button" 
               typeDesign="outline" 
-              text="پاک کردن همه"
+              :text="$t('designShowcase.toasts.clearAll')"
               @click="clearAllToasts"
             />
           </div>
@@ -220,24 +220,26 @@
 <script setup lang="ts">
 import { useToast } from '~/composables/useToast'
 
+const { t } = useI18n()
+
 // Toast composable
 const toast = useToast()
 
 // Toast handlers
 const showSuccessToast = () => {
-  toast.success('عملیات با موفقیت انجام شد')
+  toast.success(t('common.messages.success'))
 }
 
 const showErrorToast = () => {
-  toast.error('خطایی رخ داده است. لطفاً دوباره تلاش کنید')
+  toast.error(t('designShowcase.toasts.errorMessage'))
 }
 
 const showWarningToast = () => {
-  toast.warning('توجه: این عملیات قابل بازگشت نیست')
+  toast.warning(t('designShowcase.toasts.warningMessage'))
 }
 
 const showInfoToast = () => {
-  toast.info('اطلاعات شما به‌روزرسانی شد')
+  toast.info(t('designShowcase.toasts.infoMessage'))
 }
 
 const clearAllToasts = () => {
@@ -262,17 +264,17 @@ const formData = reactive({
 })
 // Select options
 const cities = [
-  { ID: 1, name: 'تهران' },
-  { ID: 2, name: 'اصفهان' },
-  { ID: 3, name: 'شیراز' },
-  { ID: 4, name: 'مشهد' },
-  { ID: 5, name: 'تبریز' },
+  { ID: 1, name: t('designShowcase.cities.tehran') },
+  { ID: 2, name: t('designShowcase.cities.isfahan') },
+  { ID: 3, name: t('designShowcase.cities.shiraz') },
+  { ID: 4, name: t('designShowcase.cities.mashhad') },
+  { ID: 5, name: t('designShowcase.cities.tabriz') },
 ]
 
 // Radio options
 const genderOptions = [
-  { label: 'مرد', value: 'male' },
-  { label: 'زن', value: 'female' },
+  { label: t('designShowcase.gender.male'), value: 'male' },
+  { label: t('designShowcase.gender.female'), value: 'female' },
 ]
 
 

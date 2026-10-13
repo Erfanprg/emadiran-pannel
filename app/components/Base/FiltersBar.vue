@@ -1,4 +1,5 @@
-<script setup lang="ts">
+<script setup lang="ts">import { translate } from '~/i18n/translate'
+
 interface FilterField {
   key: string
   label?: string
@@ -20,12 +21,12 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  title: 'فیلترها',
+  title: () => translate('common.filters.title'),
   showSearch: false,
-  searchPlaceholder: 'جستجو...',
+  searchPlaceholder: () => translate('common.filters.searchPlaceholder'),
   showActions: true,
-  applyLabel: 'اعمال فیلتر',
-  resetLabel: 'پاک کردن'
+  applyLabel: () => translate('common.filters.apply'),
+  resetLabel: () => translate('global.button.clear')
 })
 
 const emit = defineEmits<{
@@ -79,7 +80,7 @@ watch(() => props.searchValue, (newVal) => {
           @click="handleSearch"
           class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-accent transition-colors duration-200 whitespace-nowrap font-medium"
         >
-          جستجو
+          {{ $t('global.button.search') }}
         </button>
       </div>
 

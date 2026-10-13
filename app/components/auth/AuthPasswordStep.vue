@@ -22,16 +22,16 @@ const showPassword = defineModel<boolean>('show', { required: true })
   <div class="space-y-6">
     <div>
       <AuthBackButton @click="emit('back')" />
-      <h2 class="text-xl font-bold text-gray-900 mb-2">رمز عبور را وارد کنید</h2>
+      <h2 class="text-xl font-bold text-gray-900 mb-2">{{ $t('auth.password.title') }}</h2>
       <p class="text-sm text-gray-600">
-        ورود با شماره
+        {{ $t('auth.password.loginWith') }}
         <span class="font-bold text-gray-900" dir="ltr">{{ phoneNumber }}</span>
       </p>
     </div>
 
     <div class="space-y-4">
       <div>
-        <label for="login-password" class="block text-sm font-medium text-gray-900 mb-2">رمز عبور</label>
+        <label for="login-password" class="block text-sm font-medium text-gray-900 mb-2">{{ $t('auth.loginWithPassword_title') }}</label>
         <AuthPasswordInput
           v-model="password"
           v-model:show="showPassword"
@@ -42,9 +42,9 @@ const showPassword = defineModel<boolean>('show', { required: true })
       <AuthSubmitButton
         :disabled="!isPasswordValid || isSubmitting"
         :loading="isSubmitting"
-        loading-text="در حال بررسی..."
+        :loading-text="$t('auth.checking')"
         @click="emit('submit')"
-      >ورود</AuthSubmitButton>
+      >{{ $t('global.button.login') }}</AuthSubmitButton>
     </div>
   </div>
 </template>

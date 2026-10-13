@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
+import { translate } from '~/i18n/translate'
 
 interface Props {
   title: string
@@ -9,9 +10,9 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  subtitle: 'عماد، نماد اعتماد',
+  subtitle: () => translate('app.title'),
   backTo: '/admin',
-  backLabel: 'داشبورد'
+  backLabel: () => translate('global.navigation.dashboard')
 })
 
 const authStore = useAuthStore()
@@ -29,7 +30,7 @@ const handleLogout = () => {
       <div class="flex items-center justify-between">
         <!-- Right side: Logo and Title -->
         <div class="flex items-center gap-4">
-          <img src="/emad-logo-p.png" alt="عماد" class="h-10" />
+          <img src="/emad-logo-p.png" :alt="$t('common.brand.short')" class="h-10" />
           <div>
             <h1 class="text-lg font-bold text-gray-900">{{ title }}</h1>
             <p class="text-sm text-gray-600">{{ subtitle }}</p>
@@ -51,7 +52,7 @@ const handleLogout = () => {
           </slot>
           
           <div class="text-right">
-            <p class="text-sm text-gray-600">{{ authStore.isAdmin ? 'مدیر' : 'کاربر' }}</p>
+            <p class="text-sm text-gray-600">{{ authStore.isAdmin ? $t('common.labels.admin') : $t('common.labels.user') }}</p>
             <p class="font-bold text-gray-900">{{ authStore.userFullName }}</p>
           </div>
           
@@ -59,7 +60,7 @@ const handleLogout = () => {
             @click="handleLogout"
             class="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors duration-200 text-sm font-medium"
           >
-            خروج
+            {{ $t('global.button.logout') }}
           </button>
         </div>
       </div>

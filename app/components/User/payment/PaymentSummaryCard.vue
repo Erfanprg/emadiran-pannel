@@ -27,28 +27,28 @@ const emit = defineEmits<{
         v-if="amountNumeric > 0 && selectedLoan"
         class="font-bold text-gray-900"
       >
-        خلاصه پرداخت
+        {{ $t('user.payment.summary.title') }}
       </h3>
 
       <div v-if="amountNumeric > 0 && selectedLoan" class="space-y-2">
         <div class="flex justify-between text-sm gap-4">
-          <span class="text-gray-600">تسهیلات:</span>
+          <span class="text-gray-600">{{ $t('user.payment.summary.loan') }}</span>
           <span class="font-bold" dir="ltr">
             {{ selectedLoan.loanNumber }}
           </span>
         </div>
         <div class="flex justify-between text-sm gap-4">
-          <span class="text-gray-600">مبلغ:</span>
+          <span class="text-gray-600">{{ $t('user.payment.summary.amount') }}</span>
           <span class="font-bold">
             {{ formatCurrency(amount, true) }}
           </span>
         </div>
         <div v-if="gatewayDisplayName" class="flex justify-between text-sm gap-4">
-          <span class="text-gray-600">درگاه:</span>
+          <span class="text-gray-600">{{ $t('user.payment.summary.gateway') }}</span>
           <span class="font-bold">{{ gatewayDisplayName }}</span>
         </div>
         <div v-if="description" class="flex justify-between text-sm gap-4">
-          <span class="text-gray-600">توضیحات:</span>
+          <span class="text-gray-600">{{ $t('user.payment.summary.description') }}</span>
           <span class="font-bold">{{ description }}</span>
         </div>
       </div>
@@ -63,7 +63,7 @@ const emit = defineEmits<{
         />
 
         <p v-if="!isPreviewCurrent" class="text-sm text-center text-gray-500 mt-3">
-          ابتدا پیش‌نمایش تخصیص مبلغ را بررسی کنید.
+          {{ $t('user.payment.summary.previewFirst') }}
         </p>
       </div>
     </div>

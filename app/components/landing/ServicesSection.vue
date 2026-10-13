@@ -1,4 +1,7 @@
 <script setup lang="ts">
+
+const { t } = useI18n()
+
 /**
  * Services Section Component
  * Displays main services offered
@@ -7,8 +10,8 @@
 const services = [
   {
     id: 1,
-    title: 'خدمات حقوقی تخصصی لندتک‌ها',
-    description: 'تدوین و بازبینی قراردادهای اعتباری، مشاوره تطبیق با مقررات بانکی و حقوق مصرف‌کننده، و پشتیبانی حقوقی در دعاوی مرتبط با عملیات لندتک‌ها.',
+    title: t('landing.services.legal.title'),
+    description: t('landing.services.legal.description'),
     features: [],
     icon: `
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
@@ -18,8 +21,8 @@ const services = [
   },
   {
     id: 2,
-    title: 'وصول مطالبات حقوقی و مذاکره‌ای',
-    description: 'پیگیری مطالبات معوق، تنظیم اخطاریه و دادخواست، تشکیل وکالت‌نامه و اجرای فرآیندهای وصول از طریق مراجع قضایی و شبه‌قضایی.',
+    title: t('landing.services.recovery.title'),
+    description: t('landing.services.recovery.description'),
     features: [],
     icon: `
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
@@ -29,8 +32,8 @@ const services = [
   },
   {
     id: 3,
-    title: 'مشاوره و پشتیبانی حقوقی مستمر',
-    description: 'همراهی مستمر با تیم‌های داخلی لندتک‌ها در مدیریت ریسک‌های حقوقی و تصمیم‌گیری‌های کلیدی.',
+    title: t('landing.services.consulting.title'),
+    description: t('landing.services.consulting.description'),
     features: [],
     icon: `
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
@@ -40,8 +43,8 @@ const services = [
   },
   {
     id: 4,
-    title: 'سامانه‌ها و ابزارهای فناورانه',
-    description: 'مدیریت هوشمند پرونده‌ها، رصد آنلاین وضعیت مطالبات، گزارش‌دهی شفاف و تحلیل داده‌های مالی و حقوقی.',
+    title: t('landing.services.tech.title'),
+    description: t('landing.services.tech.description'),
     features: [],
     icon: `
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
@@ -62,11 +65,11 @@ const services = [
       <!-- Section Header -->
       <div class="text-center mb-12 lg:mb-16">
         <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-          <span class="text-transparent bg-clip-text bg-gradient-to-l from-primary to-secondary">خدمات</span>
-          عمادایران
+          <span class="text-transparent bg-clip-text bg-gradient-to-l from-primary to-secondary">{{ $t('global.navigation.services') }}</span>
+          {{ $t('common.brand.emadiran') }}
         </h2>
         <p class="text-base lg:text-lg text-gray-600 max-w-2xl mx-auto">
-          راهکارهای جامع حقوقی و فناورانه برای لندتک‌ها
+          {{ $t('landing.services.subtitle') }}
         </p>
       </div>
 
@@ -117,7 +120,7 @@ const services = [
       <!-- CTA Section -->
       <div class="mt-12 text-center">
         <p class="text-lg text-gray-700 mb-6">
-          برای دریافت مشاوره و اطلاعات بیشتر با ما در تماس باشید
+          {{ $t('landing.contactCta') }}
         </p>
         <a
           href="tel:02192002343"
@@ -126,7 +129,7 @@ const services = [
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
           </svg>
-          تماس با ما
+          {{ $t('global.navigation.contact') }}
         </a>
       </div>
     </div>

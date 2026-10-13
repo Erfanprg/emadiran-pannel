@@ -29,11 +29,11 @@ const localEditReason = computed({
 </script>
 
 <template>
-  <BaseModal title="ویرایش مهلت پرداخت" max-width="md" @close="emit('close')">
+  <BaseModal :title="$t('admin.paymentDeadlines.edit.title')" max-width="md" @close="emit('close')">
     <div class="space-y-4">
       <div>
         <label class="block text-sm font-medium text-gray-900 mb-2">
-          تاریخ مهلت <span class="text-red-500">*</span>
+          {{ $t('admin.paymentDeadlines.fields.deadlineDate') }} <span class="text-red-500">*</span>
         </label>
         <input
           :value="deadlineDisplay"
@@ -58,12 +58,12 @@ const localEditReason = computed({
 
       <div>
         <label class="block text-sm font-medium text-gray-900 mb-2">
-          دلیل ویرایش <span class="text-red-500">*</span>
+          {{ $t('admin.common.editReason') }} <span class="text-red-500">*</span>
         </label>
         <textarea
           v-model="localEditReason"
           rows="3"
-          placeholder="علت ویرایش مهلت پرداخت را بنویسید"
+          :placeholder="$t('admin.paymentDeadlines.edit.reasonPlaceholder')"
           class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
           :class="reasonError ? 'border-red-500' : 'border-gray-300'"
         ></textarea>
@@ -80,8 +80,8 @@ const localEditReason = computed({
         :disabled="isSubmitting"
         @click="emit('submit')"
       >
-        <span v-if="isSubmitting">در حال ثبت...</span>
-        <span v-else>ذخیره تغییرات</span>
+        <span v-if="isSubmitting">{{ $t('common.states.submitting') }}</span>
+        <span v-else>{{ $t('common.actions.saveChanges') }}</span>
       </button>
       <button
         type="button"
@@ -89,7 +89,7 @@ const localEditReason = computed({
         :disabled="isSubmitting"
         @click="emit('close')"
       >
-        انصراف
+        {{ $t('common.actions.cancel') }}
       </button>
     </template>
   </BaseModal>

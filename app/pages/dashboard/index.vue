@@ -8,8 +8,10 @@ import type { Transaction } from "~/types/transaction";
 import QuickPayCard from "~/components/User/dashboard/QuickPayCard.vue";
 import RecentTransactionsCard from "~/components/User/dashboard/RecentTransactionsCard.vue";
 
+const { t } = useI18n()
+
 useHead({
-  title: "داشبورد - عماد ایران",
+  title: t('seo.user.dashboard'),
 });
 
 definePageMeta({
@@ -30,7 +32,7 @@ const stats = ref({
 const authStore = useAuthStore();
 
 const { loanDebtBreakdown, isLoadingLoanDebts, loanDebtError, fetchLoanDebts } =
-  useMyLoanDebts("خطا در دریافت جزئیات تسهیلات");
+  useMyLoanDebts(t('user.dashboard.errors.fetchLoanDebts'));
 
 // Fetch dashboard data
 const fetchDashboardData = async () => {
@@ -74,11 +76,11 @@ const fetchDashboardData = async () => {
 
 // Installments table columns
 const installmentColumns = [
-  { key: "index", label: "ردیف" },
-  { key: "amount", label: "مبلغ قسط" },
-  { key: "loanNumber", label: "شماره تسهیلات" },
-  { key: "dueDate", label: "سررسید" },
-  { key: "status", label: "وضعیت" },
+  { key: "index", label: t('common.table.row') },
+  { key: "amount", label: t('user.common.installmentAmount') },
+  { key: "loanNumber", label: t('common.fields.loanNumber') },
+  { key: "dueDate", label: t('user.dashboard.installments.dueDate') },
+  { key: "status", label: t('common.fields.status') },
 ];
 
 // Fetch data on mount
@@ -89,7 +91,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <UserPage title="داشبورد">
+  <UserPage :title="$t('global.navigation.dashboard')">
     <div v-if="loading" class="flex items-center justify-center py-12">
       <div
         class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"
@@ -100,9 +102,9 @@ onMounted(() => {
       <!-- Stats Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
         <BaseStatsCard
-          title="مجموع بدهی (ریال)"
+          :title="$t('user.dashboard.stats.totalDebt')"
           :value="formatCurrency(stats.totalDebt)"
-          unit="ریال"
+          :unit="$t('global.currency.rial')"
           icon="mdi:cash-multiple"
           color="red"
         />
@@ -121,9 +123,9 @@ onMounted(() => {
           color="blue"
         /> -->
         <BaseStatsCard
-          title="تاریخچه پرداخت‌های موفق"
+          :title="$t('user.dashboard.stats.successfulPayments')"
           :value="stats.successfulTransactions.toString()"
-          unit="مورد"
+          :unit="$t('common.units.item')"
           icon="mdi:check-circle"
           color="green"
         />
@@ -133,11 +135,11 @@ onMounted(() => {
       <QuickPayCard />
 
       <LoanDebtBreakdownSection
-        title="جزئیات تسهیلات"
+        :title="$t('common.fields.loanDetails')"
         :breakdown="loanDebtBreakdown"
         :loading="isLoadingLoanDebts"
         :error="loanDebtError"
-        empty-message="در حال حاضر موردی برای شما ثبت نشده است."
+        :empty-message="$t('user.dashboard.loanDebtsEmpty')"
         @retry="fetchLoanDebts"
       />
 

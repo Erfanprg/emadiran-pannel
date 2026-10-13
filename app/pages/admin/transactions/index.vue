@@ -10,8 +10,10 @@ import TransactionsTable from "~/components/Admin/transactions/TransactionsTable
 import TransactionEditModal from "~/components/Admin/transactions/TransactionEditModal.vue";
 import TransactionDeleteModal from "~/components/Admin/transactions/TransactionDeleteModal.vue";
 
+const { t } = useI18n()
+
 useHead({
-  title: "تاریخچه پرداخت - عماد ایران",
+  title: t('seo.admin.transactions'),
 });
 
 definePageMeta({
@@ -59,62 +61,62 @@ const {
 const filterFields = computed(() => [
   {
     key: "phoneNumber",
-    label: "شماره تلفن",
+    label: t('common.fields.phone'),
     type: "text" as const,
     placeholder: "09123456789",
     modelValue: filters.value.phoneNumber,
   },
   {
     key: "nationalCode",
-    label: "کد ملی",
+    label: t('common.fields.nationalCode'),
     type: "text" as const,
     placeholder: "1234567890",
     modelValue: filters.value.nationalCode,
   },
   {
     key: "firstName",
-    label: "نام",
+    label: t('common.fields.name'),
     type: "text" as const,
-    placeholder: "نام",
+    placeholder: t('common.fields.name'),
     modelValue: filters.value.firstName,
   },
   {
     key: "lastName",
-    label: "نام خانوادگی",
+    label: t('common.fields.lastName'),
     type: "text" as const,
-    placeholder: "نام خانوادگی ",
+    placeholder: t('admin.transactions.filters.lastNameLabel'),
     modelValue: filters.value.lastName,
   },
   {
     key: "loanNumber",
-    label: "شماره تسهیلات",
+    label: t('common.fields.loanNumber'),
     type: "text" as const,
     placeholder: "LN_0000000001",
     modelValue: filters.value.loanNumber,
   },
   {
     key: "status",
-    label: "وضعیت",
+    label: t('common.fields.status'),
     type: "select" as const,
     modelValue: filters.value.status,
     options: [
-      { label: "همه", value: undefined },
-      { label: "موفق", value: "SUCCESS" },
-      { label: "ناموفق", value: "FAILED" },
-      { label: "در انتظار", value: "PENDING" },
+      { label: t('common.filters.all'), value: undefined },
+      { label: t('status.success'), value: "SUCCESS" },
+      { label: t('status.failed'), value: "FAILED" },
+      { label: t('status.pending'), value: "PENDING" },
     ],
   },
   {
     key: "type",
-    label: "نوع",
+    label: t('common.fields.type'),
     type: "select" as const,
     modelValue: filters.value.type,
     options: [
-      { label: "همه", value: undefined },
-      { label: "پرداخت", value: "DEBT_PAYMENT" },
-      { label: "افزایش بدهی", value: "ADMIN_DEBT_ADD" },
-      { label: "افزایش بدهی حقوقی", value: "LEGAL_DEBT_ADD" },
-      { label: "کاهش بدهی", value: "ADMIN_DEBT_REDUCE" },
+      { label: t('common.filters.all'), value: undefined },
+      { label: t('status.transactionType.payment'), value: "DEBT_PAYMENT" },
+      { label: t('status.transactionType.debtAdd'), value: "ADMIN_DEBT_ADD" },
+      { label: t('status.transactionType.legalDebtAdd'), value: "LEGAL_DEBT_ADD" },
+      { label: t('status.transactionType.debtReduce'), value: "ADMIN_DEBT_REDUCE" },
     ],
   },
 ]);
@@ -163,7 +165,7 @@ const fetchTransactions = async () => {
     total.value = response.data.meta?.total || response.data.total || 0;
   } catch (err: any) {
     error.value =
-      err.data?.message || err.message || "خطا در دریافت تاریخچه پرداخت";
+      err.data?.message || err.message || t('admin.transactions.errors.fetch');
     console.error("Error fetching transactions:", err);
   } finally {
     isLoading.value = false;
@@ -175,10 +177,10 @@ const handleExport = async () => {
   try {
     isExporting.value = true;
     await transactionsApi.exportTransactions(filters.value);
-    toast.success("فایل اکسل با موفقیت دانلود شد");
+    toast.success(t('admin.transactions.messages.excelDownloaded'));
   } catch (err: any) {
     console.error("Export error:", err);
-    toast.error("خطا در دانلود فایل اکسل");
+    toast.error(t('admin.transactions.errors.excelDownload'));
   } finally {
     isExporting.value = false;
   }
@@ -217,7 +219,7 @@ watch(page, () => {
 </script>
 
 <template>
-  <AdminPage title="تاریخچه پرداخت">
+  <AdminPage :title="$t('admin.common.paymentHistory')">
     <!-- Filters -->
     <BaseFiltersBar
       :fields="filterFields"
@@ -229,8 +231,8 @@ watch(page, () => {
     <!-- Table -->
     <BaseCard :padding="false">
       <BaseCardHeader
-        title="تاریخچه پرداخت‌ها"
-        :subtitle="`تعداد: ${formatNumber(total)} مورد`"
+        :title="$t('admin.transactions.list.title')"
+        :subtitle="$t('admin.transactions.list.count', { total: formatNumber(total) })"
       >
         <div class="flex items-center gap-3 flex-wrap justify-end">
           <button
@@ -238,7 +240,7 @@ watch(page, () => {
             class="px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:shadow-lg transition-all duration-300 flex items-center gap-2 font-medium"
           >
             <IconsOutline name="upload" class="w-5 h-5" />
-            بدهی گروهی
+            {{ $t('admin.import.csv.title') }}
           </button>
 
           <button
@@ -246,13 +248,13 @@ watch(page, () => {
             class="px-4 py-2 bg-gradient-to-r from-primary to-accent text-white rounded-lg hover:shadow-lg transition-all duration-300 flex items-center gap-2 font-medium"
           >
             <IconsOutline name="download" class="w-5 h-5" />
-            پرداخت گروهی
+            {{ $t('admin.transactions.actions.bulkPayment') }}
           </button>
         </div>
       </BaseCardHeader>
 
       <!-- Loading State -->
-      <StateLoader v-if="isLoading" message="در حال بارگذاری..." />
+      <StateLoader v-if="isLoading" :message="$t('common.states.loading')" />
 
       <!-- Error State -->
       <StateError
@@ -272,7 +274,7 @@ watch(page, () => {
       />
 
       <!-- Empty State -->
-      <StateEmpty v-else icon="document" message="موردی یافت نشد" />
+      <StateEmpty v-else icon="document" :message="$t('common.states.noResults')" />
 
       <!-- Pagination -->
       <BasePagination

@@ -9,6 +9,8 @@ import ImportStatCard from '~/components/Admin/import/ImportStatCard.vue'
 import ImportErrorsList from '~/components/Admin/import/ImportErrorsList.vue'
 import ImportModalFooter from '~/components/Admin/import/ImportModalFooter.vue'
 
+const { t } = useI18n()
+
 const props = defineProps<{
   modelValue: boolean
 }>()
@@ -41,13 +43,13 @@ const validateAndSetFile = (file?: File) => {
   if (!file) return false
 
   if (!file.name.toLowerCase().endsWith('.csv')) {
-    toast.error('لطفاً فقط فایل CSV انتخاب کنید')
+    toast.error(t('admin.import.errors.csvOnly'))
     clearFileInput()
     return false
   }
 
   if (file.size > 10 * 1024 * 1024) {
-    toast.error('حجم فایل نباید بیشتر از 10 مگابایت باشد')
+    toast.error(t('admin.import.errors.fileTooLarge'))
     clearFileInput()
     return false
   }
@@ -85,15 +87,15 @@ const handleDrop = (event: DragEvent) => {
 const formatCurrency = (amount: string) => {
   const numericAmount = Number(amount)
   if (Number.isNaN(numericAmount)) {
-    return `${amount} ریال`
+    return t('admin.import.amountRial', { amount: amount })
   }
 
-  return `${new Intl.NumberFormat('fa-IR').format(numericAmount)} ریال`
+  return t('admin.import.amountRial', { amount: new Intl.NumberFormat('fa-IR').format(numericAmount) })
 }
 
 const handleUpload = async () => {
   if (!selectedFile.value) {
-    toast.error('لطفاً ابتدا فایل را انتخاب کنید')
+    toast.error(t('admin.import.errors.noFile'))
     return
   }
 
@@ -103,14 +105,14 @@ const handleUpload = async () => {
     importResult.value = result
 
     if (result.success) {
-      toast.success(result.message || 'عملیات با موفقیت انجام شد')
+      toast.success(result.message || t('common.messages.success'))
       emit('success')
     } else {
-      toast.error(result.message || 'خطا در آپلود فایل')
+      toast.error(result.message || t('admin.import.errors.upload'))
     }
   } catch (error: any) {
     console.error('Error uploading payment CSV:', error)
-    toast.error(error?.data?.message || 'خطا در آپلود فایل CSV')
+    toast.error(error?.data?.message || t('admin.import.errors.uploadCsv'))
   } finally {
     isUploading.value = false
   }
@@ -140,7 +142,7 @@ watch(
 <template>
   <BaseModal
     v-if="modelValue"
-    title="آپلود گروهی پرداخت‌ها"
+    :title="$t('admin.import.bulkPayment.title')"
     max-width="2xl"
     @close="handleClose"
   >
@@ -158,19 +160,19 @@ watch(
 
       <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <p class="text-sm text-blue-800">
-          <strong>نکات مهم:</strong>
+          <strong>{{ $t('common.labels.importantNotes') }}</strong>
         </p>
         <ul class="list-disc list-inside mt-2 space-y-1 text-sm text-blue-800">
-          <li>فایل باید UTF-8 encoded باشد</li>
-          <li>تمام کاربران باید از قبل ایجاد شده باشند</li>
-          <li>تمام تسهیلات باید از قبل موجود باشند</li>
+          <li>{{ $t('admin.import.bulkPayment.notes.utf8') }}</li>
+          <li>{{ $t('admin.import.bulkPayment.notes.usersExist') }}</li>
+          <li>{{ $t('admin.import.bulkPayment.notes.loansExist') }}</li>
         </ul>
       </div>
 
       <div v-if="isUploading" class="bg-gray-50 rounded-lg p-4 border border-gray-200">
         <div class="flex items-center justify-between text-sm text-gray-700 mb-2">
-          <span>در حال ارسال و پردازش فایل...</span>
-          <span>لطفاً منتظر بمانید</span>
+          <span>{{ $t('admin.import.bulkPayment.uploadingTitle') }}</span>
+          <span>{{ $t('admin.import.bulkPayment.pleaseWait') }}</span>
         </div>
         <div class="h-2 rounded-full bg-gray-200 overflow-hidden">
           <div class="h-full w-2/3 animate-pulse bg-gradient-to-r from-primary to-accent"></div>
@@ -180,17 +182,17 @@ watch(
 
     <div v-else class="space-y-6">
       <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <ImportStatCard color="green" label="موفق" bold-label :value="formatNumber(importResult.data.successCount)" />
-        <ImportStatCard color="red" label="ناموفق" bold-label :value="formatNumber(importResult.data.failedCount)" />
-        <ImportStatCard color="blue" label="کل ردیف‌ها" bold-label :value="formatNumber(importResult.data.metadata.totalRows)" />
-        <ImportStatCard color="purple" label="کاربران پردازش شده" bold-label :value="formatNumber(importResult.data.processedUsers)" />
-        <ImportStatCard color="yellow" label="مبلغ کل پرداخت" bold-label :value="formatCurrency(importResult.data.metadata.totalPaymentAmount)" />
-        <ImportStatCard color="indigo" label="کاهش بدهی" bold-label :value="formatCurrency(importResult.data.metadata.totalDebtReduced)" />
+        <ImportStatCard color="green" :label="$t('status.success')" bold-label :value="formatNumber(importResult.data.successCount)" />
+        <ImportStatCard color="red" :label="$t('status.failed')" bold-label :value="formatNumber(importResult.data.failedCount)" />
+        <ImportStatCard color="blue" :label="$t('admin.import.stats.totalRows')" bold-label :value="formatNumber(importResult.data.metadata.totalRows)" />
+        <ImportStatCard color="purple" :label="$t('admin.import.stats.processedUsers')" bold-label :value="formatNumber(importResult.data.processedUsers)" />
+        <ImportStatCard color="yellow" :label="$t('admin.import.stats.totalPaymentAmount')" bold-label :value="formatCurrency(importResult.data.metadata.totalPaymentAmount)" />
+        <ImportStatCard color="indigo" :label="$t('admin.import.stats.debtReduced')" bold-label :value="formatCurrency(importResult.data.metadata.totalDebtReduced)" />
       </div>
 
       <div class="bg-gray-50 rounded-lg p-4 text-sm text-gray-700 space-y-2">
-        <p><span class="font-medium">زمان پردازش:</span> {{ importResult.data.metadata.processingTime }}</p>
-        <p><span class="font-medium">ردیف‌های رد شده:</span> {{ formatNumber(importResult.data.metadata.skippedRows) }}</p>
+        <p><span class="font-medium">{{ $t('admin.import.meta.processingTime') }}</span> {{ importResult.data.metadata.processingTime }}</p>
+        <p><span class="font-medium">{{ $t('admin.import.meta.skippedRows') }}</span> {{ formatNumber(importResult.data.metadata.skippedRows) }}</p>
       </div>
 
       <ImportErrorsList
@@ -202,8 +204,8 @@ watch(
 
       <div v-else class="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
         <IconsOutline name="check-circle" class="w-12 h-12 text-green-600 mx-auto mb-3" />
-        <p class="text-green-900 font-bold text-lg">همه پرداخت‌ها با موفقیت ثبت شدند!</p>
-        <p class="text-green-700 text-sm mt-2">بدهی کاربران کاهش یافته است.</p>
+        <p class="text-green-900 font-bold text-lg">{{ $t('admin.import.bulkPayment.allSucceeded') }}</p>
+        <p class="text-green-700 text-sm mt-2">{{ $t('admin.import.bulkPayment.debtsReduced') }}</p>
       </div>
     </div>
 

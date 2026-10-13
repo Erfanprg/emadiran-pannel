@@ -5,6 +5,8 @@ import { ADMIN_TRANSACTION_STATUS_BADGES, ADMIN_TRANSACTION_TYPE_BADGES } from "
 import type { Transaction } from "~/types/transaction";
 import type { TableColumn } from "~/components/Base/Table.vue";
 
+const { t } = useI18n()
+
 defineProps<{
   transactions: Transaction[];
   loading: boolean;
@@ -25,15 +27,15 @@ const canExpandTransaction = (transaction: any) =>
   getTransactionAllocations(transaction).length > 0;
 
 const transactionColumns: TableColumn<Transaction>[] = [
-  { key: "id", label: "شناسه", align: "center" },
-  { key: "amount", label: "مبلغ", align: "center" },
-  { key: "type", label: "نوع", align: "center" },
-  { key: "allocationSummary", label: "جزئیات تسهیلات", align: "center" },
-  { key: "status", label: "وضعیت", align: "center" },
-  { key: "transactionDate", label: "تاریخ", align: "center" },
+  { key: "id", label: t('common.fields.id'), align: "center" },
+  { key: "amount", label: t('common.fields.amount'), align: "center" },
+  { key: "type", label: t('common.fields.type'), align: "center" },
+  { key: "allocationSummary", label: t('common.fields.loanDetails'), align: "center" },
+  { key: "status", label: t('common.fields.status'), align: "center" },
+  { key: "transactionDate", label: t('common.fields.date'), align: "center" },
   {
     key: "description",
-    label: "توضیحات",
+    label: t('common.fields.description'),
     align: "center",
     class: "whitespace-normal"
   }
@@ -45,14 +47,14 @@ const transactionColumns: TableColumn<Transaction>[] = [
     <div class="flex items-center justify-between gap-3 border-b border-gray-200 px-6 py-4">
       <div>
         <h3 class="text-lg font-bold text-gray-900">
-          تاریخچه تراکنش‌های کاربر
+          {{ $t('admin.users.detail.transactions.title') }}
         </h3>
       </div>
     </div>
 
     <StateLoader
       v-if="loading"
-      message="در حال بارگذاری تاریخچه تراکنش‌ها..."
+      :message="$t('admin.users.detail.transactions.loading')"
     />
 
     <StateError
@@ -113,7 +115,7 @@ const transactionColumns: TableColumn<Transaction>[] = [
       <StateEmpty
         v-else
         icon="document"
-        message="تراکنشی برای این کاربر یافت نشد"
+        :message="$t('admin.users.detail.transactions.empty')"
       />
 
       <BasePagination

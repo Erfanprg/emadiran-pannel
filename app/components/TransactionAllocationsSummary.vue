@@ -2,11 +2,14 @@
 import type { Transaction } from '~/types/transaction'
 import { formatCurrency, formatNumber } from '~/utils/formatters'
 import {
+
   getTransactionAllocations,
   getTransactionAllocationTypeLabel,
   getTransactionLoanFallback,
   getTransactionLoanSummary
 } from '~/utils/transactionAllocations'
+
+const { t } = useI18n()
 
 const props = withDefaults(
   defineProps<{
@@ -30,7 +33,7 @@ const allocations = computed(() => getTransactionAllocations(props.transaction))
 const hasAllocations = computed(() => allocations.value.length > 0)
 const fallbackLoan = computed(() => getTransactionLoanFallback(props.transaction))
 const summaryLabel = computed(() => getTransactionLoanSummary(props.transaction))
-const allocationsCountLabel = computed(() => `${formatNumber(allocations.value.length)} تسهیلات`)
+const allocationsCountLabel = computed(() => t('common.allocations.summaryCount', { count: formatNumber(allocations.value.length) }))
 
 const handleToggle = () => {
   if (hasAllocations.value) {
@@ -46,7 +49,7 @@ const handleToggle = () => {
       type="button"
       class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-2.5 py-1.5 text-sm font-medium text-gray-700 transition-all hover:border-primary/30 hover:bg-primary/5 hover:text-primary"
       :aria-expanded="expanded"
-      aria-label="مشاهده جزئیات تسهیلات"
+      :aria-label="$t('common.allocations.viewDetails')"
       @click="handleToggle"
     >
       <span class="text-[10px] font-medium text-gray-500 md:text-[11px]">
@@ -73,7 +76,7 @@ const handleToggle = () => {
     >
       <div class="flex flex-col gap-3 border-b border-gray-100 pb-3 md:flex-row md:items-center md:justify-between">
         <div>
-          <p class="text-sm font-bold text-gray-900">جزئیات تسهیلات</p>
+          <p class="text-sm font-bold text-gray-900">{{ $t('common.fields.loanDetails') }}</p>
           <p class="mt-1 text-xs text-gray-500">{{ allocationsCountLabel }}</p>
         </div>
      
@@ -87,13 +90,13 @@ const handleToggle = () => {
         >
           <div class="flex items-start justify-between gap-3">
             <div class="min-w-0">
-              <p class="text-xs text-gray-500">شماره تسهیلات</p>
+              <p class="text-xs text-gray-500">{{ $t('common.fields.loanNumber') }}</p>
               <p class="mt-1 font-semibold text-gray-900" dir="ltr">
                 {{ allocation.loanNumber }}
               </p>
             </div>
             <div class="shrink-0 text-left">
-              <p class="text-xs text-gray-500">مبلغ تخصیص</p>
+              <p class="text-xs text-gray-500">{{ $t('common.allocations.allocatedAmount') }}</p>
               <p class="mt-1 font-bold text-gray-900" dir="ltr">
                 {{ formatCurrency(allocation.amount) }}
               </p>

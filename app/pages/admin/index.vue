@@ -7,8 +7,10 @@ import AmountStatCard from '~/components/Admin/dashboard/AmountStatCard.vue'
 import TopDebtorsTable from '~/components/Admin/dashboard/TopDebtorsTable.vue'
 import QuickActionLink from '~/components/Admin/dashboard/QuickActionLink.vue'
 
+const { t } = useI18n()
+
 useHead({
-  title: 'داشبورد مدیریت - عماد ایران'
+  title: t('seo.admin.dashboard')
 })
 
 definePageMeta({
@@ -75,7 +77,7 @@ const fetchDashboard = async () => {
     
     debtReport.value = debtResponse.data
   } catch (err: any) {
-    error.value = err.data?.message || 'خطا در دریافت آمار'
+    error.value = err.data?.message || t('admin.dashboard.errors.fetchStats')
     console.error('Error fetching dashboard:', err)
   } finally {
     isLoading.value = false
@@ -89,10 +91,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <AdminPage title="داشبورد">
+  <AdminPage :title="$t('global.navigation.dashboard')">
 
     <!-- Loading State -->
-    <StateLoader v-if="isLoading" message="در حال بارگذاری..." />
+    <StateLoader v-if="isLoading" :message="$t('common.states.loading')" />
 
     <!-- Error State -->
     <StateError v-else-if="error" :message="error" @retry="fetchDashboard" />
@@ -101,36 +103,36 @@ onMounted(() => {
     <div v-else-if="dashboardData" class="space-y-8">
       <!-- User Stats -->
       <div>
-        <h3 class="text-lg font-bold text-gray-900 mb-4">آمار کاربران</h3>
+        <h3 class="text-lg font-bold text-gray-900 mb-4">{{ $t('admin.dashboard.users.title') }}</h3>
         <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           <BaseStatsCard
-            title="کل کاربران"
+            :title="$t('admin.dashboard.users.total')"
             :value="dashboardData.users.total"
-            description="تعداد کل کاربران ثبت شده"
+            :description="$t('admin.dashboard.users.totalHint')"
             icon="users"
             icon-color="primary"
           />
 
           <BaseStatsCard
-            title="کاربران فعال"
+            :title="$t('admin.dashboard.users.active')"
             :value="dashboardData.users.active"
-            :description="`از ${formatNumber(dashboardData.users.total)} کاربر`"
+            :description="$t('admin.dashboard.users.ofTotal', { total: formatNumber(dashboardData.users.total) })"
             icon="check"
             icon-color="success"
           />
 
           <BaseStatsCard
-            title="کاربران غیرفعال"
+            :title="$t('admin.dashboard.users.inactive')"
             :value="dashboardData.users.inactive"
-            :description="`از ${formatNumber(dashboardData.users.total)} کاربر`"
+            :description="$t('admin.dashboard.users.ofTotal', { total: formatNumber(dashboardData.users.total) })"
             icon="close"
             icon-color="gray"
           />
 
           <BaseStatsCard
-            title="کاربران بدهکار"
+            :title="$t('admin.dashboard.users.withDebt')"
             :value="dashboardData.users.withDebt"
-            description="تعداد کاربران دارای بدهی"
+            :description="$t('admin.dashboard.users.withDebtHint')"
             icon="money"
             icon-color="warning"
           />
@@ -139,24 +141,24 @@ onMounted(() => {
 
       <!-- Financial Stats -->
       <div>
-        <h3 class="text-lg font-bold text-gray-900 mb-4">آمار مالی</h3>
+        <h3 class="text-lg font-bold text-gray-900 mb-4">{{ $t('admin.dashboard.finance.title') }}</h3>
         <div class="grid gap-6 md:grid-cols-3">
           <AmountStatCard
-            label="مجموع بدهی"
+            :label="$t('admin.dashboard.finance.totalDebt')"
             :value="formatCurrency(dashboardData.financial.totalDebt)"
             icon="money"
             color="red"
           />
 
           <AmountStatCard
-            label="میانگین بدهی"
+            :label="$t('admin.dashboard.finance.averageDebt')"
             :value="formatCurrency(dashboardData.financial.averageDebt)"
             icon="chart-bar"
             color="orange"
           />
 
           <AmountStatCard
-            label="بیشترین بدهی"
+            :label="$t('admin.dashboard.finance.maxDebt')"
             :value="formatCurrency(dashboardData.financial.maxDebt)"
             icon="trending-up"
             color="yellow"
@@ -166,20 +168,20 @@ onMounted(() => {
 
       <!-- Transaction Stats -->
       <div>
-        <h3 class="text-lg font-bold text-gray-900 mb-4">آمار پرداخت‌ها</h3>
+        <h3 class="text-lg font-bold text-gray-900 mb-4">{{ $t('admin.dashboard.payments.title') }}</h3>
         <div class="grid gap-6 md:grid-cols-2">
             <BaseStatsCard
-            title="کل تراکنش‌ها"
+            :title="$t('admin.dashboard.payments.totalTransactions')"
             :value="dashboardData.transactions.totalPaymentTransactions"
-              v-bind="{ title: 'تعداد پرداخت‌های موفق', description: 'ADMIN_DEBT_REDUCE و DEBT_PAYMENT' }"
-              description="تعداد کل تراکنش‌ها"
+              v-bind="{ title: $t('admin.dashboard.payments.successCount'), description: $t('admin.dashboard.payments.successCountHint') }"
+              :description="$t('admin.dashboard.payments.totalTransactionsHint')"
             icon="document"
             icon-color="primary"
           />
 
 
           <AmountStatCard
-            label="مجموع مبلغ پرداخت‌های موفق"
+            :label="$t('admin.dashboard.payments.successAmount')"
             :value="formatCurrency(dashboardData.transactions.totalPaymentAmount)"
             icon="money"
             color="green"
@@ -190,26 +192,26 @@ onMounted(() => {
 
       <!-- Top Debtors -->
       <div v-if="debtReport && debtReport.topDebtors.length > 0">
-        <h3 class="text-lg font-bold text-gray-900 mb-4">کاربران با بیشترین بدهی</h3>
+        <h3 class="text-lg font-bold text-gray-900 mb-4">{{ $t('admin.dashboard.topDebtors.title') }}</h3>
         <TopDebtorsTable :debtors="debtReport.topDebtors" />
       </div>
 
       <!-- Quick Actions -->
       <div>
-        <h3 class="text-lg font-bold text-gray-900 mb-4">دسترسی سریع</h3>
+        <h3 class="text-lg font-bold text-gray-900 mb-4">{{ $t('admin.dashboard.quickActions.title') }}</h3>
         <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <QuickActionLink
             to="/admin/users"
-            title="مدیریت کاربران"
-            description="مشاهده و ویرایش کاربران"
+            :title="$t('admin.common.manageUsers')"
+            :description="$t('admin.dashboard.quickActions.usersHint')"
             icon="user-group"
             icon-bg="bg-primary"
           />
 
           <QuickActionLink
             to="/admin/transactions"
-            title="تاریخچه پرداخت"
-            description="لیست و گزارش پرداخت‌ها"
+            :title="$t('admin.common.paymentHistory')"
+            :description="$t('admin.dashboard.quickActions.paymentsHint')"
             icon="clipboard-list"
             icon-bg="bg-green-600"
           />
@@ -229,8 +231,8 @@ onMounted(() => {
 
           <QuickActionLink
             to="/admin/gateways"
-            title="درگاه‌های پرداخت"
-            description="مدیریت درگاه‌ها"
+            :title="$t('admin.common.gateways')"
+            :description="$t('admin.dashboard.quickActions.gatewaysHint')"
             icon="credit-card"
             icon-bg="bg-purple-600"
           />

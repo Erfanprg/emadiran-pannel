@@ -1,3 +1,4 @@
+import { translate } from '../i18n/translate'
 /**
  * Format a date to Persian locale
  * @param date - Date string, Date object, or timestamp
@@ -62,5 +63,5 @@ export const formatNumber = (value: string | number | null | undefined, defaultV
  */
 export const formatCurrency = (value: string | number | null | undefined, showUnit = false): string => {
   const formatted = formatNumber(value, '0')
-  return showUnit ? ` ${formatted} ریال` : formatted
+  return showUnit ? translate('common.currency.withUnit', { formatted: formatted }) : formatted
 }

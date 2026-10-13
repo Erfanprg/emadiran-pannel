@@ -1,4 +1,5 @@
-<script setup lang="ts">
+<script setup lang="ts">import { translate } from '~/i18n/translate'
+
 const props = withDefaults(
   defineProps<{
     modelValue?: string | number
@@ -11,7 +12,7 @@ const props = withDefaults(
   }>(),
   {
     disabled: false,
-    placeholder: 'انتخاب کنید...'
+    placeholder: () => translate('common.select.placeholder')
   }
 )
 

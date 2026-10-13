@@ -5,6 +5,8 @@ import { useCurrencyInput } from '~/composables/useCurrencyInput'
 import type { Installment } from '~/types/installment'
 import { getUserDisplayName } from '~/func/getUserDisplayName'
 
+const { t } = useI18n()
+
 const props = defineProps<{
   installment: Installment
 }>()
@@ -30,11 +32,11 @@ const validateForm = () => {
   errors.value = {}
   
   if (!amountInput.rawValue.value || amountInput.numericValue.value < 1000) {
-    errors.value.amount = 'مبلغ باید حداقل 1000 ریال باشد'
+    errors.value.amount = t('admin.installments.validation.minAmount')
   }
   
   if (!formData.value.dueDate) {
-    errors.value.dueDate = 'تاریخ سررسید الزامی است'
+    errors.value.dueDate = t('admin.installments.validation.dueDateRequired')
   }
   
   return Object.keys(errors.value).length === 0
@@ -43,7 +45,7 @@ const validateForm = () => {
 // Handle submit
 const handleSubmit = async () => {
   if (!validateForm()) {
-    toast.error('لطفاً خطاهای فرم را برطرف کنید')
+    toast.error(t('common.validation.fixErrors'))
     return
   }
   
@@ -59,7 +61,7 @@ const handleSubmit = async () => {
     emit('close')
   } catch (err: any) {
     console.error('Update error:', err)
-    toast.error(err.data?.message || err.message || 'خطا در ویرایش قسط')
+    toast.error(err.data?.message || err.message || t('admin.installments.errors.update'))
   } finally {
     isSubmitting.value = false
   }
@@ -67,7 +69,7 @@ const handleSubmit = async () => {
 </script>
 
 <template>
-  <BaseModal title="ویرایش قسط" @close="emit('close')">
+  <BaseModal :title="$t('admin.installments.edit.title')" @close="emit('close')">
     <!-- User Info -->
     <BaseCard :padding="true" class="mb-6 bg-gray-50">
       <div class="flex items-center gap-3">
@@ -75,7 +77,7 @@ const handleSubmit = async () => {
           <IconsOutline name="user" class="w-5 h-5 text-primary" />
         </div>
         <div>
-          <p class="text-sm text-gray-600">کاربر</p>
+          <p class="text-sm text-gray-600">{{ $t('admin.installments.fields.user') }}</p>
           <p class="font-bold text-gray-900">{{ installment.user ? getUserDisplayName(installment.user) : `#${installment.userId}` }}</p>
         </div>
       </div>
@@ -85,7 +87,7 @@ const handleSubmit = async () => {
       <!-- Amount -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-2">
-          مبلغ (ریال) <span class="text-red-500">*</span>
+          {{ $t('common.fields.amountRial') }} <span class="text-red-500">*</span>
         </label>
         <input
           :value="amountInput.displayValue.value"
@@ -103,7 +105,7 @@ const handleSubmit = async () => {
       <!-- Due Date -->
       <BaseInput
         v-model="formData.dueDate"
-        label="تاریخ سررسید"
+        :label="$t('common.fields.dueDate')"
         type="text"
         required
         class="installment-edit-duedate"
@@ -117,8 +119,8 @@ const handleSubmit = async () => {
       <!-- Description -->
       <BaseTextarea
         v-model="formData.description"
-        label="توضیحات (اختیاری)"
-        placeholder="توضیحات مربوط به این قسط..."
+        :label="$t('common.fields.descriptionOptional')"
+        :placeholder="$t('admin.installments.form.descriptionPlaceholder')"
       />
     </form>
 
@@ -132,7 +134,7 @@ const handleSubmit = async () => {
         :disabled="isSubmitting"
         @click="handleSubmit"
       >
-        ذخیره تغییرات
+        {{ $t('common.actions.saveChanges') }}
       </BaseButton>
       <BaseButton
         variant="secondary"
@@ -141,7 +143,7 @@ const handleSubmit = async () => {
         :disabled="isSubmitting"
         @click="emit('close')"
       >
-        انصراف
+        {{ $t('common.actions.cancel') }}
       </BaseButton>
     </template>
   </BaseModal>

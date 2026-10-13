@@ -9,6 +9,8 @@ import type { LoanListItem } from '~/types/loan'
 import { getUserDisplayName } from '~/func/getUserDisplayName'
 import { formatDate } from '~/utils/formatters'
 
+const { t } = useI18n()
+
 const emit = defineEmits(['close', 'created'])
 const toast = useToast()
 
@@ -42,7 +44,7 @@ const fetchUsers = async () => {
     users.value = response.data
   } catch (err: any) {
     console.error('Error fetching users:', err)
-    toast.error('خطا در دریافت لیست کاربران')
+    toast.error(t('admin.installments.errors.fetchUsers'))
   } finally {
     isLoadingUsers.value = false
   }
@@ -69,7 +71,7 @@ const fetchUserLoans = async (userId: number) => {
     }
   } catch (err: any) {
     console.error('Error fetching loans:', err)
-    toast.error('خطا در دریافت لیست تسهیلات')
+    toast.error(t('admin.common.errors.fetchLoans'))
   } finally {
     isLoadingLoans.value = false
   }
@@ -83,7 +85,7 @@ const formatLoanOption = (loan: LoanListItem) => {
 // Create loan for user with custom loan number
 const createLoanForUser = async () => {
   if (!formData.value.userId || !formData.value.newLoanNumber.trim()) {
-    toast.error('لطفاً شماره تسهیلات را وارد کنید')
+    toast.error(t('admin.common.loans.numberRequired'))
     return false
   }
   
@@ -93,13 +95,13 @@ const createLoanForUser = async () => {
       userId: formData.value.userId,
       loanNumber: formData.value.newLoanNumber.trim()
     })
-    toast.success('تسهیلات جدید با موفقیت ایجاد شد')
+    toast.success(t('admin.common.loans.created'))
     // دوباره لیست تسهیلات را بارگذاری کن
     await fetchUserLoans(formData.value.userId)
     return true
   } catch (err: any) {
     console.error('Error creating loan:', err)
-    toast.error(err.data?.message || err.message || 'خطا در ایجاد تسهیلات')
+    toast.error(err.data?.message || err.message || t('admin.common.loans.createFailed'))
     return false
   } finally {
     isLoadingLoans.value = false
@@ -125,23 +127,23 @@ const validateForm = () => {
   errors.value = {}
   
   if (!formData.value.userId) {
-    errors.value.userId = 'انتخاب کاربر الزامی است'
+    errors.value.userId = t('admin.installments.validation.userRequired')
   }
   
   if ((showLoanWarning.value || showNewLoanInput.value) && !formData.value.newLoanNumber.trim()) {
-    errors.value.newLoanNumber = 'شماره تسهیلات الزامی است'
+    errors.value.newLoanNumber = t('admin.installments.validation.loanNumberRequired')
   }
   
   if (!showLoanWarning.value && !showNewLoanInput.value && !formData.value.loanId) {
-    errors.value.loanId = 'کاربر باید حداقل یک تسهیلات داشته باشد'
+    errors.value.loanId = t('admin.installments.validation.userNeedsLoan')
   }
   
   if (!amountInput.rawValue.value || amountInput.numericValue.value < 1000) {
-    errors.value.amount = 'مبلغ باید حداقل 1000 ریال باشد'
+    errors.value.amount = t('admin.installments.validation.minAmount')
   }
   
   if (!formData.value.dueDate) {
-    errors.value.dueDate = 'تاریخ سررسید الزامی است'
+    errors.value.dueDate = t('admin.installments.validation.dueDateRequired')
   }
   
   return Object.keys(errors.value).length === 0
@@ -150,7 +152,7 @@ const validateForm = () => {
 // Handle submit
 const handleSubmit = async () => {
   if (!validateForm()) {
-    toast.error('لطفاً خطاهای فرم را برطرف کنید')
+    toast.error(t('common.validation.fixErrors'))
     return
   }
   
@@ -164,14 +166,14 @@ const handleSubmit = async () => {
         return
       }
       if (!formData.value.loanId) {
-        toast.error('خطا در ایجاد تسهیلات')
+        toast.error(t('admin.common.loans.createFailed'))
         isSubmitting.value = false
         return
       }
     }
     
     if (!formData.value.loanId) {
-      toast.error('ابتدا باید یک تسهیلات برای این کاربر ایجاد شود')
+      toast.error(t('admin.installments.create.needLoanFirst'))
       isSubmitting.value = false
       return
     }
@@ -188,7 +190,7 @@ const handleSubmit = async () => {
     emit('close')
   } catch (err: any) {
     console.error('Create error:', err)
-    toast.error(err.data?.message || err.message || 'خطا در ایجاد قسط')
+    toast.error(err.data?.message || err.message || t('admin.installments.errors.create'))
   } finally {
     isSubmitting.value = false
   }
@@ -213,16 +215,16 @@ onMounted(() => {
 </script>
 
 <template>
-  <BaseModal title="ایجاد قسط جدید" @close="emit('close')">
+  <BaseModal :title="$t('admin.installments.create.title')" @close="emit('close')">
     <form @submit.prevent="handleSubmit" class="space-y-4">
       <!-- User Selection -->
       <BaseSelect
         v-model="formData.userId"
-        label="کاربر"
+        :label="$t('admin.installments.fields.user')"
         required
         :disabled="isLoadingUsers"
         :error="errors.userId"
-        placeholder="انتخاب کاربر..."
+        :placeholder="$t('admin.installments.create.selectUser')"
         :options="users.map(user => ({
           value: user.id,
           label: `${getUserDisplayName(user)} - ${user.phoneNumber}`
@@ -235,7 +237,7 @@ onMounted(() => {
         <!-- New Loan Number Input -->
         <BaseInput
           v-model="formData.newLoanNumber"
-          label="شماره تسهیلات"
+          :label="$t('common.fields.loanNumber')"
           type="text"
           required
           placeholder="LN_0000000001"
@@ -250,11 +252,11 @@ onMounted(() => {
         <div v-if="!showNewLoanInput">
           <BaseSelect
             v-model="formData.loanId"
-            label="انتخاب تسهیلات"
+            :label="$t('common.fields.selectLoan')"
             required
             :disabled="isLoadingLoans || loans.length === 0"
             :error="errors.loanId"
-            placeholder="انتخاب تسهیلات..."
+            :placeholder="$t('admin.installments.create.selectLoanPlaceholder')"
             :options="loans.map(loan => ({
               value: loan.id,
               label: formatLoanOption(loan)
@@ -265,7 +267,7 @@ onMounted(() => {
         <div v-if="showNewLoanInput" >     
           <BaseInput
             v-model="formData.newLoanNumber"
-            label="شماره تسهیلات جدید"
+            :label="$t('admin.common.loans.newNumber')"
             type="text"
             required
             placeholder="LN_0000000001"
@@ -283,15 +285,15 @@ onMounted(() => {
           <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
-          <span v-if="!showNewLoanInput">ایجاد تسهیلات جدید</span>
-          <span v-else>بازگشت به لیست تسهیلات</span>
+          <span v-if="!showNewLoanInput">{{ $t('admin.common.loans.createNew') }}</span>
+          <span v-else>{{ $t('admin.installments.create.backToLoans') }}</span>
         </button>
       </div>
 
       <!-- Amount -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-2">
-          مبلغ (ریال) <span class="text-red-500">*</span>
+          {{ $t('common.fields.amountRial') }} <span class="text-red-500">*</span>
         </label>
         <input
           :value="amountInput.displayValue.value"
@@ -309,7 +311,7 @@ onMounted(() => {
       <!-- Due Date -->
       <BaseInput
         v-model="formData.dueDate"
-        label="تاریخ سررسید"
+        :label="$t('common.fields.dueDate')"
         type="text"
         required
         class="installment-create-duedate"
@@ -323,8 +325,8 @@ onMounted(() => {
       <!-- Description -->
       <BaseTextarea
         v-model="formData.description"
-        label="توضیحات (اختیاری)"
-        placeholder="توضیحات مربوط به این قسط..."
+        :label="$t('common.fields.descriptionOptional')"
+        :placeholder="$t('admin.installments.form.descriptionPlaceholder')"
       />
     </form>
 
@@ -338,7 +340,7 @@ onMounted(() => {
         :disabled="isSubmitting"
         @click="handleSubmit"
       >
-        ایجاد قسط
+        {{ $t('admin.installments.create.submit') }}
       </BaseButton>
       <BaseButton
         variant="secondary"
@@ -347,7 +349,7 @@ onMounted(() => {
         :disabled="isSubmitting"
         @click="emit('close')"
       >
-        انصراف
+        {{ $t('common.actions.cancel') }}
       </BaseButton>
     </template>
   </BaseModal>

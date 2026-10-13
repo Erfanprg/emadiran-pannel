@@ -7,8 +7,8 @@
       </div>
 
       <!-- Error Message -->
-      <h2 class="text-2xl font-bold text-gray-900 mb-2">پرداخت ناموفق</h2>
-      <p class="text-gray-600 mb-6">متأسفانه پرداخت شما ناموفق بود</p>
+      <h2 class="text-2xl font-bold text-gray-900 mb-2">{{ $t('user.paymentResult.failed.title') }}</h2>
+      <p class="text-gray-600 mb-6">{{ $t('user.paymentResult.failed.message') }}</p>
 
       <!-- Failure Reason -->
       <!-- <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
@@ -24,14 +24,14 @@
           class="px-6 py-3 bg-primary text-white rounded-lg font-bold hover:bg-primary/90 transition-colors duration-200 flex items-center justify-center gap-2"
         >
           <Icon name="mdi:refresh" size="20" />
-          تلاش مجدد
+          {{ $t('common.actions.retry') }}
         </NuxtLink>
         <NuxtLink
           to="/dashboard"
           class="px-6 py-3 bg-white border-2 border-gray-300 text-gray-700 rounded-lg font-bold hover:bg-gray-50 transition-colors duration-200 flex items-center justify-center gap-2"
         >
           <Icon name="mdi:home" size="20" />
-          بازگشت به داشبورد
+          {{ $t('user.common.backToDashboard') }}
         </NuxtLink>
       </div>
     </div>

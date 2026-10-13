@@ -2,6 +2,8 @@
 import { formatDate } from '~/utils/formatters'
 import type { PaymentDeadline, PaymentDeadlinesMeta } from '~/types/admin'
 
+const { t } = useI18n()
+
 const props = withDefaults(
   defineProps<{
     items: PaymentDeadline[]
@@ -29,8 +31,8 @@ const emit = defineEmits<{
 }>()
 
 const columns = [
-  { key: 'deadlineAt', label: 'تاریخ مهلت', align: 'center', format: (val: string) => formatDate(val) },
-  { key: 'editReason', label: 'دلیل ویرایش', align: 'center', format: (val: string | null) => val || '-' }
+  { key: 'deadlineAt', label: t('admin.paymentDeadlines.fields.deadlineDate'), align: 'center', format: (val: string) => formatDate(val) },
+  { key: 'editReason', label: t('admin.common.editReason'), align: 'center', format: (val: string | null) => val || '-' }
 ]
 
 const handleEdit = (deadline: PaymentDeadline) => {
@@ -39,10 +41,10 @@ const handleEdit = (deadline: PaymentDeadline) => {
 </script>
 
 <template>
-  <BaseModal title="مهلت‌های پرداخت" max-width="2xl" @close="emit('close')">
+  <BaseModal :title="$t('admin.paymentDeadlines.list.title')" max-width="2xl" @close="emit('close')">
     <template #header>
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <h3 class="text-xl font-bold text-gray-900">مهلت‌های پرداخت</h3>
+        <h3 class="text-xl font-bold text-gray-900">{{ $t('admin.paymentDeadlines.list.title') }}</h3>
         <button
           type="button"
           class="px-4 py-2.5 rounded-lg font-medium text-sm border transition-colors duration-200"
@@ -52,13 +54,13 @@ const handleEdit = (deadline: PaymentDeadline) => {
           :disabled="disableCreate"
           @click="emit('create')"
         >
-          ثبت مهلت پرداخت
+          {{ $t('admin.paymentDeadlines.create.title') }}
         </button>
       </div>
     </template>
 
     <div class="space-y-4">
-      <StateLoader v-if="isLoading" message="در حال بارگذاری..." />
+      <StateLoader v-if="isLoading" :message="$t('common.states.loading')" />
 
       <StateError
         v-else-if="error"
@@ -78,7 +80,7 @@ const handleEdit = (deadline: PaymentDeadline) => {
               v-if="currentId === row.id"
               class="text-xs font-medium px-2 py-0.5 rounded-full bg-green-100 text-green-700"
             >
-              فعلی
+              {{ $t('admin.paymentDeadlines.list.current') }}
             </span>
           </div>
         </template>
@@ -103,7 +105,7 @@ const handleEdit = (deadline: PaymentDeadline) => {
 
         <template #empty>
           <div class="py-12 text-center text-gray-600 font-medium">
-            مهلت پرداخت ثبت نشده.
+            {{ $t('admin.paymentDeadlines.list.empty') }}
           </div>
         </template>
       </BaseTable>

@@ -32,6 +32,6 @@ const emit = defineEmits<{
       class="animate-spin"
     />
     <Icon v-else name="mdi:credit-card-check" :size="compact ? '22' : '24'" />
-    {{ submitting ? "در حال انتقال..." : "پرداخت" }}
+    {{ submitting ? $t('user.payment.submit.redirecting') : $t('user.payment.submit.pay') }}
   </button>
 </template>

@@ -1,9 +1,12 @@
 <script lang="ts" setup>
+
+const { t } = useI18n()
+
 // Landing page
 const siteUrl = 'https://emadiran.ir'
-const title = 'عمادایران | ضمانت هوشمند اقساط و خدمات حقوقی لندتک‌ها'
+const title = t('seo.home.title')
 const description =
-  'عمادایران ارائه‌دهنده ضمانت هوشمند اقساط، خدمات حقوقی و وصول مطالبات برای کاربران، بانک‌ها و لندتک‌هاست؛ با هدف حفظ سلامت اعتباری و مدیریت ریسک مالی.'
+  t('seo.home.description')
 
 useHead({
   title,
@@ -15,11 +18,11 @@ useHead({
       innerHTML: JSON.stringify({
         '@context': 'https://schema.org',
         '@type': 'Organization',
-        name: 'عماد ایران',
+        name: t('seo.siteName'),
         alternateName: 'Emad Iran',
         url: `${siteUrl}/`,
         logo: `${siteUrl}/emad-logo-p.png`,
-        slogan: 'عماد، نماد اعتماد',
+        slogan: t('app.title'),
       }),
     },
   ],
@@ -30,7 +33,7 @@ useSeoMeta({
   robots: 'index, follow',
   ogType: 'website',
   ogLocale: 'fa_IR',
-  ogSiteName: 'عماد ایران',
+  ogSiteName: t('seo.siteName'),
   ogTitle: title,
   ogDescription: description,
   ogUrl: `${siteUrl}/`,

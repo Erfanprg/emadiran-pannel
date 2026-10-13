@@ -12,13 +12,13 @@ defineProps<{
     <template #header>
       <div class="flex items-center justify-between">
         <h2 class="text-xl font-bold text-gray-900">
-          آخرین تاریخچه بدهی‌ها
+          {{ $t('user.dashboard.recent.title') }}
         </h2>
         <NuxtLink
           to="/dashboard/transactions"
           class="text-primary hover:text-accent transition-colors duration-200 text-sm font-medium flex items-center gap-1"
         >
-          مشاهده همه
+          {{ $t('user.dashboard.recent.viewAll') }}
           <Icon name="mdi:chevron-left" size="20" />
         </NuxtLink>
       </div>
@@ -28,7 +28,7 @@ defineProps<{
       v-if="!transactions || transactions.length === 0"
       class="text-center py-8 text-gray-500"
     >
-      هیچ موردی یافت نشد
+      {{ $t('user.dashboard.recent.empty') }}
     </div>
 
     <UserTransactionsTable v-else :transactions="transactions" />

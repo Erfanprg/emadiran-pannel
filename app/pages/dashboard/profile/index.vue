@@ -8,8 +8,10 @@ import ProfileField from '~/components/User/profile/ProfileField.vue'
 import ProfileFinancialSummary from '~/components/User/profile/ProfileFinancialSummary.vue'
 import ProfileQuickLink from '~/components/User/profile/ProfileQuickLink.vue'
 
+const { t } = useI18n()
+
 useHead({
-  title: 'پروفایل کاربری - عماد ایران'
+  title: t('seo.user.profile')
 })
 
 definePageMeta({
@@ -18,7 +20,7 @@ definePageMeta({
 
 const authStore = useAuthStore()
 const { loanDebtBreakdown, isLoadingLoanDebts, loanDebtError, fetchLoanDebts } =
-  useMyLoanDebts('خطا در دریافت جزئیات بدهی')
+  useMyLoanDebts(t('user.profile.errors.fetchLoanDebts'))
 
 // Ensure user data is loaded
 onMounted(async () => {
@@ -47,7 +49,7 @@ const userInfo = computed(() => {
 </script>
 
 <template>
-  <UserPage title="پروفایل کاربری">
+  <UserPage :title="$t('user.common.profile')">
     <div v-if="!userInfo" class="flex items-center justify-center py-12">
       <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
     </div>
@@ -63,10 +65,10 @@ const userInfo = computed(() => {
       <!-- Personal Information -->
       <BaseCard>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <ProfileField label="نام و نام خانوادگی" :value="userInfo.fullName" />
-          <ProfileField label="شماره موبایل" :value="userInfo.phoneNumber" ltr />
-          <ProfileField label="کد ملی" :value="userInfo.nationalCode" ltr />
-          <ProfileField label="تاریخ عضویت" :value="formatDate(userInfo.createdAt)" />
+          <ProfileField :label="$t('common.fields.fullName')" :value="userInfo.fullName" />
+          <ProfileField :label="$t('global.form.mobile_number')" :value="userInfo.phoneNumber" ltr />
+          <ProfileField :label="$t('common.fields.nationalCode')" :value="userInfo.nationalCode" ltr />
+          <ProfileField :label="$t('user.profile.fields.memberSince')" :value="formatDate(userInfo.createdAt)" />
         </div>
       </BaseCard>
 
@@ -74,11 +76,11 @@ const userInfo = computed(() => {
       <ProfileFinancialSummary :total-debt="userInfo.totalDebt" />
 
       <LoanDebtBreakdownSection
-        title="جزئیات بدهی به تفکیک تسهیلات"
+        :title="$t('common.loanDebts.breakdownTitle')"
         :breakdown="loanDebtBreakdown"
         :loading="isLoadingLoanDebts"
         :error="loanDebtError"
-        empty-message="در حال حاضر تسهیلات بدهکاری برای شما ثبت نشده است."
+        :empty-message="$t('user.profile.loanDebtsEmpty')"
         @retry="fetchLoanDebts"
       />
 
@@ -96,8 +98,8 @@ const userInfo = computed(() => {
         <ProfileQuickLink
           to="/dashboard/transactions"
           icon="mdi:receipt-text"
-          title="تاریخچه بدهی‌ها"
-          description="تاریخچه پرداخت‌ها"
+          :title="$t('user.common.debtHistory')"
+          :description="$t('user.profile.quickLinks.paymentHistory')"
           icon-box-class="bg-green-100 group-hover:bg-green-200"
           icon-class="text-green-600"
         />
@@ -105,8 +107,8 @@ const userInfo = computed(() => {
         <ProfileQuickLink
           to="/dashboard"
           icon="mdi:view-dashboard"
-          title="داشبورد"
-          description="بازگشت به صفحه اصلی"
+          :title="$t('global.navigation.dashboard')"
+          :description="$t('common.actions.backToHome')"
           icon-box-class="bg-purple-100 group-hover:bg-purple-200"
           icon-class="text-purple-600"
         />

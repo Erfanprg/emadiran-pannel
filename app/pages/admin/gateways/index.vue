@@ -6,8 +6,10 @@ import { useApiCall } from "~/composables/useApiCall";
 import { useConfirm } from "~/composables/useConfirm";
 import { ACTIVE_STATUS_BADGES } from "~/constants/badges";
 
+const { t } = useI18n()
+
 useHead({
-  title: 'مدیریت درگاه‌های پرداخت - عماد ایران'
+  title: t('seo.admin.gateways')
 })
 
 definePageMeta({
@@ -16,9 +18,9 @@ definePageMeta({
 
 // Table columns
 const columns = [
-  { key: "index", label: "ردیف", align: "center" as const },
-  { key: "displayName", label: "نام درگاه", align: "center" as const },
-  { key: "isActive", label: "وضعیت", align: "center" as const },
+  { key: "index", label: t('common.table.row'), align: "center" as const },
+  { key: "displayName", label: t('admin.gateways.table.name'), align: "center" as const },
+  { key: "isActive", label: t('common.fields.status'), align: "center" as const },
 ];
 
 // State
@@ -46,7 +48,7 @@ const fetchGateways = async () => {
   } catch (err: any) {
     console.error("Error:", err);
     error.value =
-      err.data?.message || err.message || "خطا در دریافت لیست درگاه‌ها";
+      err.data?.message || err.message || t('admin.gateways.errors.fetch');
   } finally {
     loading.value = false;
   }
@@ -55,20 +57,20 @@ const fetchGateways = async () => {
 // Handle toggle gateway status
 const handleToggle = async (gateway: Gateway) => {
   const newStatus = !gateway.isActive;
-  const action = newStatus ? "فعال" : "غیرفعال";
+  const action = newStatus ? t('status.active') : t('status.inactive');
 
   const confirmed = await confirm({
-    title: `${action} کردن درگاه`,
-    message: `آیا از ${action} کردن درگاه ${gateway.displayName} اطمینان دارید؟`,
+    title: t('admin.gateways.toggle.title', { action: action }),
+    message: t('admin.gateways.toggle.confirm', { action: action, displayName: gateway.displayName }),
     type: newStatus ? "info" : "warning",
-    confirmText: `بله، ${action} شود`,
+    confirmText: t('admin.common.confirmYesAction', { action: action }),
   });
 
   if (!confirmed) return;
 
   await execute(() => gatewaysApi.toggle(gateway.name, newStatus), {
-    successMessage: `درگاه ${gateway.displayName} با موفقیت ${action} شد`,
-    errorMessage: `خطا در ${action} کردن درگاه`,
+    successMessage: t('admin.gateways.messages.toggled', { displayName: gateway.displayName, action: action }),
+    errorMessage: t('admin.gateways.errors.toggle', { action: action }),
     onSuccess: () => fetchGateways(),
   });
 };
@@ -80,14 +82,14 @@ onMounted(() => {
 </script>
 
 <template>
-  <AdminPage title="درگاه‌های پرداخت">
+  <AdminPage :title="$t('admin.common.gateways')">
     <!-- Content -->
     <BaseCard class="mt-6">
       <StateLoader v-if="loading" />
       <StateError v-else-if="error" :message="error" @retry="fetchGateways" />
       <StateEmpty
         v-else-if="!gateways.length"
-        message="درگاه پرداختی یافت نشد"
+        :message="$t('admin.gateways.empty')"
       />
 
       <BaseTable v-else :columns="columns" :data="gatewaysWithIndex">
@@ -116,7 +118,7 @@ onMounted(() => {
                   ? 'bg-red-600 text-white border-red-600 hover:bg-red-700 hover:-translate-y-0.5 hover:shadow-[0_2px_8px_rgba(220,38,38,0.3)]'
                   : 'bg-green-600 text-white border-green-600 hover:bg-green-700 hover:-translate-y-0.5 hover:shadow-[0_2px_8px_rgba(22,163,74,0.3)]'
               "
-              :title="row.isActive ? 'غیرفعال کردن' : 'فعال کردن'"
+              :title="row.isActive ? $t('admin.common.deactivate') : $t('admin.common.activate')"
             >
               <Icon
                 :name="
@@ -126,7 +128,7 @@ onMounted(() => {
                 "
                 size="18"
               />
-              {{ row.isActive ? "غیرفعال کردن" : "فعال کردن" }}
+              {{ row.isActive ? $t('admin.common.deactivate') : $t('admin.common.activate') }}
             </button>
           </div>
         </template>

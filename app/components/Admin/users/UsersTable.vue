@@ -5,6 +5,8 @@ import { ACTIVE_STATUS_BADGES, USER_ROLE_BADGES } from '~/constants/badges'
 import type { AdminUser } from '~/types/admin'
 import type { TableColumn } from '~/components/Base/Table.vue'
 
+const { t } = useI18n()
+
 defineProps<{
   users: AdminUser[]
 }>()
@@ -15,23 +17,23 @@ const emit = defineEmits<{
 }>()
 
 const columns: TableColumn<AdminUser>[] = [
-  { key: 'id', label: 'شناسه', align: 'center' },
+  { key: 'id', label: t('common.fields.id'), align: 'center' },
   {
     key: 'fullName',
-    label: 'نام',
+    label: t('common.fields.name'),
     align: 'center',
     format: (val, row) => getUserDisplayName(row)
   },
-  { key: 'phoneNumber', label: 'موبایل', align: 'center' },
-  { key: 'nationalCode', label: 'کد ملی', align: 'center' },
-  { key: 'role', label: 'نقش', align: 'center' },
+  { key: 'phoneNumber', label: t('admin.users.list.table.mobile'), align: 'center' },
+  { key: 'nationalCode', label: t('common.fields.nationalCode'), align: 'center' },
+  { key: 'role', label: t('admin.users.list.table.role'), align: 'center' },
   {
     key: 'totalDebt',
-    label: 'بدهی',
+    label: t('admin.users.list.table.debt'),
     align: 'center',
     format: (val) => formatNumber(val)
   },
-  { key: 'isActive', label: 'وضعیت', align: 'center' }
+  { key: 'isActive', label: t('common.fields.status'), align: 'center' }
 ]
 </script>
 
@@ -62,7 +64,7 @@ const columns: TableColumn<AdminUser>[] = [
       <div class="flex items-center justify-center gap-2">
         <NuxtLink
           :to="`/admin/users/${row.id}`"
-          title="مشاهده جزئیات"
+          :title="$t('common.actions.viewDetails')"
           class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors duration-200"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -72,7 +74,7 @@ const columns: TableColumn<AdminUser>[] = [
         </NuxtLink>
         <NuxtLink
           :to="`/admin/users/edit/${row.id}`"
-          title="ویرایش"
+          :title="$t('global.button.edit')"
           class="p-2 text-primary hover:bg-blue-50 rounded-lg transition-colors duration-200"
         >
           <IconsOutline name="edit" class="w-5 h-5" />
@@ -80,14 +82,14 @@ const columns: TableColumn<AdminUser>[] = [
         <button
           v-if="row.role !== 'ADMIN'"
           @click="emit('toggle-status', row)"
-          :title="row.isActive ? 'غیرفعال کردن' : 'فعال کردن'"
+          :title="row.isActive ? $t('admin.common.deactivate') : $t('admin.common.activate')"
           class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200"
         >
           <IconsOutline name="switch-horizontal" class="w-5 h-5" />
         </button>
         <button
           @click="emit('delete', row)"
-          title="حذف"
+          :title="$t('global.button.delete')"
           class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
         >
           <IconsOutline name="trash" class="w-5 h-5" />

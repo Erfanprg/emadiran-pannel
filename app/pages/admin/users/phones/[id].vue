@@ -10,8 +10,10 @@ import type { UserPhone } from '~/types/userPhone'
 import type { AdminUser } from '~/types/admin'
 import PhoneFormModal from '~/components/Admin/users/PhoneFormModal.vue'
 
+const { t } = useI18n()
+
 useHead({
-  title: 'مدیریت شماره تلفن‌ها - عماد ایران'
+  title: t('seo.admin.phones')
 })
 
 definePageMeta({
@@ -67,7 +69,7 @@ const fetchPhones = async () => {
     error.value = null
     phones.value = await userPhonesApi.getUserPhones(userId)
   } catch (err: any) {
-    error.value = err.data?.message || 'خطا در دریافت شماره تلفن‌ها'
+    error.value = err.data?.message || t('admin.users.phones.errors.fetch')
     console.error('Error fetching phones:', err)
   } finally {
     isLoading.value = false
@@ -79,13 +81,13 @@ const validateAddForm = () => {
   errors.value = {}
   
   if (!addForm.value.phoneNumber.trim()) {
-    errors.value.phoneNumber = 'شماره تلفن الزامی است'
+    errors.value.phoneNumber = t('admin.users.phones.validation.required')
     return false
   }
   
   // Simple phone validation (can be more strict)
   if (!/^[\d\s\-\+()]+$/.test(addForm.value.phoneNumber)) {
-    errors.value.phoneNumber = 'شماره تلفن معتبر نیست'
+    errors.value.phoneNumber = t('admin.users.phones.validation.invalid')
     return false
   }
   
@@ -97,12 +99,12 @@ const validateEditForm = () => {
   errors.value = {}
   
   if (editForm.value.phoneNumber && !editForm.value.phoneNumber.trim()) {
-    errors.value.phoneNumber = 'شماره تلفن نمی‌تواند خالی باشد'
+    errors.value.phoneNumber = t('admin.users.phones.validation.empty')
     return false
   }
   
   if (editForm.value.phoneNumber && !/^[\d\s\-\+()]+$/.test(editForm.value.phoneNumber)) {
-    errors.value.phoneNumber = 'شماره تلفن معتبر نیست'
+    errors.value.phoneNumber = t('admin.users.phones.validation.invalid')
     return false
   }
   
@@ -112,7 +114,7 @@ const validateEditForm = () => {
 // Add phone
 const handleAddPhone = async () => {
   if (!validateAddForm()) {
-    toast.error('لطفاً خطاهای فرم را برطرف کنید')
+    toast.error(t('common.validation.fixErrors'))
     return
   }
   
@@ -122,7 +124,7 @@ const handleAddPhone = async () => {
       label: addForm.value.label.trim() || undefined
     }),
     {
-      successMessage: 'شماره تلفن با موفقیت اضافه شد',
+      successMessage: t('admin.users.phones.messages.added'),
       onSuccess: () => {
         showAddModal.value = false
         addForm.value = { phoneNumber: '', label: '' }
@@ -147,7 +149,7 @@ const handleUpdatePhone = async () => {
   if (!editingPhone.value) return
   
   if (!validateEditForm()) {
-    toast.error('لطفاً خطاهای فرم را برطرف کنید')
+    toast.error(t('common.validation.fixErrors'))
     return
   }
   
@@ -157,7 +159,7 @@ const handleUpdatePhone = async () => {
       label: editForm.value.label.trim() || undefined
     }),
     {
-      successMessage: 'شماره تلفن با موفقیت به‌روزرسانی شد',
+      successMessage: t('admin.users.phones.messages.updated'),
       onSuccess: () => {
         showEditModal.value = false
         editingPhone.value = null
@@ -170,10 +172,10 @@ const handleUpdatePhone = async () => {
 // Delete phone
 const handleDeletePhone = async (phone: UserPhone) => {
   const confirmed = await confirm({
-    title: 'حذف شماره تلفن',
-    message: `آیا از حذف شماره "${phone.phoneNumber}" اطمینان دارید؟`,
+    title: t('admin.users.phones.delete.title'),
+    message: t('admin.users.phones.delete.confirm', { phoneNumber: phone.phoneNumber }),
     type: 'danger',
-    confirmText: 'بله، حذف شود'
+    confirmText: t('common.actions.confirmDelete')
   })
   
   if (!confirmed) return
@@ -181,7 +183,7 @@ const handleDeletePhone = async (phone: UserPhone) => {
   const { success } = await execute(
     () => userPhonesApi.deleteUserPhone(phone.id),
     {
-      successMessage: 'شماره تلفن با موفقیت حذف شد',
+      successMessage: t('admin.users.phones.messages.deleted'),
       onSuccess: () => fetchPhones()
     }
   )
@@ -195,7 +197,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <AdminPage title="مدیریت شماره تلفن‌ها">
+  <AdminPage :title="$t('admin.users.phones.title')">
     <div class="max-w-4xl mx-auto space-y-6">
       <!-- User Info Card -->
       <BaseCard v-if="user" class="bg-gradient-to-r from-primary/5 to-accent/5">
@@ -206,33 +208,33 @@ onMounted(() => {
             </div>
             <div>
               <h2 class="text-xl font-bold text-gray-900">{{ getUserDisplayName(user) }}</h2>
-              <p class="text-sm text-gray-600">شماره اصلی: <span class="font-medium" dir="ltr">{{ user.phoneNumber }}</span></p>
+              <p class="text-sm text-gray-600">{{ $t('admin.users.phones.primaryNumber') }} <span class="font-medium" dir="ltr">{{ user.phoneNumber }}</span></p>
             </div>
           </div>
           <NuxtLink
             :to="`/admin/users/${userId}`"
             class="text-sm text-gray-600 hover:text-primary transition-colors"
           >
-            بازگشت به جزئیات کاربر
+            {{ $t('admin.users.phones.backToUser') }}
           </NuxtLink>
         </div>
       </BaseCard>
 
       <!-- Actions Bar -->
       <div class="flex items-center justify-between">
-        <h3 class="text-lg font-bold text-gray-900">شماره تلفن‌های اضافی</h3>
+        <h3 class="text-lg font-bold text-gray-900">{{ $t('admin.users.phones.extra.title') }}</h3>
         <BaseButton
           @click="showAddModal = true"
           variant="primary"
           size="md"
         >
           <IconsOutline name="plus-large" class="w-5 h-5 ml-2" />
-          افزودن شماره جدید
+          {{ $t('admin.users.phones.extra.add') }}
         </BaseButton>
       </div>
 
       <!-- Loading State -->
-      <StateLoader v-if="isLoading" message="در حال بارگذاری..." />
+      <StateLoader v-if="isLoading" :message="$t('common.states.loading')" />
 
       <!-- Error State -->
       <StateError v-else-if="error" :message="error" @retry="fetchPhones" />
@@ -243,7 +245,7 @@ onMounted(() => {
           <div class="w-20 h-20 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
             <IconsOutline name="phone" class="w-10 h-10 text-gray-400" />
           </div>
-          <p class="text-gray-600 mb-2">هیچ شماره اضافی ثبت نشده</p>
+          <p class="text-gray-600 mb-2">{{ $t('admin.users.phones.extra.empty') }}</p>
         </div>
       </BaseCard>
 
@@ -258,7 +260,7 @@ onMounted(() => {
               <div class="flex-1">
                 <p class="text-lg font-bold text-gray-900">{{ phone.phoneNumber }}</p>
                 <p class="text-sm text-gray-600">
-                  {{ phone.label || 'بدون برچسب' }}
+                  {{ phone.label || $t('admin.users.phones.extra.noLabel') }}
                 </p>
               </div>
             </div>
@@ -267,14 +269,14 @@ onMounted(() => {
               <button
                 @click="openEditModal(phone)"
                 class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                title="ویرایش"
+                :title="$t('global.button.edit')"
               >
                 <IconsOutline name="edit" class="w-5 h-5" />
               </button>
               <button
                 @click="handleDeletePhone(phone)"
                 class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                title="حذف"
+                :title="$t('global.button.delete')"
               >
                 <IconsOutline name="trash" class="w-5 h-5" />
               </button>
@@ -290,8 +292,8 @@ onMounted(() => {
         v-if="showAddModal"
         v-model:phone-number="addForm.phoneNumber"
         v-model:label="addForm.label"
-        title="افزودن شماره تلفن جدید"
-        submit-text="افزودن شماره"
+        :title="$t('admin.users.phones.form.addTitle')"
+        :submit-text="$t('admin.users.phones.form.addSubmit')"
         phone-placeholder="09123456789 "
         :errors="errors"
         @submit="handleAddPhone"
@@ -303,9 +305,9 @@ onMounted(() => {
         v-if="showEditModal"
         v-model:phone-number="editForm.phoneNumber"
         v-model:label="editForm.label"
-        title="ویرایش شماره تلفن"
-        submit-text="ذخیره تغییرات"
-        phone-placeholder="09123456789 یا 02188776655"
+        :title="$t('admin.users.phones.form.editTitle')"
+        :submit-text="$t('common.actions.saveChanges')"
+        :phone-placeholder="$t('admin.users.phones.fields.phonePlaceholder')"
         :errors="errors"
         @submit="handleUpdatePhone"
         @close="showEditModal = false"

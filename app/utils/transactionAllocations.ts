@@ -1,9 +1,10 @@
 import type { Transaction, TransactionAllocation } from '~/types/transaction'
 import { formatNumber } from '~/utils/formatters'
+import { translate } from '../i18n/translate'
 
 const allocationTypeLabels: Record<string, string> = {
-  SELECTED_LOAN: 'تسهیلات انتخاب‌شده',
-  AUTO_DISTRIBUTED: 'تخصیص خودکار'
+  get SELECTED_LOAN() { return translate('common.allocations.types.selectedLoan') },
+  get AUTO_DISTRIBUTED() { return translate('common.allocations.types.autoDistributed') }
 }
 
 export const getTransactionAllocations = (
@@ -26,7 +27,7 @@ export const getTransactionLoanSummary = (
   const allocations = getTransactionAllocations(transaction)
 
   if (allocations.length > 0) {
-    return `${formatNumber(allocations.length)} تسهیلات`
+    return translate('common.allocations.summaryCount', { count: formatNumber(allocations.length) })
   }
 
   return getTransactionLoanFallback(transaction)
@@ -37,7 +38,7 @@ export const getTransactionAllocationTypeLabel = (
   allocationRole?: string | null
 ): string => {
   if (!allocationType && !allocationRole) {
-    return 'تخصیص ثبت‌شده'
+    return translate('common.allocations.types.recorded')
   }
 
   if (allocationRole === 'SELECTED_LOAN' || allocationType === 'SELECTED_LOAN') {
@@ -51,5 +52,5 @@ export const getTransactionAllocationTypeLabel = (
     return allocationTypeLabels.AUTO_DISTRIBUTED
   }
 
-  return allocationTypeLabels[allocationType || ''] || 'تخصیص ثبت‌شده'
+  return allocationTypeLabels[allocationType || ''] || translate('common.allocations.types.recorded')
 }

@@ -10,8 +10,10 @@ import { formatDate, formatNumber, formatCurrency } from '~/utils/formatters'
 import { getUserDisplayName } from '~/func/getUserDisplayName'
 import { INSTALLMENT_STATUS_BADGES } from '~/constants/badges'
 
+const { t } = useI18n()
+
 useHead({
-  title: 'مدیریت اقساط - عماد ایران'
+  title: t('seo.admin.installments')
 })
 
 definePageMeta({
@@ -53,42 +55,42 @@ const {
 const filterFields = computed(() => [
   {
     key: 'phoneNumber',
-    label: 'شماره تلفن',
+    label: t('common.fields.phone'),
     type: 'text' as const,
     placeholder: '09123456789',
     modelValue: filters.value.phoneNumber
   },
   {
     key: 'firstName',
-    label: 'نام',
+    label: t('common.fields.name'),
     type: 'text' as const,
-    placeholder: 'نام',
+    placeholder: t('common.fields.name'),
     modelValue: filters.value.firstName
   },
   {
     key: 'lastName',
-    label: 'نام خانوادگی',
+    label: t('common.fields.lastName'),
     type: 'text' as const,
-    placeholder: 'نام خانوادگی',
+    placeholder: t('common.fields.lastName'),
     modelValue: filters.value.lastName
   },
   {
     key: 'loanNumber',
-    label: 'شماره تسهیلات',
+    label: t('common.fields.loanNumber'),
     type: 'text' as const,
     placeholder: 'LN_0000000001',
     modelValue: filters.value.loanNumber
   },
   {
     key: 'status',
-    label: 'وضعیت',
+    label: t('common.fields.status'),
     type: 'select' as const,
     modelValue: filters.value.status,
     options: [
-      { label: 'همه', value: undefined },
-      { label: 'در انتظار', value: 'PENDING' },
-      { label: 'پرداخت شده', value: 'PAID' },
-      { label: 'عقب افتاده', value: 'OVERDUE' }
+      { label: t('common.filters.all'), value: undefined },
+      { label: t('status.pending'), value: 'PENDING' },
+      { label: t('status.paid'), value: 'PAID' },
+      { label: t('status.overdue'), value: 'OVERDUE' }
     ]
   }
 ])
@@ -113,7 +115,7 @@ const fetchInstallments = async () => {
     installments.value = response.data.data || []
     total.value = response.data.meta?.total || 0
   } catch (err: any) {
-    error.value = err.data?.message || err.message || 'خطا در دریافت لیست اقساط'
+    error.value = err.data?.message || err.message || t('admin.installments.errors.fetch')
     console.error('Error fetching installments:', err)
   } finally {
     isLoading.value = false
@@ -136,7 +138,7 @@ const resetFilters = () => {
 // Handle edit
 const handleEdit = (installment: Installment) => {
   if (installment.status === 'PAID') {
-    toast.error('قسط پرداخت شده قابل ویرایش نیست')
+    toast.error(t('admin.installments.errors.paidNotEditable'))
     return
   }
   editingInstallment.value = installment
@@ -149,7 +151,7 @@ const handleChangeStatus = async (installment: Installment) => {
                     installment.status === 'PAID' ? 'PENDING' : 'PENDING'
   
   const confirmed = await confirm({
-    message: 'آیا از تغییر وضعیت این قسط اطمینان دارید؟',
+    message: t('admin.installments.confirm.toggleStatus'),
     type: 'warning'
   })
 
@@ -158,7 +160,7 @@ const handleChangeStatus = async (installment: Installment) => {
   await execute(
     () => installmentsApi.changeStatus(installment.id, { status: newStatus }),
     {
-      successMessage: 'وضعیت قسط با موفقیت تغییر کرد',
+      successMessage: t('admin.installments.messages.statusChanged'),
       onSuccess: () => fetchInstallments()
     }
   )
@@ -167,14 +169,14 @@ const handleChangeStatus = async (installment: Installment) => {
 // Handle delete
 const handleDelete = async (installment: Installment) => {
   if (installment.status === 'PAID') {
-    toast.error('قسط پرداخت شده قابل حذف نیست')
+    toast.error(t('admin.installments.errors.paidNotDeletable'))
     return
   }
   
   const confirmed = await confirm({
-    message: `آیا از حذف قسط شماره ${installment.id} اطمینان دارید؟`,
+    message: t('admin.installments.confirm.delete', { id: installment.id }),
     type: 'danger',
-    confirmText: 'حذف'
+    confirmText: t('global.button.delete')
   })
 
   if (!confirmed) return
@@ -182,7 +184,7 @@ const handleDelete = async (installment: Installment) => {
   await execute(
     () => installmentsApi.deleteInstallment(installment.id),
     {
-      successMessage: 'قسط با موفقیت حذف شد',
+      successMessage: t('admin.installments.messages.deleted'),
       onSuccess: () => fetchInstallments()
     }
   )
@@ -200,7 +202,7 @@ watch(page, () => {
 </script>
 
 <template>
-  <AdminPage title="مدیریت اقساط">
+  <AdminPage :title="$t('admin.installments.title')">
     <!-- Filters -->
     <BaseFiltersBar
       :fields="filterFields"
@@ -211,31 +213,31 @@ watch(page, () => {
 
     <!-- Table -->
     <BaseCard :padding="false">
-      <BaseCardHeader title="لیست اقساط" :subtitle="`تعداد: ${formatNumber(total)} قسط`">
+      <BaseCardHeader :title="$t('common.labels.installmentsList')" :subtitle="$t('admin.installments.list.count', { total: formatNumber(total) })">
         <button
           @click="showCreateModal = true"
           class="px-4 py-2 bg-gradient-to-r from-primary to-accent text-white rounded-lg hover:shadow-lg transition-all duration-300 flex items-center gap-2 font-medium"
         >
           <IconsOutline name="plus" class="w-5 h-5" />
-          ایجاد قسط جدید
+          {{ $t('admin.installments.create.title') }}
         </button>
       </BaseCardHeader>
 
       <!-- Loading State -->
-      <StateLoader v-if="isLoading" message="در حال بارگذاری..." />
+      <StateLoader v-if="isLoading" :message="$t('common.states.loading')" />
 
       <!-- Error State -->
       <StateError v-else-if="error" :message="error" @retry="fetchInstallments" />
 
       <!-- Table -->
       <BaseTable v-else-if="installments.length > 0" :columns="[
-        { key: 'id', label: 'شناسه', align: 'center' },
-        { key: 'userId', label: 'کاربر', align: 'center' },
-        { key: 'amount', label: 'مبلغ (ریال)', align: 'center', format: (val) => formatCurrency(val) },
-        { key: 'loan', label: 'شماره تسهیلات', align: 'center' },
-        { key: 'dueDate', label: 'تاریخ سررسید', align: 'center', format: (val) => formatDate(val) },
-        { key: 'status', label: 'وضعیت', align: 'center' },
-        { key: 'description', label: 'توضیحات', align: 'center', format: (val) => val || '-' }
+        { key: 'id', label: $t('common.fields.id'), align: 'center' },
+        { key: 'userId', label: $t('admin.installments.fields.user'), align: 'center' },
+        { key: 'amount', label: $t('common.fields.amountRial'), align: 'center', format: (val) => formatCurrency(val) },
+        { key: 'loan', label: $t('common.fields.loanNumber'), align: 'center' },
+        { key: 'dueDate', label: $t('common.fields.dueDate'), align: 'center', format: (val) => formatDate(val) },
+        { key: 'status', label: $t('common.fields.status'), align: 'center' },
+        { key: 'description', label: $t('common.fields.description'), align: 'center', format: (val) => val || '-' }
       ]" :data="installments">
         <!-- User Cell -->
         <template #cell-userId="{ row }">
@@ -255,7 +257,7 @@ watch(page, () => {
         <!-- Loan Cell -->
         <template #cell-loan="{ row }">
           <div dir="ltr" class="font-medium">
-            {{ row.loan?.loanNumber || 'ندارد' }}
+            {{ row.loan?.loanNumber || $t('common.labels.none') }}
           </div>
         </template>
 
@@ -270,14 +272,14 @@ watch(page, () => {
             <button
               v-if="row.status !== 'PAID'"
               @click="handleEdit(row)"
-              title="ویرایش"
+              :title="$t('global.button.edit')"
               class="p-2 text-primary hover:bg-blue-50 rounded-lg transition-colors duration-200"
             >
               <IconsOutline name="edit" class="w-5 h-5" />
             </button>
             <button
               @click="handleChangeStatus(row)"
-              title="تغییر وضعیت"
+              :title="$t('admin.installments.actions.toggleStatus')"
               class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors duration-200"
             >
               <IconsOutline name="check-circle" class="w-5 h-5" />
@@ -285,7 +287,7 @@ watch(page, () => {
             <button
               v-if="row.status !== 'PAID'"
               @click="handleDelete(row)"
-              title="حذف"
+              :title="$t('global.button.delete')"
               class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
             >
               <IconsOutline name="trash" class="w-5 h-5" />
@@ -298,7 +300,7 @@ watch(page, () => {
       <StateEmpty
         v-else
         icon="document"
-        message="قسطی یافت نشد"
+        :message="$t('admin.installments.list.empty')"
       />
 
       <!-- Pagination -->

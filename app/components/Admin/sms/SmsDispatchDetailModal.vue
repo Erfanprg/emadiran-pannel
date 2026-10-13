@@ -9,16 +9,16 @@ const emit = defineEmits<{ close: []; retry: [dispatch: SmsDispatch]; checkStatu
 </script>
 
 <template>
-  <BaseModal title="جزئیات پیامک" max-width="2xl" @close="emit('close')">
+  <BaseModal :title="$t('admin.sms.detail.title')" max-width="2xl" @close="emit('close')">
     <div class="max-h-[70vh] space-y-5 overflow-y-auto pl-1">
       <div class="grid gap-3 rounded-xl bg-gray-50 p-4 sm:grid-cols-2">
-        <div><span class="text-xs text-gray-500">رویداد</span><p class="mt-1 font-bold">{{ SMS_EVENT_LABELS[dispatch.eventCode] }}</p></div>
-        <div><span class="text-xs text-gray-500">نام گیرنده</span><p class="mt-1 font-bold">{{ getSmsUserName(dispatch) }}</p></div>
-        <div><span class="text-xs text-gray-500">شماره موبایل</span><p class="mt-1 font-bold" >{{ dispatch.recipient }}</p></div>
-        <div><span class="text-xs text-gray-500">وضعیت ارسال</span><p class="mt-1"><BaseBadge :variant="SMS_STATUS_DETAILS[dispatch.status].variant">{{ SMS_STATUS_DETAILS[dispatch.status].label }}</BaseBadge></p></div>
-        <div><span class="text-xs text-gray-500">وضعیت تحویل</span><p class="mt-1"><BaseBadge :variant="SMS_DELIVERY_DETAILS[dispatch.deliveryStatus].variant">{{ SMS_DELIVERY_DETAILS[dispatch.deliveryStatus].label }}</BaseBadge></p></div>
-        <div><span class="text-xs text-gray-500">قالب استفاده‌شده</span><p class="mt-1">{{ dispatch.template?.title || dispatch.templateCode }}</p></div>
-        <div><span class="text-xs text-gray-500">زمان ارسال</span><p class="mt-1">{{ formatDate(dispatch.createdAt, true) }}</p></div>
+        <div><span class="text-xs text-gray-500">{{ $t('admin.sms.fields.event') }}</span><p class="mt-1 font-bold">{{ SMS_EVENT_LABELS[dispatch.eventCode] }}</p></div>
+        <div><span class="text-xs text-gray-500">{{ $t('admin.sms.fields.recipientName') }}</span><p class="mt-1 font-bold">{{ getSmsUserName(dispatch) }}</p></div>
+        <div><span class="text-xs text-gray-500">{{ $t('global.form.mobile_number') }}</span><p class="mt-1 font-bold" >{{ dispatch.recipient }}</p></div>
+        <div><span class="text-xs text-gray-500">{{ $t('admin.sms.fields.sendStatus') }}</span><p class="mt-1"><BaseBadge :variant="SMS_STATUS_DETAILS[dispatch.status].variant">{{ SMS_STATUS_DETAILS[dispatch.status].label }}</BaseBadge></p></div>
+        <div><span class="text-xs text-gray-500">{{ $t('admin.sms.fields.deliveryStatus') }}</span><p class="mt-1"><BaseBadge :variant="SMS_DELIVERY_DETAILS[dispatch.deliveryStatus].variant">{{ SMS_DELIVERY_DETAILS[dispatch.deliveryStatus].label }}</BaseBadge></p></div>
+        <div><span class="text-xs text-gray-500">{{ $t('admin.sms.fields.templateUsed') }}</span><p class="mt-1">{{ dispatch.template?.title || dispatch.templateCode }}</p></div>
+        <div><span class="text-xs text-gray-500">{{ $t('admin.sms.fields.sentAt') }}</span><p class="mt-1">{{ formatDate(dispatch.createdAt, true) }}</p></div>
       </div>
 
       <!-- <div>
@@ -29,25 +29,25 @@ const emit = defineEmits<{ close: []; retry: [dispatch: SmsDispatch]; checkStatu
 
 
       <div v-if="dispatch.lastError" class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-        <strong class="mb-1 block">آخرین خطا<span v-if="dispatch.lastErrorCode">، کد {{ dispatch.lastErrorCode }}</span></strong>
+        <strong class="mb-1 block">{{ $t('admin.sms.fields.lastError') }}<span v-if="dispatch.lastErrorCode">{{ $t('admin.sms.detail.errorCode', { lastErrorCode: dispatch.lastErrorCode }) }}</span></strong>
         {{ dispatch.lastError }}
       </div>
 
       <div class="grid gap-2 text-xs text-gray-600 sm:grid-cols-2">
-        <p>شناسه رکورد: {{ formatNumber(dispatch.id) }}</p>
-        <p>شناسه پیامک قاصدک: <span dir="ltr">{{ dispatch.providerMessageId || '-' }}</span></p>
-        <p>آخرین تلاش: {{ formatDate(dispatch.lastAttemptAt, true) }}</p>
-        <p>آخرین استعلام: {{ formatDate(dispatch.lastStatusCheckedAt, true) }}</p>
-        <p>زمان دریافت: {{ formatDate(dispatch.acceptedAt, true) }}</p>
+        <p>{{ $t('admin.sms.detail.recordId', { id: formatNumber(dispatch.id) }) }}</p>
+        <p>{{ $t('admin.sms.detail.ghasedakId') }} <span dir="ltr">{{ dispatch.providerMessageId || '-' }}</span></p>
+        <p>{{ $t('admin.sms.detail.lastAttempt', { lastAttemptAt: formatDate(dispatch.lastAttemptAt, true) }) }}</p>
+        <p>{{ $t('admin.sms.detail.lastCheck', { lastStatusCheckedAt: formatDate(dispatch.lastStatusCheckedAt, true) }) }}</p>
+        <p>{{ $t('admin.sms.detail.deliveredAt', { acceptedAt: formatDate(dispatch.acceptedAt, true) }) }}</p>
         <!-- <p>زمان تحویل: {{ formatDate(dispatch.deliveredAt, true) }}</p> -->
       </div>
     </div>
 
     <template #footer>
       <div class="flex w-full flex-wrap justify-end gap-2">
-        <BaseButton variant="secondary" @click="emit('close')">بستن</BaseButton>
-        <BaseButton v-if="canCheckSmsStatus(dispatch)" variant="secondary" :loading="busyAction === 'status'" :disabled="Boolean(busyAction)" @click="emit('checkStatus', dispatch)">استعلام وضعیت تحویل</BaseButton>
-        <BaseButton v-if="canRetrySms(dispatch)" variant="warning" :loading="busyAction === 'retry'" :disabled="Boolean(busyAction)" @click="emit('retry', dispatch)">تلاش مجدد</BaseButton>
+        <BaseButton variant="secondary" @click="emit('close')">{{ $t('global.button.close') }}</BaseButton>
+        <BaseButton v-if="canCheckSmsStatus(dispatch)" variant="secondary" :loading="busyAction === 'status'" :disabled="Boolean(busyAction)" @click="emit('checkStatus', dispatch)">{{ $t('admin.sms.actions.checkDelivery') }}</BaseButton>
+        <BaseButton v-if="canRetrySms(dispatch)" variant="warning" :loading="busyAction === 'retry'" :disabled="Boolean(busyAction)" @click="emit('retry', dispatch)">{{ $t('common.actions.retry') }}</BaseButton>
       </div>
     </template>
   </BaseModal>

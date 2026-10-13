@@ -9,8 +9,10 @@ import PaymentGatewaySelector from "~/components/User/payment/PaymentGatewaySele
 import PaymentSummaryCard from "~/components/User/payment/PaymentSummaryCard.vue";
 import PaymentSubmitButton from "~/components/User/payment/PaymentSubmitButton.vue";
 
+const { t } = useI18n()
+
 useHead({
-  title: "پرداخت بدهی - عماد ایران",
+  title: t('seo.user.payment'),
 });
 
 definePageMeta({
@@ -47,10 +49,10 @@ const {
 </script>
 
 <template>
-  <UserPage title="پرداخت بدهی" main-class="w-full max-w-[1200px] mx-auto px-3 sm:px-4 pt-5 md:pt-8 pb-28 md:pb-8">
+  <UserPage :title="$t('user.common.payDebt')" main-class="w-full max-w-[1200px] mx-auto px-3 sm:px-4 pt-5 md:pt-8 pb-28 md:pb-8">
     <StateLoader
       v-if="loading"
-      message="در حال آماده‌سازی اطلاعات پرداخت..."
+      :message="$t('user.payment.loading')"
     />
 
     <StateError

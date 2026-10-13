@@ -7,6 +7,8 @@ import { ADMIN_TRANSACTION_STATUS_BADGES, ADMIN_TRANSACTION_TYPE_BADGES } from "
 import type { Transaction } from "~/types/transaction";
 import type { TableColumn } from "~/components/Base/Table.vue";
 
+const { t } = useI18n()
+
 defineProps<{
   transactions: Transaction[];
   expandedId: number | null;
@@ -19,37 +21,37 @@ const emit = defineEmits<{
 }>();
 
 const columns: TableColumn<Transaction>[] = [
-  { key: "id", label: "شناسه", align: "center", class: "align-middle" },
-  { key: "userId", label: "کاربر", align: "center", class: "align-middle" },
+  { key: "id", label: t('common.fields.id'), align: "center", class: "align-middle" },
+  { key: "userId", label: t('admin.transactions.table.user'), align: "center", class: "align-middle" },
   {
     key: "amount",
-    label: "مبلغ",
+    label: t('common.fields.amount'),
     align: "center",
     class: "align-middle",
     format: (val) => formatNumber(val),
   },
-  { key: "type", label: "نوع", align: "center", class: "align-middle" },
-  { key: "status", label: "وضعیت", align: "center", class: "align-middle" },
+  { key: "type", label: t('common.fields.type'), align: "center", class: "align-middle" },
+  { key: "status", label: t('common.fields.status'), align: "center", class: "align-middle" },
   {
     key: "allocationSummary",
-    label: "جزئیات تسهیلات",
+    label: t('common.fields.loanDetails'),
     align: "center",
     class: "align-middle",
   },
   {
     key: "description",
-    label: "توضیحات",
+    label: t('common.fields.description'),
     align: "center",
     class: "align-middle whitespace-normal",
   },
   {
     key: "transactionDate",
-    label: "تاریخ",
+    label: t('common.fields.date'),
     align: "center",
     class: "align-middle",
     format: (val) => formatDate(val),
   },
-  { key: "actions", label: "عملیات", align: "center", class: "align-middle" },
+  { key: "actions", label: t('common.table.actions'), align: "center", class: "align-middle" },
 ];
 
 const canExpandTransaction = (transaction: Transaction) =>
@@ -131,13 +133,13 @@ const canExpandTransaction = (transaction: Transaction) =>
           @click="emit('edit', row)"
           class="px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors duration-200 text-xs font-medium"
         >
-          ویرایش
+          {{ $t('global.button.edit') }}
         </button>
         <button
           @click="emit('delete', row)"
           class="px-3 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors duration-200 text-xs font-medium"
         >
-          حذف
+          {{ $t('global.button.delete') }}
         </button>
       </div>
       <span v-else class="text-xs text-gray-400">-</span>

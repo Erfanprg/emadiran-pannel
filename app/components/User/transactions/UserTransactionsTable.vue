@@ -4,6 +4,8 @@ import type { Transaction } from '~/types/transaction'
 import { getTransactionAllocations } from '~/utils/transactionAllocations'
 import { TRANSACTION_STATUS_BADGES, TRANSACTION_TYPE_BADGES } from '~/constants/badges'
 
+const { t } = useI18n()
+
 const props = withDefaults(
   defineProps<{
     transactions: Transaction[]
@@ -26,13 +28,13 @@ const toggleTransactionDetails = (transactionId: number) => {
 }
 
 const columns = [
-  { key: 'index', label: 'ردیف' },
-  { key: 'amount', label: 'مبلغ' },
-  { key: 'type', label: 'نوع' },
-  { key: 'allocationSummary', label: 'جزئیات تسهیلات' },
-  { key: 'status', label: 'وضعیت' },
-  { key: 'createdAt', label: 'تاریخ' },
-  ...(props.showDescription ? [{ key: 'description', label: 'توضیحات' }] : [])
+  { key: 'index', label: t('common.table.row') },
+  { key: 'amount', label: t('common.fields.amount') },
+  { key: 'type', label: t('common.fields.type') },
+  { key: 'allocationSummary', label: t('common.fields.loanDetails') },
+  { key: 'status', label: t('common.fields.status') },
+  { key: 'createdAt', label: t('common.fields.date') },
+  ...(props.showDescription ? [{ key: 'description', label: t('common.fields.description') }] : [])
 ]
 </script>
 

@@ -18,8 +18,10 @@ import ContactHistoriesModal from "~/components/Admin/contact-histories/ContactH
 import ContactHistoryCreateModal from "~/components/Admin/contact-histories/ContactHistoryCreateModal.vue";
 import type { LoanDebtBreakdown } from "~/types/debt";
 
+const { t } = useI18n()
+
 useHead({
-  title: "جزئیات کاربر - عماد ایران",
+  title: t('seo.admin.userDetail'),
 });
 
 definePageMeta({
@@ -123,7 +125,7 @@ const fetchUserLoanDebtBreakdown = async () => {
     console.error("Error fetching user loan debts:", err);
     loanDebtBreakdown.value = null;
     loanDebtBreakdownError.value =
-      err.data?.message || "خطا در دریافت جزئیات بدهی تسهیلات";
+      err.data?.message || t('admin.users.detail.errors.fetchLoanDebts');
   } finally {
     isLoadingLoanDebtBreakdown.value = false;
   }
@@ -138,7 +140,7 @@ const fetchUserDetails = async () => {
     user.value = await adminApi.getUserById(userId);
     await fetchUserLoanDebtBreakdown();
   } catch (err: any) {
-    error.value = err.data?.message || "خطا در دریافت اطلاعات کاربر";
+    error.value = err.data?.message || t('admin.common.errors.fetchUser');
     console.error("Error fetching user:", err);
   } finally {
     isLoading.value = false;
@@ -151,23 +153,23 @@ const handleToggleStatus = async () => {
 
   // Prevent toggling admin users
   if (user.value.role === "ADMIN") {
-    toast.error("امکان تغییر وضعیت مدیران وجود ندارد");
+    toast.error(t('admin.common.errors.adminStatusLocked'));
     return;
   }
 
   // Confirm action
-  const action = user.value.isActive ? "غیرفعال" : "فعال";
+  const action = user.value.isActive ? t('status.inactive') : t('status.active');
   const confirmed = await confirm({
-    message: `آیا از ${action} کردن کاربر "${getUserDisplayName(
+    message: t('admin.common.confirmToggleUser', { action: action, user: getUserDisplayName(
       user.value
-    )}" اطمینان دارید؟`,
+    ) }),
     type: "warning",
   });
 
   if (!confirmed) return;
 
   await execute(() => adminApi.toggleUserStatus(userId), {
-    successMessage: `وضعیت کاربر با موفقیت ${action} شد`,
+    successMessage: t('admin.users.detail.messages.statusChanged', { action: action }),
     onSuccess: () => fetchUserDetails(),
   });
 };
@@ -196,13 +198,13 @@ onMounted(() => {
 </script>
 
 <template>
-  <AdminPage title="جزئیات کاربر">
+  <AdminPage :title="$t('admin.users.detail.title')">
     <!-- Loading State -->
     <div v-if="isLoading" class="text-center py-12">
       <div
         class="inline-block w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"
       ></div>
-      <p class="text-gray-600 mt-4">در حال بارگذاری...</p>
+      <p class="text-gray-600 mt-4">{{ $t('common.states.loading') }}</p>
     </div>
 
     <!-- Error State -->
@@ -216,7 +218,7 @@ onMounted(() => {
         @click="fetchUserDetails"
         class="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200"
       >
-        تلاش مجدد
+        {{ $t('common.actions.retry') }}
       </button>
     </div>
 
@@ -235,12 +237,12 @@ onMounted(() => {
       />
 
       <LoanDebtBreakdownSection
-        title="جزئیات بدهی به تفکیک تسهیلات"
+        :title="$t('common.loanDebts.breakdownTitle')"
         :breakdown="loanDebtBreakdown"
         :loading="isLoadingLoanDebtBreakdown"
         :error="loanDebtBreakdownError"
         :show-discrepancy-warning="true"
-        empty-message="در حال حاضر تسهیلات بدهکاری برای این کاربر ثبت نشده است."
+        :empty-message="$t('admin.users.detail.loanDebtsEmpty')"
         @retry="fetchUserLoanDebtBreakdown"
       />
 

@@ -28,7 +28,7 @@ onBeforeMount(async () => {
     <div v-if="!isAuthInitialized && !isPublicPage" class="w-ful flex items-center justify-center min-h-screen bg-gray-50 w-full">
       <div class="text-center">
         <div class="inline-block w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p class="text-gray-600">در حال بارگذاری...</p>
+        <p class="text-gray-600">{{ $t('common.states.loading') }}</p>
       </div>
     </div>
 

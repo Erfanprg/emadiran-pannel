@@ -24,12 +24,12 @@ const localDescription = computed({
 </script>
 
 <template>
-  <BaseModal title="ثبت تماس جدید" max-width="md" @close="emit('close')">
+  <BaseModal :title="$t('admin.contactHistories.create.title')" max-width="md" @close="emit('close')">
     <div class="space-y-4">
       <BaseTextarea
         v-model="localDescription"
-        label="توضیحات"
-        placeholder="توضیحات تماس را وارد کنید"
+        :label="$t('common.fields.description')"
+        :placeholder="$t('admin.contactHistories.create.placeholder')"
         :error="error || undefined"
         :rows="5"
         required
@@ -43,8 +43,8 @@ const localDescription = computed({
         :disabled="isSubmitting"
         @click="emit('submit')"
       >
-        <span v-if="isSubmitting">در حال ثبت...</span>
-        <span v-else>ثبت تماس</span>
+        <span v-if="isSubmitting">{{ $t('common.states.submitting') }}</span>
+        <span v-else>{{ $t('admin.contactHistories.create.submit') }}</span>
       </button>
       <button
         type="button"
@@ -52,7 +52,7 @@ const localDescription = computed({
         :disabled="isSubmitting"
         @click="emit('close')"
       >
-        انصراف
+        {{ $t('common.actions.cancel') }}
       </button>
     </template>
   </BaseModal>

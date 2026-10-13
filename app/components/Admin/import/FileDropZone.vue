@@ -39,10 +39,10 @@ defineExpose({ clear })
       <IconsOutline name="upload" class="w-16 h-16 text-gray-400" />
       <div>
         <p class="text-lg font-medium text-gray-700">
-          {{ selectedFile ? selectedFile.name : 'انتخاب فایل CSV' }}
+          {{ selectedFile ? selectedFile.name : $t('admin.import.dropZone.title') }}
         </p>
         <p class="text-sm text-gray-500 mt-1">
-          {{ selectedFile ? `${(selectedFile.size / 1024).toFixed(2)} KB` : 'کلیک کنید یا فایل را اینجا بکشید' }}
+          {{ selectedFile ? `${(selectedFile.size / 1024).toFixed(2)} KB` : $t('admin.import.dropZone.hint') }}
         </p>
       </div>
     </label>

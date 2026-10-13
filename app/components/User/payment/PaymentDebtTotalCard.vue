@@ -12,16 +12,16 @@ defineProps<{
     <div class="text-white">
       <div class="flex items-center justify-between gap-4">
         <div>
-          <p class="text-sm opacity-90 mb-1">مبلغ کل</p>
+          <p class="text-sm opacity-90 mb-1">{{ $t('user.payment.total.label') }}</p>
           <div
             class="inline-flex flex-row-reverse items-baseline gap-1 text-3xl font-bold"
           >
             <span>{{ formatCurrency(total) }}</span>
-            <span class="text-lg">ریال</span>
+            <span class="text-lg">{{ $t('global.currency.rial') }}</span>
           </div>
         </div>
         <div class="text-left">
-          <p class="text-sm opacity-90 mb-1">تسهیلات دارای بدهی</p>
+          <p class="text-sm opacity-90 mb-1">{{ $t('user.payment.total.loansWithDebt') }}</p>
           <p class="text-2xl font-bold">
             {{ formatNumber(loanCount) }}
           </p>

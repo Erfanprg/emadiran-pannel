@@ -9,8 +9,10 @@ import { formatNumber } from '~/utils/formatters'
 import { getUserDisplayName } from '~/func/getUserDisplayName'
 import UsersTable from '~/components/Admin/users/UsersTable.vue'
 
+const { t } = useI18n()
+
 useHead({
-  title: 'مدیریت کاربران - عماد ایران'
+  title: t('seo.admin.users')
 })
 
 definePageMeta({
@@ -42,24 +44,24 @@ const sortFilter = ref<'' | 'debt_desc' | 'debt_asc'>('')
 const filterFields = computed(() => [
   {
     key: 'status',
-    label: 'وضعیت',
+    label: t('common.fields.status'),
     type: 'select' as const,
     modelValue: statusFilter.value,
     options: [
-      { label: 'همه وضعیت‌ها', value: '' },
-      { label: 'فعال', value: true },
-      { label: 'غیرفعال', value: false }
+      { label: t('common.filters.allStatuses'), value: '' },
+      { label: t('status.active'), value: true },
+      { label: t('status.inactive'), value: false }
     ]
   },
   {
     key: 'sort',
-    label: 'مرتب سازی بر اساس',
+    label: t('admin.users.list.filters.sortBy'),
     type: 'select' as const,
     modelValue: sortFilter.value,
     options: [
-      { label: 'جدیدترین', value: '' },
-      { label: 'بیشترین بدهی', value: 'debt_desc' },
-      { label: 'کمترین بدهی', value: 'debt_asc' }
+      { label: t('admin.users.list.filters.newest'), value: '' },
+      { label: t('admin.users.list.filters.highestDebt'), value: 'debt_desc' },
+      { label: t('admin.users.list.filters.lowestDebt'), value: 'debt_asc' }
     ]
   }
 ])
@@ -91,7 +93,7 @@ const fetchUsers = async () => {
     users.value = response.data
     total.value = response.meta.total
   } catch (err: any) {
-    error.value = err.data?.message || 'خطا در دریافت کاربران'
+    error.value = err.data?.message || t('admin.users.list.errors.fetch')
     console.error('Error fetching users:', err)
   } finally {
     isLoading.value = false
@@ -121,17 +123,17 @@ const goToPage = (page: number) => {
 const handleToggleStatus = async (user: AdminUser) => {
   // Prevent toggling admin users
   if (user.role === 'ADMIN') {
-    toast.error('امکان تغییر وضعیت مدیران وجود ندارد')
+    toast.error(t('admin.common.errors.adminStatusLocked'))
     return
   }
 
   // Confirm action
-  const action = user.isActive ? 'غیرفعال' : 'فعال'
+  const action = user.isActive ? t('status.inactive') : t('status.active')
   const confirmed = await confirm({
-    title: `${action} کردن کاربر`,
-    message: `آیا از ${action} کردن کاربر "${getUserDisplayName(user)}" اطمینان دارید؟`,
+    title: t('admin.users.list.toggle.title', { action: action }),
+    message: t('admin.common.confirmToggleUser', { action: action, user: getUserDisplayName(user) }),
     type: 'warning',
-    confirmText: `بله، ${action} شود`
+    confirmText: t('admin.common.confirmYesAction', { action: action })
   })
 
   if (!confirmed) return
@@ -139,7 +141,7 @@ const handleToggleStatus = async (user: AdminUser) => {
   await execute(
     () => adminApi.toggleUserStatus(user.id),
     {
-      successMessage: 'وضعیت کاربر با موفقیت تغییر کرد',
+      successMessage: t('admin.users.list.messages.statusChanged'),
       onSuccess: () => fetchUsers()
     }
   )
@@ -148,10 +150,10 @@ const handleToggleStatus = async (user: AdminUser) => {
 // Delete user
 const handleDeleteUser = async (user: AdminUser) => {
   const confirmed = await confirm({
-    title: 'حذف کاربر',
-    message: `آیا از حذف کاربر "${getUserDisplayName(user)}" اطمینان دارید؟`,
+    title: t('admin.users.list.delete.title'),
+    message: t('admin.users.list.delete.confirm', { user: getUserDisplayName(user) }),
     type: 'danger',
-    confirmText: 'بله، حذف شود'
+    confirmText: t('common.actions.confirmDelete')
   })
 
   if (!confirmed) return
@@ -159,7 +161,7 @@ const handleDeleteUser = async (user: AdminUser) => {
   await execute(
     () => adminApi.deleteUser(user.id),
     {
-      successMessage: 'کاربر با موفقیت حذف شد',
+      successMessage: t('admin.users.list.messages.deleted'),
       onSuccess: () => fetchUsers()
     }
   )
@@ -177,12 +179,12 @@ onMounted(() => {
 </script>
 
 <template>
-  <AdminPage title="مدیریت کاربران">
+  <AdminPage :title="$t('admin.common.manageUsers')">
     <!-- Filters Section -->
     <BaseFiltersBar
       title=""
       :show-search="true"
-      search-placeholder="جستجو در نام، موبایل یا کد ملی..."
+      :search-placeholder="$t('admin.users.list.filters.searchPlaceholder')"
       :search-value="search"
       :fields="filterFields"
       @search="(val) => { search = val; handleSearch() }"
@@ -196,7 +198,7 @@ onMounted(() => {
 
     <!-- Loading State -->
     <BaseCard v-if="isLoading">
-      <StateLoader message="در حال بارگذاری کاربران..." />
+      <StateLoader :message="$t('admin.users.list.loading')" />
     </BaseCard>
 
     <!-- Error State -->
@@ -209,7 +211,7 @@ onMounted(() => {
     <!-- Users Table -->
     <BaseCard v-else :padding="false">
       <!-- Table Header -->
-      <BaseCardHeader title="لیست کاربران" :subtitle="`تعداد: ${formatNumber(total)} کاربر`">
+      <BaseCardHeader :title="$t('admin.users.list.title')" :subtitle="$t('admin.users.list.count', { total: formatNumber(total) })">
         <div class="flex items-center gap-3">
           <!-- <button
             @click="showCsvImportModal = true"
@@ -223,7 +225,7 @@ onMounted(() => {
             class="px-4 py-2 bg-gradient-to-r from-primary to-accent text-white rounded-lg hover:shadow-lg transition-all duration-300 flex items-center gap-2 font-medium"
           >
             <IconsOutline name="plus-large" class="w-5 h-5" />
-            ایجاد کاربر جدید
+            {{ $t('admin.common.createUser') }}
           </NuxtLink>
         </div>
       </BaseCardHeader>

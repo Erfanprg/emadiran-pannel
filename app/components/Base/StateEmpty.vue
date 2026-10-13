@@ -1,11 +1,12 @@
-<script setup lang="ts">
+<script setup lang="ts">import { translate } from '~/i18n/translate'
+
 withDefaults(
   defineProps<{
     message?: string
     icon?: 'default' | 'search' | 'document' | 'user'
   }>(),
   {
-    message: 'موردی یافت نشد',
+    message: () => translate('common.states.noResults'),
     icon: 'default'
   }
 )

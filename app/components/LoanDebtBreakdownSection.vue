@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import type { LoanDebtBreakdown, LoanDebtItem } from "~/types/debt";
 import { formatCurrency, formatDate, formatNumber } from "~/utils/formatters";
+import { translate } from '~/i18n/translate'
+
+const { t } = useI18n()
 
 const props = withDefaults(
   defineProps<{
@@ -12,11 +15,11 @@ const props = withDefaults(
     showDiscrepancyWarning?: boolean;
   }>(),
   {
-    title: "بدهی به تفکیک تسهیلات",
+    title: () => translate('common.loanDebts.title'),
     breakdown: null,
     loading: false,
     error: null,
-    emptyMessage: "موردی برای نمایش وجود ندارد",
+    emptyMessage: () => translate('common.states.nothingToShow'),
     showDiscrepancyWarning: false,
   }
 );
@@ -99,20 +102,20 @@ const shouldShowEmptyState = computed(() => {
 const getLoanBadge = (loan: LoanDebtItem) => {
   if (loan.hasNegativeDebt) {
     return {
-      label: "نیازمند بررسی",
+      label: t('common.loanDebts.status.needsReview'),
       variant: "warning" as const,
     };
   }
 
   if (parseAmount(loan.currentDebt) > 0) {
     return {
-      label: "بدهکار",
+      label: t('common.loanDebts.status.debtor'),
       variant: "danger" as const,
     };
   }
 
   return {
-    label: "تسویه",
+    label: t('common.loanDebts.status.settled'),
     variant: "gray" as const,
   };
 };
@@ -126,7 +129,7 @@ const getLoanBadge = (loan: LoanDebtItem) => {
       </div>
     </div>
 
-    <StateLoader v-if="loading" message="در حال بارگذاری بدهی تسهیلات..." />
+    <StateLoader v-if="loading" :message="$t('common.loanDebts.loading')" />
 
     <StateError v-else-if="error" :message="error" @retry="emit('retry')" />
 
@@ -141,22 +144,22 @@ const getLoanBadge = (loan: LoanDebtItem) => {
         v-if="showDiscrepancyWarning && hasDiscrepancy"
         class="rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-yellow-900"
       >
-        <p class="font-bold mb-2">اختلاف در جمع مبالغ</p>
+        <p class="font-bold mb-2">{{ $t('common.loanDebts.mismatch.title') }}</p>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
           <div>
-            <p class="text-yellow-700">مبلغ ثبت‌شده</p>
+            <p class="text-yellow-700">{{ $t('common.loanDebts.mismatch.stored') }}</p>
             <p class="font-semibold" dir="ltr">
               {{ formatCurrency(breakdown?.storedTotalDebt, true) }}
             </p>
           </div>
           <div>
-            <p class="text-yellow-700">مبلغ محاسبه‌شده</p>
+            <p class="text-yellow-700">{{ $t('common.loanDebts.mismatch.computed') }}</p>
             <p class="font-semibold" dir="ltr">
               {{ formatCurrency(breakdown?.computedTotalDebt, true) }}
             </p>
           </div>
           <div>
-            <p class="text-yellow-700">اختلاف</p>
+            <p class="text-yellow-700">{{ $t('common.loanDebts.mismatch.difference') }}</p>
             <p class="font-semibold" dir="ltr">
               {{
                 formatCurrency(breakdown?.differenceFromStoredTotalDebt, true)
@@ -181,7 +184,7 @@ const getLoanBadge = (loan: LoanDebtItem) => {
         >
           <div class="flex items-start justify-between gap-3 mb-4">
             <div>
-              <p class="text-sm text-gray-500 mb-1">شماره تسهیلات</p>
+              <p class="text-sm text-gray-500 mb-1">{{ $t('common.fields.loanNumber') }}</p>
               <p class="text-lg font-bold text-gray-900" dir="ltr">
                 {{ loan.loanNumber }}
               </p>
@@ -196,7 +199,7 @@ const getLoanBadge = (loan: LoanDebtItem) => {
             <div
               class="rounded-lg bg-white/70 px-3 py-3 border border-gray-100"
             >
-              <p class="text-xs text-gray-500 mb-1">مبلغی بدهی</p>
+              <p class="text-xs text-gray-500 mb-1">{{ $t('common.loanDebts.table.debtAmount') }}</p>
               <p
                 :class="[
                   'text-lg font-bold',
@@ -215,7 +218,7 @@ const getLoanBadge = (loan: LoanDebtItem) => {
             <div
               class="rounded-lg bg-white/70 px-3 py-3 border border-gray-100"
             >
-              <p class="text-xs text-gray-500 mb-1">تعداد تراکنش</p>
+              <p class="text-xs text-gray-500 mb-1">{{ $t('common.loanDebts.table.transactionCount') }}</p>
               <p class="text-lg font-bold text-gray-900">
                 {{ formatNumber(loan.transactionCount) }}
               </p>
@@ -225,12 +228,12 @@ const getLoanBadge = (loan: LoanDebtItem) => {
           <div
             class="mt-3 rounded-lg bg-white/70 px-3 py-3 border border-gray-100"
           >
-            <p class="text-xs text-gray-500 mb-1">آخرین تراکنش</p>
+            <p class="text-xs text-gray-500 mb-1">{{ $t('common.loanDebts.table.lastTransaction') }}</p>
             <p class="text-sm font-medium text-gray-900">
               {{
                 loan.lastTransactionDate
                   ? formatDate(loan.lastTransactionDate)
-                  : "ثبت نشده"
+                  : $t('common.loanDebts.table.notRecorded')
               }}
             </p>
           </div>

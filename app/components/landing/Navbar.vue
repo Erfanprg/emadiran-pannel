@@ -1,4 +1,7 @@
 <script setup lang="ts">
+
+const { t } = useI18n()
+
 /**
  * Landing Page Navbar Component
  * Contains logo, navigation menu and CTA button
@@ -12,11 +15,11 @@ const scrollToSection = (sectionId: string) => {
 };
 
 const menuItems = [
-  { label: "خانه", id: "home" },
-  { label: "درباره ما", id: "about" },
-  { label: "خدمات", id: "services" },
-  { label: "سوالات متداول", id: "faq" },
-  { label: "تماس با ما", id: "contact" },
+  { label: t('global.navigation.home'), id: "home" },
+  { label: t('global.navigation.about'), id: "about" },
+  { label: t('global.navigation.services'), id: "services" },
+  { label: t('landing.faq.title'), id: "faq" },
+  { label: t('global.navigation.contact'), id: "contact" },
 ];
 
 // Mobile menu state
@@ -78,7 +81,7 @@ const toggleMobileMenu = () => {
       >
         <img
           src="/emad-logo-p.png"
-          alt="عماد، نماد اعتماد"
+          :alt="$t('app.title')"
           class="h-10 lg:h-14 w-auto"
         />
       </NuxtLink>
@@ -101,7 +104,7 @@ const toggleMobileMenu = () => {
           to="/auth"
           class="max-w flex items-center justify-center px-2 text-sm lg:px-6 py-2.5 bg-gradient-to-br from-primary to-accent text-white font-semibold text-[15px] rounded-lg shadow-lg shadow-primary/20 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary/30"
         >
-          ورود به پنل
+          {{ $t('common.labels.loginToPanel') }}
         </NuxtLink>
 
         <!-- Mobile Menu Toggle -->
@@ -136,7 +139,7 @@ const toggleMobileMenu = () => {
           to="/auth"
           class="mt-2 inline-flex items-center justify-center py-3 px-6 bg-gradient-to-br from-primary to-accent text-white font-semibold rounded-lg"
         >
-          ورود به پنل
+          {{ $t('common.labels.loginToPanel') }}
         </NuxtLink>
       </div>
     </Transition>

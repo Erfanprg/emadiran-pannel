@@ -11,13 +11,13 @@ const selectedGateway = defineModel<string>({ required: true });
 <template>
   <BaseCard class="!p-4 md:!p-5 bg-gray-50">
     <h3 class="text-sm font-bold text-gray-900 mb-3">
-      انتخاب درگاه پرداخت:
+      {{ $t('user.payment.gateway.title') }}
     </h3>
 
     <StateEmpty
       v-if="gateways.length === 0"
       icon="document"
-      message="هیچ درگاه فعالی یافت نشد"
+      :message="$t('user.payment.gateway.empty')"
     />
 
     <div v-else class="space-y-2">

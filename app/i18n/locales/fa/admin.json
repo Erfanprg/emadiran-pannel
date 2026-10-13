@@ -1,0 +1,651 @@
+{
+  "admin": {
+    "common": {
+      "activate": "فعال کردن",
+      "addDebt": "افزودن بدهی",
+      "confirmToggleUser": "آیا از {action} کردن کاربر \"{user}\" اطمینان دارید؟",
+      "confirmYesAction": "بله، {action} شود",
+      "createUser": "ایجاد کاربر جدید",
+      "deactivate": "غیرفعال کردن",
+      "editReason": "دلیل ویرایش",
+      "errors": {
+        "adminStatusLocked": "امکان تغییر وضعیت مدیران وجود ندارد",
+        "fetchLoans": "خطا در دریافت لیست تسهیلات",
+        "fetchUser": "خطا در دریافت اطلاعات کاربر"
+      },
+      "gateways": "درگاه‌های پرداخت",
+      "loans": {
+        "createFailed": "خطا در ایجاد تسهیلات",
+        "createNew": "ایجاد تسهیلات جدید",
+        "created": "تسهیلات جدید با موفقیت ایجاد شد",
+        "newNumber": "شماره تسهیلات جدید",
+        "numberRequired": "لطفاً شماره تسهیلات را وارد کنید"
+      },
+      "manageSms": "مدیریت پیامک‌ها",
+      "manageUsers": "مدیریت کاربران",
+      "paymentHistory": "تاریخچه پرداخت",
+      "validation": {
+        "reasonMin": "دلیل باید حداقل ۵ کاراکتر باشد"
+      }
+    },
+    "contactHistories": {
+      "create": {
+        "placeholder": "توضیحات تماس را وارد کنید",
+        "submit": "ثبت تماس",
+        "success": "تماس با موفقیت ثبت شد",
+        "title": "ثبت تماس جدید"
+      },
+      "empty": "تاریخچه تماسی ثبت نشده.",
+      "errors": {
+        "create": "خطا در ثبت تماس",
+        "fetch": "خطا در دریافت تاریخچه تماس"
+      },
+      "loadMore": "نمایش بیشتر",
+      "table": {
+        "dateTime": "تاریخ و ساعت",
+        "operator": "اپراتور"
+      },
+      "title": "تاریخچه تماس‌ها",
+      "validation": {
+        "descriptionRequired": "توضیحات الزامی است",
+        "descriptionTooLong": "حداکثر طول توضیحات 2000 کاراکتر است"
+      }
+    },
+    "dashboard": {
+      "errors": {
+        "fetchStats": "خطا در دریافت آمار"
+      },
+      "finance": {
+        "averageDebt": "میانگین بدهی",
+        "maxDebt": "بیشترین بدهی",
+        "title": "آمار مالی",
+        "totalDebt": "مجموع بدهی"
+      },
+      "payments": {
+        "successAmount": "مجموع مبلغ پرداخت‌های موفق",
+        "successCount": "تعداد پرداخت‌های موفق",
+        "successCountHint": "ADMIN_DEBT_REDUCE و DEBT_PAYMENT",
+        "title": "آمار پرداخت‌ها",
+        "totalTransactions": "کل تراکنش‌ها",
+        "totalTransactionsHint": "تعداد کل تراکنش‌ها"
+      },
+      "quickActions": {
+        "gatewaysHint": "مدیریت درگاه‌ها",
+        "paymentsHint": "لیست و گزارش پرداخت‌ها",
+        "title": "دسترسی سریع",
+        "usersHint": "مشاهده و ویرایش کاربران"
+      },
+      "topDebtors": {
+        "debt": "میزان بدهی",
+        "phone": "شماره تماس",
+        "rank": "رتبه",
+        "title": "کاربران با بیشترین بدهی"
+      },
+      "users": {
+        "active": "کاربران فعال",
+        "inactive": "کاربران غیرفعال",
+        "ofTotal": "از {total} کاربر",
+        "title": "آمار کاربران",
+        "total": "کل کاربران",
+        "totalHint": "تعداد کل کاربران ثبت شده",
+        "withDebt": "کاربران بدهکار",
+        "withDebtHint": "تعداد کاربران دارای بدهی"
+      }
+    },
+    "gateways": {
+      "empty": "درگاه پرداختی یافت نشد",
+      "errors": {
+        "fetch": "خطا در دریافت لیست درگاه‌ها",
+        "toggle": "خطا در {action} کردن درگاه"
+      },
+      "messages": {
+        "toggled": "درگاه {displayName} با موفقیت {action} شد"
+      },
+      "table": {
+        "name": "نام درگاه"
+      },
+      "toggle": {
+        "confirm": "آیا از {action} کردن درگاه {displayName} اطمینان دارید؟",
+        "title": "{action} کردن درگاه"
+      }
+    },
+    "import": {
+      "amountRial": "{amount} ریال",
+      "bulkPayment": {
+        "allSucceeded": "همه پرداخت‌ها با موفقیت ثبت شدند!",
+        "debtsReduced": "بدهی کاربران کاهش یافته است.",
+        "notes": {
+          "loansExist": "تمام تسهیلات باید از قبل موجود باشند",
+          "usersExist": "تمام کاربران باید از قبل ایجاد شده باشند",
+          "utf8": "فایل باید UTF-8 encoded باشد"
+        },
+        "pleaseWait": "لطفاً منتظر بمانید",
+        "title": "آپلود گروهی پرداخت‌ها",
+        "uploadingTitle": "در حال ارسال و پردازش فایل..."
+      },
+      "csv": {
+        "allSucceeded": "همه تراکنش‌ها با موفقیت ثبت شدند!",
+        "success": "عملیات با موفقیت انجام شد.",
+        "title": "بدهی گروهی"
+      },
+      "dropZone": {
+        "hint": "کلیک کنید یا فایل را اینجا بکشید",
+        "title": "انتخاب فایل CSV"
+      },
+      "errors": {
+        "csvOnly": "لطفاً فقط فایل CSV انتخاب کنید",
+        "fileTooLarge": "حجم فایل نباید بیشتر از 10 مگابایت باشد",
+        "noFile": "لطفاً ابتدا فایل را انتخاب کنید",
+        "upload": "خطا در آپلود فایل",
+        "uploadCsv": "خطا در آپلود فایل CSV"
+      },
+      "errorsList": {
+        "more": "و {value} خطای دیگر...",
+        "title": "خطاها ({count})"
+      },
+      "footer": {
+        "newUpload": "آپلود فایل جدید",
+        "upload": "آپلود و پردازش",
+        "uploading": "در حال آپلود..."
+      },
+      "meta": {
+        "processingTime": "زمان پردازش:",
+        "skippedRows": "ردیف‌های رد شده:"
+      },
+      "stats": {
+        "debtReduced": "کاهش بدهی",
+        "newLoans": "تسهیلات جدید",
+        "newUsers": "کاربران جدید",
+        "processedUsers": "کاربران پردازش شده",
+        "totalPaymentAmount": "مبلغ کل پرداخت",
+        "totalRows": "کل ردیف‌ها"
+      }
+    },
+    "installments": {
+      "actions": {
+        "toggleStatus": "تغییر وضعیت"
+      },
+      "confirm": {
+        "delete": "آیا از حذف قسط شماره {id} اطمینان دارید؟",
+        "toggleStatus": "آیا از تغییر وضعیت این قسط اطمینان دارید؟"
+      },
+      "create": {
+        "backToLoans": "بازگشت به لیست تسهیلات",
+        "needLoanFirst": "ابتدا باید یک تسهیلات برای این کاربر ایجاد شود",
+        "selectLoanPlaceholder": "انتخاب تسهیلات...",
+        "selectUser": "انتخاب کاربر...",
+        "submit": "ایجاد قسط",
+        "title": "ایجاد قسط جدید"
+      },
+      "edit": {
+        "title": "ویرایش قسط"
+      },
+      "errors": {
+        "create": "خطا در ایجاد قسط",
+        "fetch": "خطا در دریافت لیست اقساط",
+        "fetchUsers": "خطا در دریافت لیست کاربران",
+        "paidNotDeletable": "قسط پرداخت شده قابل حذف نیست",
+        "paidNotEditable": "قسط پرداخت شده قابل ویرایش نیست",
+        "update": "خطا در ویرایش قسط"
+      },
+      "fields": {
+        "user": "کاربر"
+      },
+      "form": {
+        "descriptionPlaceholder": "توضیحات مربوط به این قسط..."
+      },
+      "list": {
+        "count": "تعداد: {total} قسط",
+        "empty": "قسطی یافت نشد"
+      },
+      "messages": {
+        "deleted": "قسط با موفقیت حذف شد",
+        "statusChanged": "وضعیت قسط با موفقیت تغییر کرد"
+      },
+      "title": "مدیریت اقساط",
+      "validation": {
+        "dueDateRequired": "تاریخ سررسید الزامی است",
+        "loanNumberRequired": "شماره تسهیلات الزامی است",
+        "minAmount": "مبلغ باید حداقل 1000 ریال باشد",
+        "userNeedsLoan": "کاربر باید حداقل یک تسهیلات داشته باشد",
+        "userRequired": "انتخاب کاربر الزامی است"
+      }
+    },
+    "layout": {
+      "nav": {
+        "users": "کاربران"
+      },
+      "panelTitle": "پنل مدیریت"
+    },
+    "paymentDeadlines": {
+      "create": {
+        "submit": "ثبت مهلت",
+        "title": "ثبت مهلت پرداخت"
+      },
+      "currentLabel": "مهلت پرداخت: {deadlineAt}",
+      "edit": {
+        "reasonPlaceholder": "علت ویرایش مهلت پرداخت را بنویسید",
+        "title": "ویرایش مهلت پرداخت"
+      },
+      "errors": {
+        "activeExists": "مهلت فعال وجود دارد و امکان ثبت مهلت جدید نیست",
+        "create": "خطا در ثبت مهلت پرداخت",
+        "fetch": "خطا در دریافت لیست مهلت‌ها",
+        "noneSelected": "مهلت پرداخت برای ویرایش انتخاب نشده است",
+        "update": "خطا در ویرایش مهلت پرداخت"
+      },
+      "fields": {
+        "deadlineDate": "تاریخ مهلت"
+      },
+      "list": {
+        "current": "فعلی",
+        "empty": "مهلت پرداخت ثبت نشده.",
+        "title": "مهلت‌های پرداخت"
+      },
+      "loadingCurrent": "در حال بارگذاری مهلت پرداخت...",
+      "messages": {
+        "created": "مهلت پرداخت با موفقیت ثبت شد",
+        "updated": "مهلت پرداخت با موفقیت ویرایش شد"
+      },
+      "validation": {
+        "dateInvalid": "تاریخ مهلت معتبر نیست",
+        "datePast": "تاریخ مهلت نمی‌تواند گذشته باشد",
+        "dateRequired": "تاریخ مهلت الزامی است",
+        "reasonRequired": "دلیل ویرایش الزامی است"
+      }
+    },
+    "sms": {
+      "actions": {
+        "checkDelivery": "استعلام وضعیت تحویل",
+        "details": "جزئیات",
+        "refresh": "به‌روزرسانی"
+      },
+      "confirm": {
+        "retryConfirm": "بله، تلاش مجدد",
+        "retryMessage": "پیش از ارسال مجدد، سامانه شناسه قبلی را در قاصدک بررسی می‌کند تا پیامک تکراری ارسال نشود. ادامه می‌دهید؟"
+      },
+      "deliveryStatus": {
+        "blacklisted": "بلاک شده",
+        "delivered": "تحویل به گیرنده",
+        "invalidMessageId": "شناسه پیامک نامعتبر",
+        "notChecked": "بدون بررسی",
+        "reachedTelecom": "ارسال به مخابرات",
+        "telecomFailed": "عدم ارسال به مخابرات"
+      },
+      "detail": {
+        "deliveredAt": "زمان دریافت: {acceptedAt}",
+        "errorCode": "، کد {lastErrorCode}",
+        "ghasedakId": "شناسه پیامک قاصدک:",
+        "lastAttempt": "آخرین تلاش: {lastAttemptAt}",
+        "lastCheck": "آخرین استعلام: {lastStatusCheckedAt}",
+        "recordId": "شناسه رکورد: {id}",
+        "title": "جزئیات پیامک"
+      },
+      "dispatchStatus": {
+        "queued": "در صف ارسال",
+        "sending": "در حال ارسال",
+        "skipped": "لغو ارسال"
+      },
+      "dispatches": {
+        "count": "{total} رکورد",
+        "loading": "در حال دریافت پیامک‌ها...",
+        "title": "آرشیو ارسال پیامک"
+      },
+      "errors": {
+        "checkDelivery": "استعلام وضعیت تحویل انجام نشد",
+        "fetchDispatch": "دریافت جزئیات پیامک انجام نشد",
+        "fetchDispatches": "دریافت آرشیو پیامک‌ها انجام نشد",
+        "fetchEvents": "دریافت تنظیمات رویدادهای پیامکی انجام نشد",
+        "fetchTemplates": "دریافت قالب‌های پیامک انجام نشد",
+        "retry": "تلاش مجدد برای ارسال انجام نشد",
+        "saveEvent": "ذخیره تنظیمات رویداد انجام نشد",
+        "saveTemplate": "ذخیره قالب پیامک انجام نشد"
+      },
+      "events": {
+        "availableVariables": "متغیرهای قابل استفاده",
+        "enableSending": "فعالسازی ارسال پیامک",
+        "inactiveSuffix": "، غیرفعال",
+        "loading": "در حال دریافت رویدادها...",
+        "names": {
+          "adminDebtReduced": "کاهش بدهی توسط مدیر",
+          "bulkPaymentConfirmed": "تأیید پرداخت گروهی",
+          "deadlineDueNoPayment": "پایان مهلت بدون پرداخت",
+          "deadlineDueWithPayment": "پایان مهلت همراه با پرداخت",
+          "debtAdded": "ثبت بدهی",
+          "legalDebtAdded": "ثبت هزینه حقوقی",
+          "loginOtp": "کد ورود",
+          "onlinePaymentConfirmed": "تأیید پرداخت آنلاین",
+          "paymentWithoutDeadline": "پرداخت بدون مهلت فعال"
+        },
+        "saved": "تنظیمات «{title}» ذخیره شد",
+        "selectTemplate": "انتخاب قالب",
+        "selectTemplateFirst": "ابتدا قالب این رویداد را انتخاب کنید",
+        "sendingDisabled": "ارسال غیرفعال",
+        "sendingEnabled": "ارسال فعال",
+        "template": "قالب پیامک"
+      },
+      "fields": {
+        "deliveryStatus": "وضعیت تحویل",
+        "event": "رویداد",
+        "lastError": "آخرین خطا",
+        "recipientName": "نام گیرنده",
+        "sendStatus": "وضعیت ارسال",
+        "sentAt": "زمان ارسال",
+        "templateUsed": "قالب استفاده‌شده"
+      },
+      "filters": {
+        "allEvents": "همه رویدادها",
+        "clear": "پاک کردن فیلترها",
+        "fromDate": "از تاریخ",
+        "recipientPhone": "شماره گیرنده",
+        "recipientPhonePlaceholder": "مثلاً 0912...",
+        "smsType": "نوع پیامک",
+        "toDate": "تا تاریخ",
+        "unsent": "ارسال‌نشده‌ها"
+      },
+      "formatters": {
+        "integer": "عدد صحیح",
+        "rialAmount": "مبلغ ریالی",
+        "text": "متن"
+      },
+      "messages": {
+        "deliveryUpdated": "وضعیت تحویل از قاصدک به‌روز شد",
+        "requeued": "پیامک دوباره در صف ارسال قرار گرفت"
+      },
+      "nav": {
+        "dispatches": "آرشیو پیامک‌ها",
+        "events": "رویدادها",
+        "templates": "قالب‌ها"
+      },
+      "recipient": {
+        "noName": "بدون نام",
+        "unknown": "کاربر نامشخص"
+      },
+      "stats": {
+        "pending": "در انتظار ارسال",
+        "sent": "ارسال‌شده",
+        "total": "کل پیامک‌ها"
+      },
+      "table": {
+        "attempts": "تلاش‌ها",
+        "createdAt": "زمان ثبت",
+        "recipient": "گیرنده"
+      },
+      "templates": {
+        "createTitle": "قالب پیامک جدید",
+        "created": "قالب پیامک ساخته شد",
+        "editTitle": "ویرایش قالب پیامک",
+        "fields": {
+          "active": "وضعیت ارسال قالب",
+          "body": "متن پیامک",
+          "bodyHint": "متن را بنویسید و متغیرها را به شکل {'{'}{'{'}variableName{'}'}{'}'} قرار دهید.",
+          "code": "کد قالب",
+          "title": "عنوان قابل نمایش",
+          "titlePlaceholder": "مثلاً تأیید پرداخت"
+        },
+        "insertVariable": "افزودن {label} به متن",
+        "loading": "در حال دریافت قالب‌ها...",
+        "save": "ذخیره قالب",
+        "table": {
+          "events": "رویدادهای متصل",
+          "preview": "پیش‌نمایش متن",
+          "template": "قالب",
+          "updatedAt": "آخرین ویرایش"
+        },
+        "title": "قالب‌های پیامک",
+        "updated": "قالب پیامک ویرایش شد",
+        "validation": {
+          "duplicateVariable": "نام متغیرها نباید تکراری باشد",
+          "required": "کد، عنوان و متن قالب الزامی است",
+          "variableLabel": "عنوان فارسی همه متغیرها را وارد کنید",
+          "variableName": "نام متغیر باید انگلیسی باشد و با حرف شروع شود"
+        },
+        "variables": {
+          "add": "افزودن متغیر",
+          "empty": "این قالب هنوز متغیری ندارد.",
+          "fallback": "متغیر",
+          "format": "نحوه نمایش",
+          "hint": "هر متغیر تعریف‌شده باید دقیقاً در متن استفاده شود.",
+          "label": "عنوان فارسی",
+          "name": "نام متغیر",
+          "title": "متغیرهای قالب"
+        }
+      },
+      "variables": {
+        "customerFullName": "نام و نام خانوادگی مشتری",
+        "paidAmount": "مبلغ پرداخت‌شده",
+        "paymentDeadlineDays": "تعداد روزهای مهلت پرداخت",
+        "remainingDebt": "باقی‌مانده بدهی"
+      }
+    },
+    "transactions": {
+      "actions": {
+        "bulkPayment": "پرداخت گروهی"
+      },
+      "delete": {
+        "confirm": "آیا از حذف تراکنش {selectedTransactionTypeLabel} اطمینان دارید؟",
+        "deleting": "در حال حذف...",
+        "reason": "دلیل حذف",
+        "submit": "تایید حذف",
+        "summary": "شناسه تراکنش {id} به مبلغ {amount} ریال",
+        "title": "حذف تراکنش"
+      },
+      "edit": {
+        "title": "ویرایش تراکنش"
+      },
+      "errors": {
+        "delete": "خطا در حذف تراکنش",
+        "excelDownload": "خطا در دانلود فایل اکسل",
+        "fetch": "خطا در دریافت تاریخچه پرداخت",
+        "update": "خطا در ویرایش تراکنش"
+      },
+      "filters": {
+        "lastNameLabel": "نام خانوادگی "
+      },
+      "list": {
+        "count": "تعداد: {total} مورد",
+        "title": "تاریخچه پرداخت‌ها"
+      },
+      "messages": {
+        "deleted": "تراکنش با موفقیت حذف شد",
+        "excelDownloaded": "فایل اکسل با موفقیت دانلود شد",
+        "updated": "تراکنش با موفقیت ویرایش شد"
+      },
+      "table": {
+        "user": "کاربر"
+      },
+      "validation": {
+        "amountPositive": "مبلغ باید بیشتر از صفر باشد",
+        "dateInvalid": "تاریخ تراکنش معتبر نیست",
+        "minAmount": "حداقل مبلغ باید ۱,۰۰۰ ریال باشد",
+        "noChanges": "حداقل یک فیلد را تغییر دهید",
+        "typeInvalid": "نوع تراکنش معتبر نیست",
+        "typeRequired": "لطفاً نوع تراکنش را مشخص کنید"
+      }
+    },
+    "users": {
+      "debt": {
+        "actions": {
+          "reduce": "کاهش بدهی"
+        },
+        "confirm": {
+          "add": "آیا از افزودن {debtAmountInput} ریال به بدهی کاربر ({transactionType}) اطمینان دارید؟",
+          "reduce": "آیا از کاهش {debtAmountInput} ریال از بدهی کاربر اطمینان دارید؟"
+        },
+        "descriptionPlaceholder": "توضیحات مربوط به این تراکنش...",
+        "errors": {
+          "submit": "خطا در ثبت تراکنش"
+        },
+        "loadingLoans": "در حال بارگذاری تسهیلات...",
+        "maxAmount": "حداکثر: {value} ریال",
+        "messages": {
+          "added": "بدهی با موفقیت افزوده شد",
+          "reduced": "بدهی با موفقیت کاهش یافت"
+        },
+        "noLoans": "این کاربر تسهیلاتی ندارد. لطفاً شماره تسهیلات جدید وارد کنید.",
+        "selectLoanHint": "تسهیلات کاربر را انتخاب کنید",
+        "sendSms": "ارسال پیامک اطلاع رسانی",
+        "typeHint": "نوع تراکنش را مشخص کنید.",
+        "useExistingLoan": "انتخاب از تسهیلات موجود",
+        "validation": {
+          "reduceExceedsDebt": "مبلغ کاهش نمی‌تواند بیشتر از بدهی فعلی ({maxDebt} ریال) باشد",
+          "selectLoan": "لطفاً یک تسهیلات انتخاب کنید"
+        }
+      },
+      "debtHistory": {
+        "changes": {
+          "subtitle": "تمام عملیات افزایش و کاهش بدهی",
+          "title": "تاریخچه تغییرات بدهی"
+        },
+        "empty": "تاریخچه‌ای یافت نشد",
+        "errors": {
+          "fetch": "خطا در دریافت تاریخچه بدهی"
+        },
+        "table": {
+          "operationType": "نوع عملیات"
+        },
+        "title": "تاریخچه بدهی"
+      },
+      "detail": {
+        "actions": {
+          "edit": "ویرایش اطلاعات",
+          "history": "تاریخچه",
+          "phones": "مدیریت شماره‌ها"
+        },
+        "dates": {
+          "registeredAt": "تاریخ ثبت‌نام:",
+          "updatedAt": "آخرین به‌روزرسانی:"
+        },
+        "errors": {
+          "fetchLoanDebts": "خطا در دریافت جزئیات بدهی تسهیلات"
+        },
+        "fields": {
+          "debtAmount": "مبلغ بدهی",
+          "userId": "شناسه کاربر"
+        },
+        "loanDebtsEmpty": "در حال حاضر تسهیلات بدهکاری برای این کاربر ثبت نشده است.",
+        "messages": {
+          "statusChanged": "وضعیت کاربر با موفقیت {action} شد"
+        },
+        "title": "جزئیات کاربر",
+        "transactions": {
+          "empty": "تراکنشی برای این کاربر یافت نشد",
+          "loading": "در حال بارگذاری تاریخچه تراکنش‌ها...",
+          "title": "تاریخچه تراکنش‌های کاربر"
+        }
+      },
+      "form": {
+        "create": {
+          "submit": "ایجاد کاربر"
+        },
+        "edit": {
+          "title": "ویرایش کاربر"
+        },
+        "errors": {
+          "initialDebt": "کاربر ایجاد شد اما خطا در ثبت بدهی اولیه"
+        },
+        "fields": {
+          "firstNamePlaceholder": "علی",
+          "initialDebt": "میزان بدهی اولیه (اختیاری)",
+          "initialDebtHint": "در صورت خالی گذاشتن، بدهی اولیه صفر خواهد بود",
+          "isActive": "کاربر فعال است",
+          "isActiveHint": "در صورت غیرفعال بودن، کاربر نمی‌تواند وارد سیستم شود",
+          "lastNamePlaceholder": "احمدی",
+          "mobileReadonly": "شماره موبایل (غیرقابل تغییر)",
+          "nationalCodeReadonly": "کد ملی (غیرقابل تغییر)"
+        },
+        "initialDebt": {
+          "description": "بدهی اولیه"
+        },
+        "messages": {
+          "created": "کاربر با موفقیت ایجاد شد",
+          "createdWithDebt": "کاربر با بدهی اولیه {initialDebtInput} ریال ثبت شد",
+          "updated": "اطلاعات کاربر با موفقیت ویرایش شد"
+        },
+        "notes": {
+          "autoActive": "کاربر پس از ایجاد به صورت خودکار فعال خواهد بود",
+          "initialDebt": "در صورت وارد کردن بدهی اولیه، بعد از ایجاد کاربر به صورت خودکار ثبت می‌شود",
+          "nationalCode": "کد ملی باید 10 رقم و یکتا باشد",
+          "uniqueMobile": "شماره موبایل باید یکتا باشد و قبلاً ثبت نشده باشد"
+        },
+        "validation": {
+          "firstNameRequired": "نام الزامی است",
+          "lastNameRequired": "نام خانوادگی الزامی است",
+          "mobileInvalid": "شماره موبایل معتبر نیست (09123456789)",
+          "mobileRequired": "شماره موبایل الزامی است",
+          "nationalCodeLength": "کد ملی باید 10 رقم باشد",
+          "nationalCodeRequired": "کد ملی الزامی است"
+        }
+      },
+      "list": {
+        "count": "تعداد: {total} کاربر",
+        "delete": {
+          "confirm": "آیا از حذف کاربر \"{user}\" اطمینان دارید؟",
+          "title": "حذف کاربر"
+        },
+        "errors": {
+          "fetch": "خطا در دریافت کاربران"
+        },
+        "filters": {
+          "highestDebt": "بیشترین بدهی",
+          "lowestDebt": "کمترین بدهی",
+          "newest": "جدیدترین",
+          "searchPlaceholder": "جستجو در نام، موبایل یا کد ملی...",
+          "sortBy": "مرتب سازی بر اساس"
+        },
+        "loading": "در حال بارگذاری کاربران...",
+        "messages": {
+          "deleted": "کاربر با موفقیت حذف شد",
+          "statusChanged": "وضعیت کاربر با موفقیت تغییر کرد"
+        },
+        "table": {
+          "debt": "بدهی",
+          "mobile": "موبایل",
+          "role": "نقش"
+        },
+        "title": "لیست کاربران",
+        "toggle": {
+          "title": "{action} کردن کاربر"
+        }
+      },
+      "phones": {
+        "backToUser": "بازگشت به جزئیات کاربر",
+        "delete": {
+          "confirm": "آیا از حذف شماره \"{phoneNumber}\" اطمینان دارید؟",
+          "title": "حذف شماره تلفن"
+        },
+        "errors": {
+          "fetch": "خطا در دریافت شماره تلفن‌ها"
+        },
+        "extra": {
+          "add": "افزودن شماره جدید",
+          "empty": "هیچ شماره اضافی ثبت نشده",
+          "noLabel": "بدون برچسب",
+          "title": "شماره تلفن‌های اضافی"
+        },
+        "fields": {
+          "labelOptional": "برچسب (اختیاری)",
+          "labelPlaceholder": "مثلاً: تلفن منزل، شماره پدر، شماره دوم",
+          "phonePlaceholder": "09123456789 یا 02188776655"
+        },
+        "form": {
+          "addSubmit": "افزودن شماره",
+          "addTitle": "افزودن شماره تلفن جدید",
+          "editTitle": "ویرایش شماره تلفن"
+        },
+        "messages": {
+          "added": "شماره تلفن با موفقیت اضافه شد",
+          "deleted": "شماره تلفن با موفقیت حذف شد",
+          "updated": "شماره تلفن با موفقیت به‌روزرسانی شد"
+        },
+        "primaryNumber": "شماره اصلی:",
+        "title": "مدیریت شماره تلفن‌ها",
+        "validation": {
+          "empty": "شماره تلفن نمی‌تواند خالی باشد",
+          "invalid": "شماره تلفن معتبر نیست",
+          "required": "شماره تلفن الزامی است"
+        }
+      }
+    }
+  }
+}

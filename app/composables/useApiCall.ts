@@ -1,4 +1,5 @@
 import { useToast } from './useToast'
+import { translate } from '~/i18n/translate'
 
 interface ApiCallOptions<T> {
   onSuccess?: (data: T) => void | Promise<void>
@@ -44,7 +45,7 @@ export const useApiCall = () => {
 
       // Show error toast
       if (showErrorToast) {
-        const message = errorMessage || err.data?.message || err.message || 'خطا در انجام عملیات'
+        const message = errorMessage || err.data?.message || err.message || translate('common.errors.operationFailed')
         toast.error(message)
       }
 

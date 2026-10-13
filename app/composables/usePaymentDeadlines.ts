@@ -5,6 +5,7 @@ import { useApiCall } from "~/composables/useApiCall";
 import { formatDate } from "~/utils/formatters";
 import { convertJalaliDateToIso, isValidJalaliDate } from "~/func/GenerateDate";
 import type { PaymentDeadline, PaymentDeadlinesMeta } from "~/types/admin";
+import { translate } from '~/i18n/translate'
 
 /**
  * Payment deadline state of a user and the flow between its list, create and edit modals.
@@ -47,14 +48,14 @@ export const usePaymentDeadlines = (userId: number) => {
 
   const paymentDeadlineLabel = computed(() => {
     if (isLoadingPaymentDeadline.value) {
-      return "در حال بارگذاری مهلت پرداخت...";
+      return translate('admin.paymentDeadlines.loadingCurrent');
     }
     if (currentPaymentDeadline.value?.deadlineAt) {
-      return `مهلت پرداخت: ${formatDate(
+      return translate('admin.paymentDeadlines.currentLabel', { deadlineAt: formatDate(
         currentPaymentDeadline.value.deadlineAt
-      )}`;
+      ) });
     }
-    return "ثبت مهلت پرداخت";
+    return translate('admin.paymentDeadlines.create.title');
   });
 
   const fetchCurrentPaymentDeadline = async () => {
@@ -84,7 +85,7 @@ export const usePaymentDeadlines = (userId: number) => {
       paymentDeadlinesMeta.value = response.data.meta;
     } catch (err: any) {
       paymentDeadlinesError.value =
-        err.data?.message || "خطا در دریافت لیست مهلت‌ها";
+        err.data?.message || translate('admin.paymentDeadlines.errors.fetch');
     } finally {
       isLoadingPaymentDeadlines.value = false;
     }
@@ -107,7 +108,7 @@ export const usePaymentDeadlines = (userId: number) => {
 
   const openCreatePaymentDeadlineModal = () => {
     if (currentPaymentDeadline.value) {
-      toast.error("مهلت فعال وجود دارد و امکان ثبت مهلت جدید نیست");
+      toast.error(translate('admin.paymentDeadlines.errors.activeExists'));
       return;
     }
     createPaymentDeadlineForm.value.deadlineAt = "";
@@ -145,16 +146,16 @@ export const usePaymentDeadlines = (userId: number) => {
   const validatePaymentDeadlineDate = (value: string) => {
     const trimmed = (value || "").trim();
     if (!trimmed) {
-      return { isValid: false, error: "تاریخ مهلت الزامی است" };
+      return { isValid: false, error: translate('admin.paymentDeadlines.validation.dateRequired') };
     }
 
     if (!isValidJalaliDate(trimmed)) {
-      return { isValid: false, error: "تاریخ مهلت معتبر نیست" };
+      return { isValid: false, error: translate('admin.paymentDeadlines.validation.dateInvalid') };
     }
 
     const iso = convertJalaliDateToIso(trimmed);
     if (!iso) {
-      return { isValid: false, error: "تاریخ مهلت معتبر نیست" };
+      return { isValid: false, error: translate('admin.paymentDeadlines.validation.dateInvalid') };
     }
 
     const deadlineTime = new Date(iso).getTime();
@@ -162,7 +163,7 @@ export const usePaymentDeadlines = (userId: number) => {
     todayUtc.setUTCHours(0, 0, 0, 0);
 
     if (deadlineTime < todayUtc.getTime()) {
-      return { isValid: false, error: "تاریخ مهلت نمی‌تواند گذشته باشد" };
+      return { isValid: false, error: translate('admin.paymentDeadlines.validation.datePast') };
     }
 
     return { isValid: true, iso };
@@ -193,7 +194,7 @@ export const usePaymentDeadlines = (userId: number) => {
     createPaymentDeadlineErrors.value = {};
 
     if (currentPaymentDeadline.value) {
-      toast.error("مهلت فعال وجود دارد و امکان ثبت مهلت جدید نیست");
+      toast.error(translate('admin.paymentDeadlines.errors.activeExists'));
       return;
     }
 
@@ -202,7 +203,7 @@ export const usePaymentDeadlines = (userId: number) => {
     );
     if (!validation.isValid) {
       createPaymentDeadlineErrors.value.deadlineAt = validation.error;
-      toast.error(validation.error || "لطفاً خطاهای فرم را برطرف کنید");
+      toast.error(validation.error || translate('common.validation.fixErrors'));
       return;
     }
 
@@ -214,10 +215,10 @@ export const usePaymentDeadlines = (userId: number) => {
           deadlineAt: validation.iso as string,
         }),
       {
-        successMessage: "مهلت پرداخت با موفقیت ثبت شد",
+        successMessage: translate('admin.paymentDeadlines.messages.created'),
         onError: (err) => {
           const message =
-            err?.data?.message || err?.message || "خطا در ثبت مهلت پرداخت";
+            err?.data?.message || err?.message || translate('admin.paymentDeadlines.errors.create');
           setCreatePaymentDeadlineErrorsFromBackend(message);
         },
         onSuccess: async () => {
@@ -254,14 +255,14 @@ export const usePaymentDeadlines = (userId: number) => {
     editPaymentDeadlineErrors.value = {};
 
     if (!selectedPaymentDeadline.value) {
-      toast.error("مهلت پرداخت برای ویرایش انتخاب نشده است");
+      toast.error(translate('admin.paymentDeadlines.errors.noneSelected'));
       return;
     }
 
     const reason = (editPaymentDeadlineForm.value.editReason || "").trim();
     if (!reason) {
-      editPaymentDeadlineErrors.value.editReason = "دلیل ویرایش الزامی است";
-      toast.error("دلیل ویرایش الزامی است");
+      editPaymentDeadlineErrors.value.editReason = translate('admin.paymentDeadlines.validation.reasonRequired');
+      toast.error(translate('admin.paymentDeadlines.validation.reasonRequired'));
       return;
     }
 
@@ -270,7 +271,7 @@ export const usePaymentDeadlines = (userId: number) => {
     );
     if (!validation.isValid) {
       editPaymentDeadlineErrors.value.deadlineAt = validation.error;
-      toast.error(validation.error || "لطفاً خطاهای فرم را برطرف کنید");
+      toast.error(validation.error || translate('common.validation.fixErrors'));
       return;
     }
 
@@ -287,10 +288,10 @@ export const usePaymentDeadlines = (userId: number) => {
           }
         ),
       {
-        successMessage: "مهلت پرداخت با موفقیت ویرایش شد",
+        successMessage: translate('admin.paymentDeadlines.messages.updated'),
         onError: (err) => {
           const message =
-            err?.data?.message || err?.message || "خطا در ویرایش مهلت پرداخت";
+            err?.data?.message || err?.message || translate('admin.paymentDeadlines.errors.update');
           setEditPaymentDeadlineErrorsFromBackend(message);
         },
         onSuccess: async () => {

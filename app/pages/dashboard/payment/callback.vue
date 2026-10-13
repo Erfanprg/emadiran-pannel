@@ -5,8 +5,10 @@ import type { Transaction } from '~/types/transaction'
 import PaymentSuccessCard from '~/components/User/payment/PaymentSuccessCard.vue'
 import PaymentFailedCard from '~/components/User/payment/PaymentFailedCard.vue'
 
+const { t } = useI18n()
+
 useHead({
-  title: 'نتیجه پرداخت - عماد ایران'
+  title: t('seo.user.paymentResult')
 })
 
 definePageMeta({
@@ -58,7 +60,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <UserPage title="نتیجه پرداخت">
+  <UserPage :title="$t('user.paymentResult.title')">
     <div class="max-w-2xl mx-auto">
       <!-- Success State -->
       <PaymentSuccessCard
@@ -77,8 +79,8 @@ onMounted(async () => {
         <div class="flex gap-3">
           <Icon name="mdi:information" size="24" class="text-blue-500 flex-shrink-0" />
           <div class="text-sm text-blue-800">
-            <p class="font-bold mb-1">نکته:</p>
-            <p>در صورت کسر وجه از حساب و عدم ثبت پرداخت، مبلغ پرداختی ظرف 72 ساعت به حساب شما بازگردانده خواهد شد.</p>
+            <p class="font-bold mb-1">{{ $t('user.paymentResult.note.title') }}</p>
+            <p>{{ $t('user.paymentResult.note.refund') }}</p>
           </div>
         </div>
       </div>

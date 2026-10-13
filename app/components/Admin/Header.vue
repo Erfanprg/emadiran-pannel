@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { useAuthStore } from "~/stores/auth";
 
+const { t } = useI18n()
+
 const props = defineProps<{
   title: string;
 }>();
@@ -10,13 +12,13 @@ const route = useRoute();
 
 // Navigation items
 const navItems = [
-  { title: "داشبورد", path: "/admin", icon: "mdi:view-dashboard" },
-  { title: "کاربران", path: "/admin/users", icon: "mdi:account-group" },
-  { title: "تاریخچه پرداخت", path: "/admin/transactions", icon: "mdi:receipt-text" },
-  { title: "مدیریت پیامک‌ها", path: "/admin/system-sms", icon: "mdi:message-text-clock" },
+  { title: t('global.navigation.dashboard'), path: "/admin", icon: "mdi:view-dashboard" },
+  { title: t('admin.layout.nav.users'), path: "/admin/users", icon: "mdi:account-group" },
+  { title: t('admin.common.paymentHistory'), path: "/admin/transactions", icon: "mdi:receipt-text" },
+  { title: t('admin.common.manageSms'), path: "/admin/system-sms", icon: "mdi:message-text-clock" },
   // { title: "اقساط", path: "/admin/installments", icon: "mdi:calendar-clock" },
   {
-    title: "درگاه‌های پرداخت",
+    title: t('admin.common.gateways'),
     path: "/admin/gateways",
     icon: "mdi:credit-card-multiple",
   },
@@ -44,10 +46,10 @@ const handleLogout = async () => {
         <!-- Logo & Title -->
         <div class="flex items-center gap-6">
           <div class="flex items-center gap-3">
-            <img src="/emad-logo-p.png" alt="عماد" class="h-10" />
+            <img src="/emad-logo-p.png" :alt="$t('common.brand.short')" class="h-10" />
             <div>
               <h1 class="text-xl font-bold text-gray-900 min-w-[150px]">{{ title }}</h1>
-              <p class="text-xs text-gray-500">پنل مدیریت</p>
+              <p class="text-xs text-gray-500">{{ $t('admin.layout.panelTitle') }}</p>
             </div>
           </div>
         </div>
@@ -83,10 +85,10 @@ const handleLogout = async () => {
           <button
             @click="handleLogout"
             class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
-            title="خروج"
+            :title="$t('global.button.logout')"
           >
             <Icon name="mdi:logout" size="20" />
-            <span class="hidden sm:inline">خروج</span>
+            <span class="hidden sm:inline">{{ $t('global.button.logout') }}</span>
           </button>
         </div>
       </div>

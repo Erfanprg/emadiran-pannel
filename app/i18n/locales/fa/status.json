@@ -1,0 +1,22 @@
+{
+  "status": {
+    "active": "فعال",
+    "failed": "ناموفق",
+    "inactive": "غیرفعال",
+    "overdue": "عقب افتاده",
+    "paid": "پرداخت شده",
+    "pending": "در انتظار",
+    "role": {
+      "admin": "مدیر",
+      "user": "کاربر"
+    },
+    "success": "موفق",
+    "transactionType": {
+      "debtAdd": "افزایش بدهی",
+      "debtPayment": "پرداخت بدهی",
+      "debtReduce": "کاهش بدهی",
+      "legalDebtAdd": "افزایش بدهی حقوقی",
+      "payment": "پرداخت"
+    }
+  }
+}

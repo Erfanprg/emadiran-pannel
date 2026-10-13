@@ -7,6 +7,8 @@ import { useCurrencyInput } from "~/composables/useCurrencyInput";
 import { buildEditTransactionPayload } from "~/utils/adminTransactionPayload";
 import type { DebtTransactionType, Transaction } from "~/types/transaction";
 
+const { t } = useI18n()
+
 const props = defineProps<{
   transaction: Transaction;
 }>();
@@ -88,7 +90,7 @@ const handleEditSubmit = async () => {
 
   if (!validation.isValid || !validation.payload) {
     editErrors.value = validation.errors;
-    toast.error("لطفاً خطاهای فرم را برطرف کنید");
+    toast.error(t('common.validation.fixErrors'));
     return;
   }
 
@@ -100,10 +102,10 @@ const handleEditSubmit = async () => {
         validation.payload!
       ),
     {
-      successMessage: "تراکنش با موفقیت ویرایش شد",
+      successMessage: t('admin.transactions.messages.updated'),
       onError: (err) => {
         const message =
-          err?.data?.message || err?.message || "خطا در ویرایش تراکنش";
+          err?.data?.message || err?.message || t('admin.transactions.errors.update');
         setEditErrorsFromBackend(message);
       },
       onSuccess: () => {
@@ -121,7 +123,7 @@ const handleEditSubmit = async () => {
   >
     <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6">
       <div class="flex items-center justify-between mb-5">
-        <h3 class="text-lg font-bold text-gray-900">ویرایش تراکنش</h3>
+        <h3 class="text-lg font-bold text-gray-900">{{ $t('admin.transactions.edit.title') }}</h3>
         <button
           @click="emit('close')"
           class="text-gray-400 hover:text-gray-700"
@@ -133,7 +135,7 @@ const handleEditSubmit = async () => {
       <div class="space-y-4">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2"
-            >مبلغ (ریال)</label
+            >{{ $t('common.fields.amountRial') }}</label
           >
           <input
             :value="amountInput.displayValue.value"
@@ -151,16 +153,16 @@ const handleEditSubmit = async () => {
 
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2"
-            >نوع تراکنش</label
+            >{{ $t('common.fields.transactionType') }}</label
           >
           <select
             v-model="editForm.type"
             class="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
             :class="editErrors.type ? 'border-red-500' : 'border-gray-300'"
           >
-            <option value="ADMIN_DEBT_ADD">افزایش بدهی</option>
-            <option value="LEGAL_DEBT_ADD">افزایش بدهی حقوقی</option>
-            <option value="ADMIN_DEBT_REDUCE">کاهش بدهی</option>
+            <option value="ADMIN_DEBT_ADD">{{ $t('status.transactionType.debtAdd') }}</option>
+            <option value="LEGAL_DEBT_ADD">{{ $t('status.transactionType.legalDebtAdd') }}</option>
+            <option value="ADMIN_DEBT_REDUCE">{{ $t('status.transactionType.debtReduce') }}</option>
           </select>
           <p v-if="editErrors.type" class="text-xs text-red-600 mt-1">
             {{ editErrors.type }}
@@ -169,7 +171,7 @@ const handleEditSubmit = async () => {
 
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2"
-            >تاریخ تراکنش (اختیاری)</label
+            >{{ $t('common.fields.transactionDateOptional') }}</label
           >
           <input
             :value="editTransactionDateDisplay"
@@ -201,7 +203,7 @@ const handleEditSubmit = async () => {
 
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2"
-            >توضیحات</label
+            >{{ $t('common.fields.description') }}</label
           >
           <textarea
             v-model="editForm.description"
@@ -212,7 +214,7 @@ const handleEditSubmit = async () => {
 
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2"
-            >دلیل ویرایش <span class="text-red-500">*</span></label
+            >{{ $t('admin.common.editReason') }} <span class="text-red-500">*</span></label
           >
           <textarea
             v-model="editForm.reason"
@@ -231,15 +233,15 @@ const handleEditSubmit = async () => {
             :disabled="isUpdating"
             class="py-2.5 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 text-white font-medium disabled:opacity-60"
           >
-            <span v-if="isUpdating">در حال ذخیره...</span>
-            <span v-else>ذخیره</span>
+            <span v-if="isUpdating">{{ $t('common.states.saving') }}</span>
+            <span v-else>{{ $t('global.button.save') }}</span>
           </button>
           <button
             @click="emit('close')"
             :disabled="isUpdating"
             class="py-2.5 rounded-lg bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 disabled:opacity-60"
           >
-            انصراف
+            {{ $t('common.actions.cancel') }}
           </button>
         </div>
       </div>

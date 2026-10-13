@@ -4,8 +4,10 @@ import { useMyTransactions } from '~/composables/useMyTransactions'
 import UserTransactionsTable from '~/components/User/transactions/UserTransactionsTable.vue'
 import FilterSelect from '~/components/User/FilterSelect.vue'
 
+const { t } = useI18n()
+
 useHead({
-  title: 'تاریخچه بدهی‌ها - عماد ایران'
+  title: t('seo.user.transactions')
 })
 
 definePageMeta({
@@ -27,44 +29,44 @@ const {
 
 // Status options
 const statusOptions = [
-  { value: 'ALL', label: 'همه' },
-  { value: 'SUCCESS', label: 'موفق' },
-  { value: 'FAILED', label: 'ناموفق' },
-  { value: 'PENDING', label: 'در انتظار' }
+  { value: 'ALL', label: t('common.filters.all') },
+  { value: 'SUCCESS', label: t('status.success') },
+  { value: 'FAILED', label: t('status.failed') },
+  { value: 'PENDING', label: t('status.pending') }
 ]
 
 // Type options
 const typeOptions = [
-  { value: 'ALL', label: 'همه' },
-  { value: 'DEBT_PAYMENT', label: 'پرداخت بدهی' },
-  { value: 'ADMIN_DEBT_ADD', label: 'افزایش بدهی' },
-  { value: 'LEGAL_DEBT_ADD', label: 'افزایش بدهی حقوقی' },
-  { value: 'ADMIN_DEBT_REDUCE', label: 'کاهش بدهی' }
+  { value: 'ALL', label: t('common.filters.all') },
+  { value: 'DEBT_PAYMENT', label: t('user.common.payDebt') },
+  { value: 'ADMIN_DEBT_ADD', label: t('status.transactionType.debtAdd') },
+  { value: 'LEGAL_DEBT_ADD', label: t('status.transactionType.legalDebtAdd') },
+  { value: 'ADMIN_DEBT_REDUCE', label: t('status.transactionType.debtReduce') }
 ]
 </script>
 
 <template>
-  <UserPage title="تاریخچه بدهی‌های من">
+  <UserPage :title="$t('user.transactions.title')">
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
       <BaseStatsCard
-        title="تعداد پرداخت‌های موفق"
+        :title="$t('user.transactions.stats.successCount')"
         :value="stats.successfulCount.toString()"
-        unit="مورد"
+        :unit="$t('common.units.item')"
         icon="mdi:check-circle"
         color="green"
       />
       <BaseStatsCard
-        title="مجموع بدهی‌های پرداخت شده"
+        :title="$t('user.transactions.stats.paidTotal')"
         :value="formatCurrency(stats.successfulAmount)"
-        unit="ریال"
+        :unit="$t('global.currency.rial')"
         icon="mdi:cash-check"
         color="blue"
       />
       <BaseStatsCard
-        title="آخرین بدهی پرداخت شده"
+        :title="$t('user.transactions.stats.lastPaid')"
         :value="formatCurrency(stats.lastPaymentAmount)"
-        unit="ریال"
+        :unit="$t('global.currency.rial')"
         icon="mdi:calendar-check"
         color="purple"
       />
@@ -74,18 +76,18 @@ const typeOptions = [
     <BaseCard>
       <template #header>
         <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <h2 class="text-xl font-bold text-gray-900">لیست تاریخچه بدهی‌ها</h2>
+          <h2 class="text-xl font-bold text-gray-900">{{ $t('user.transactions.list.title') }}</h2>
 
           <!-- Filters -->
           <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <FilterSelect v-model="selectedStatus" label="وضعیت:" :options="statusOptions" />
-            <FilterSelect v-model="selectedType" label="نوع:" :options="typeOptions" />
+            <FilterSelect v-model="selectedStatus" :label="$t('common.fields.statusLabel')" :options="statusOptions" />
+            <FilterSelect v-model="selectedType" :label="$t('user.transactions.filters.type')" :options="typeOptions" />
           </div>
         </div>
       </template>
 
       <!-- Loading State -->
-      <StateLoader v-if="loading" message="در حال بارگذاری..." />
+      <StateLoader v-if="loading" :message="$t('common.states.loading')" />
 
       <StateError
         v-else-if="error"
@@ -97,7 +99,7 @@ const typeOptions = [
       <StateEmpty
         v-else-if="!transactions || transactions.length === 0"
         icon="document"
-        message="موردی برای نمایش وجود ندارد"
+        :message="$t('common.states.nothingToShow')"
       />
 
       <!-- Table -->
