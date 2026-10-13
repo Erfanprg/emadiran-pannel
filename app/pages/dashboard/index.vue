@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { useAuthStore } from "~/stores/auth";
 import { userApi } from "~/services/api/user";
-import { formatCurrency, formatDate } from "~/utils/formatters";
+import { formatCurrency } from "~/utils/formatters";
+import { useMyLoanDebts } from "~/composables/useMyLoanDebts";
 import type { Installment } from "~/types/installment";
 import type { Transaction } from "~/types/transaction";
-import type { LoanDebtBreakdown } from "~/types/debt";
-import { getTransactionAllocations } from "~/utils/transactionAllocations";
-import { TRANSACTION_STATUS_BADGES, TRANSACTION_TYPE_BADGES } from "~/constants/badges";
+import QuickPayCard from "~/components/User/dashboard/QuickPayCard.vue";
+import RecentTransactionsCard from "~/components/User/dashboard/RecentTransactionsCard.vue";
 
 useHead({
   title: "داشبورد - عماد ایران",
@@ -20,33 +20,17 @@ definePageMeta({
 const loading = ref(true);
 const upcomingInstallments = ref<Installment[]>([]);
 const recentTransactions = ref<Transaction[]>([]);
-const loanDebtBreakdown = ref<LoanDebtBreakdown | null>(null);
-const isLoadingLoanDebts = ref(false);
-const loanDebtError = ref<string | null>(null);
 const stats = ref({
   totalDebt: "0",
   overdueInstallments: 0,
   remainingInstallments: 0,
   successfulTransactions: 0,
 });
-const expandedRecentTransactionId = ref<number | null>(null);
 
 const authStore = useAuthStore();
 
-const fetchLoanDebts = async () => {
-  try {
-    isLoadingLoanDebts.value = true;
-    loanDebtError.value = null;
-    loanDebtBreakdown.value = await userApi.getLoanDebts();
-  } catch (error: any) {
-    console.error("Error fetching loan debts:", error);
-    loanDebtBreakdown.value = null;
-    loanDebtError.value =
-      error.data?.message || error.message || "خطا در دریافت جزئیات تسهیلات";
-  } finally {
-    isLoadingLoanDebts.value = false;
-  }
-};
+const { loanDebtBreakdown, isLoadingLoanDebts, loanDebtError, fetchLoanDebts } =
+  useMyLoanDebts("خطا در دریافت جزئیات تسهیلات");
 
 // Fetch dashboard data
 const fetchDashboardData = async () => {
@@ -88,14 +72,6 @@ const fetchDashboardData = async () => {
   }
 };
 
-const canExpandTransaction = (transaction: Transaction) =>
-  getTransactionAllocations(transaction).length > 0;
-
-const toggleRecentTransactionDetails = (transactionId: number) => {
-  expandedRecentTransactionId.value =
-    expandedRecentTransactionId.value === transactionId ? null : transactionId;
-};
-
 // Installments table columns
 const installmentColumns = [
   { key: "index", label: "ردیف" },
@@ -103,16 +79,6 @@ const installmentColumns = [
   { key: "loanNumber", label: "شماره تسهیلات" },
   { key: "dueDate", label: "سررسید" },
   { key: "status", label: "وضعیت" },
-];
-
-// Transactions table columns
-const transactionColumns = [
-  { key: "index", label: "ردیف" },
-  { key: "amount", label: "مبلغ" },
-  { key: "type", label: "نوع" },
-  { key: "allocationSummary", label: "جزئیات تسهیلات" },
-  { key: "status", label: "وضعیت" },
-  { key: "createdAt", label: "تاریخ" },
 ];
 
 // Fetch data on mount
@@ -164,23 +130,7 @@ onMounted(() => {
       </div>
 
       <!-- Quick Payment Button -->
-      <BaseCard class="bg-gradient-to-r from-primary to-accent">
-        <div
-          class="flex flex-col md:flex-row items-center justify-between text-white p-2"
-        >
-          <div class="mb-4 md:mb-0">
-            <h3 class="text-xl font-bold mb-2">پرداخت سریع</h3>
-            <p class="text-white/90">برای پرداخت بدهی خود اقدام کنید</p>
-          </div>
-          <NuxtLink
-            to="/dashboard/payment/new"
-            class="bg-white text-primary px-8 py-3 rounded-lg font-bold hover:bg-gray-100 transition-colors duration-200 flex items-center gap-2"
-          >
-            <Icon name="mdi:credit-card-plus" size="20" />
-            پرداخت بدهی
-          </NuxtLink>
-        </div>
-      </BaseCard>
+      <QuickPayCard />
 
       <LoanDebtBreakdownSection
         title="جزئیات تسهیلات"
@@ -236,69 +186,7 @@ onMounted(() => {
       </BaseCard> -->
 
       <!-- Recent Transactions -->
-      <BaseCard>
-        <template #header>
-          <div class="flex items-center justify-between">
-            <h2 class="text-xl font-bold text-gray-900">
-              آخرین تاریخچه بدهی‌ها
-            </h2>
-            <NuxtLink
-              to="/dashboard/transactions"
-              class="text-primary hover:text-accent transition-colors duration-200 text-sm font-medium flex items-center gap-1"
-            >
-              مشاهده همه
-              <Icon name="mdi:chevron-left" size="20" />
-            </NuxtLink>
-          </div>
-        </template>
-
-        <div
-          v-if="!recentTransactions || recentTransactions.length === 0"
-          class="text-center py-8 text-gray-500"
-        >
-          هیچ موردی یافت نشد
-        </div>
-
-        <BaseTable
-          v-else
-          :columns="transactionColumns"
-          :data="recentTransactions"
-          :expanded-row-key="expandedRecentTransactionId"
-        >
-          <template #cell-index="{ index }">
-            {{ index + 1 }}
-          </template>
-          <template #cell-amount="{ row }">
-            <span class="font-medium" dir="ltr">{{
-              formatCurrency(row.amount)
-            }}</span>
-          </template>
-          <template #cell-type="{ row }">
-            <BaseStatusBadge :map="TRANSACTION_TYPE_BADGES" :value="row.type" />
-          </template>
-          <template #cell-allocationSummary="{ row }">
-            <TransactionAllocationsSummary
-              :transaction="row"
-              trigger-only
-              :expanded="expandedRecentTransactionId === row.id"
-              @toggle="toggleRecentTransactionDetails(row.id)"
-            />
-          </template>
-          <template #expanded-row="{ row }">
-            <TransactionAllocationsSummary
-              v-if="canExpandTransaction(row)"
-              :transaction="row"
-              default-expanded
-            />
-          </template>
-          <template #cell-status="{ row }">
-            <BaseStatusBadge :map="TRANSACTION_STATUS_BADGES" :value="row.status" />
-          </template>
-          <template #cell-createdAt="{ row }">
-            {{ formatDate(row.transactionDate) }}
-          </template>
-        </BaseTable>
-      </BaseCard>
+      <RecentTransactionsCard :transactions="recentTransactions" />
     </div>
   </UserPage>
 </template>

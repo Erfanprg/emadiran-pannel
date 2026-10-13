@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { useAuthStore } from '~/stores/auth'
-import { userApi } from '~/services/api/user'
-import { formatCurrency, formatDate } from '~/utils/formatters'
-import type { Installment } from '~/types/installment'
-import { INSTALLMENT_STATUS_BADGES } from '~/constants/badges'
+import { formatCurrency } from '~/utils/formatters'
+import { useMyInstallments } from '~/composables/useMyInstallments'
+import UserInstallmentsTable from '~/components/User/installments/UserInstallmentsTable.vue'
+import FilterSelect from '~/components/User/FilterSelect.vue'
 
 useHead({
   title: 'اقساط من - عماد ایران'
@@ -13,58 +12,15 @@ definePageMeta({
   middleware: 'auth'
 })
 
-const authStore = useAuthStore()
-
-// State
-const loading = ref(true)
-const installments = ref<Installment[]>([])
-const allInstallments = ref<Installment[]>([])
-const selectedStatus = ref<'ALL' | 'PENDING' | 'PAID' | 'OVERDUE'>('ALL')
-const currentPage = ref(1)
-const itemsPerPage = 10
-const totalItems = ref(0)
-
-// Stats
-const stats = computed(() => {
-  const all = allInstallments.value
-  return {
-    overdue: all.filter(i => i.status === 'OVERDUE').length,
-    overdueAmount: all
-      .filter(i => i.status === 'OVERDUE')
-      .reduce((sum, i) => sum + parseFloat(i.amount), 0)
-      .toString(),
-    remaining: all.filter(i => i.status === 'PENDING').length,
-    paid: all.filter(i => i.status === 'PAID').length
-  }
-})
-
-// Fetch installments
-const fetchInstallments = async () => {
-  loading.value = true
-  try {
-    const params: any = {
-      limit: itemsPerPage,
-      offset: (currentPage.value - 1) * itemsPerPage
-    }
-    
-    if (selectedStatus.value !== 'ALL') {
-      params.status = selectedStatus.value
-    }
-
-    const response = await userApi.getInstallments(params)
-    installments.value = response.data || []
-    totalItems.value = response.total || 0
-
-    // Fetch all installments for stats (without pagination)
-    const allResponse = await userApi.getInstallments({})
-    allInstallments.value = allResponse.data || []
-  } catch (error) {
-    console.error('Error fetching installments:', error)
-    installments.value = []
-  } finally {
-    loading.value = false
-  }
-}
+const {
+  loading,
+  installments,
+  selectedStatus,
+  currentPage,
+  itemsPerPage,
+  totalItems,
+  stats
+} = useMyInstallments()
 
 // Status options
 const statusOptions = [
@@ -73,26 +29,6 @@ const statusOptions = [
   { value: 'PAID', label: 'پرداخت شده' },
   { value: 'OVERDUE', label: 'عقب افتاده' }
 ]
-
-// Table columns
-const columns = [
-  { key: 'index', label: 'ردیف' },
-  { key: 'amount', label: 'مبلغ قسط' },
-  { key: 'loanNumber', label: 'شماره تسهیلات' },
-  { key: 'dueDate', label: 'تاریخ سررسید' },
-  { key: 'status', label: 'وضعیت' },
-  { key: 'description', label: 'توضیحات' }
-]
-
-// Watch filters
-watch([selectedStatus, currentPage], () => {
-  fetchInstallments()
-})
-
-// Fetch on mount
-onMounted(() => {
-  fetchInstallments()
-})
 </script>
 
 <template>
@@ -134,19 +70,9 @@ onMounted(() => {
       <template #header>
         <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <h2 class="text-xl font-bold text-gray-900">لیست اقساط</h2>
-          
+
           <!-- Status Filter -->
-          <div class="flex items-center gap-2">
-            <label class="text-sm font-medium text-gray-700">وضعیت:</label>
-            <select
-              v-model="selectedStatus"
-              class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-            >
-              <option v-for="option in statusOptions" :key="option.value" :value="option.value">
-                {{ option.label }}
-              </option>
-            </select>
-          </div>
+          <FilterSelect v-model="selectedStatus" label="وضعیت:" :options="statusOptions" />
         </div>
       </template>
 
@@ -166,26 +92,10 @@ onMounted(() => {
 
       <!-- Table -->
       <div v-else>
-        <BaseTable :columns="columns" :data="installments">
-          <template #cell-index="{ index }">
-            {{ (currentPage - 1) * itemsPerPage + index + 1 }}
-          </template>
-          <template #cell-amount="{ row }">
-            <span class="font-medium" dir="ltr">{{ formatCurrency(row.amount) }}</span>
-          </template>
-          <template #cell-loanNumber="{ row }">
-            <span dir="ltr">{{ row.loan?.loanNumber || 'ندارد' }}</span>
-          </template>
-          <template #cell-dueDate="{ row }">
-            {{ formatDate(row.dueDate) }}
-          </template>
-          <template #cell-status="{ row }">
-            <BaseStatusBadge :map="INSTALLMENT_STATUS_BADGES" :value="row.status" />
-          </template>
-          <template #cell-description="{ row }">
-            <span class="text-gray-600 text-sm">{{ row.description || '-' }}</span>
-          </template>
-        </BaseTable>
+        <UserInstallmentsTable
+          :installments="installments"
+          :offset="(currentPage - 1) * itemsPerPage"
+        />
 
         <!-- Pagination -->
         <div class="mt-6 flex justify-center">
